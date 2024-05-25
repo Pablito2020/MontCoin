@@ -52,6 +52,12 @@ class OperationViewModel : ViewModel() {
         }
     }
 
+    fun clearCurrentOperation() {
+        _uiState.update {
+            it.copy(operation = null)
+        }
+    }
+
     private suspend fun handleFoundCard(user: String) {
         val amount =  _uiState.value.amount
         if (amount.isValid() && !amount.isEmpty())
