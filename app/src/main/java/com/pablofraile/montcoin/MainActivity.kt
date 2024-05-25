@@ -22,17 +22,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MontCoinTheme {
-                val model = viewModel(
-                    factory = TransactionViewModel.provideFactory()
-                ) as TransactionViewModel
+                val model = viewModel(factory=TransactionViewModel.provideFactory()) as TransactionViewModel
                 val uiState by model.uiState.collectAsStateWithLifecycle()
                 TransactionScreen(
-                    amount = "20",
-                    card = CreditCardState.StoppedSearching,
-                    onStart = {},
-                    onStop = {},
-                    onAmountChange = {})
+                    amount = uiState.amount.value,
+                    card = uiState.card,
+                    onStart = {model.changeCardState(CreditCardState.SearchingCard)},
+                    onStop = {model.changeCardState(CreditCardState.StoppedSearching)},
+                    onAmountChange = model::changeAmount)
             }
+
         }
     }
 }
