@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.ui.transaction
+package com.pablofraile.montcoin.ui.operation
 
 sealed class CreditCardState {
     object StoppedSearching : CreditCardState()

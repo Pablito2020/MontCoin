@@ -42,8 +42,9 @@ fun LoadingAnimation(modifier: Modifier = Modifier) {
             dampingRatio = 0.1f,
             stiffness = 0.87f,
         ),
+        label = "",
     )
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "")
     val scaleBox by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 1f,
@@ -51,6 +52,7 @@ fun LoadingAnimation(modifier: Modifier = Modifier) {
             animation = tween(2000),
             repeatMode = RepeatMode.Reverse,
         ),
+        label = "",
     )
     LaunchedEffect(
         key1 = true,

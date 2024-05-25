@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.ui.transaction
+package com.pablofraile.montcoin.ui.operation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,50 +10,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class Amount(val value: String) {
-
-    override fun toString(): String {
-        return value.toString()
-    }
-
-    fun isValid(): Boolean {
-        try {
-            value.toInt()
-            return true
-        } catch (e: NumberFormatException) {
-            return false
-        }
-    }
-
-    fun isEmpty(): Boolean {
-        return value.isEmpty()
-    }
-
-    fun toInt(): Int {
-        if (!isValid())
-            throw IllegalStateException("Can't convert amount if it has an invalid number")
-        return value.toInt()
-    }
-
-}
-
-data class TransactionUiState(
+data class OperationUiState(
     val amount: Amount,
     val card: CreditCardState,
     val transaction: MontCoinTransactionState? = null
 )
 
 
-class TransactionViewModel : ViewModel() {
+class OperationViewModel : ViewModel() {
 
     private val _uiState =
         MutableStateFlow(
-            TransactionUiState(
+            OperationUiState(
                 amount = Amount(value=""),
                 card = CreditCardState.StoppedSearching
             )
         )
-    val uiState: StateFlow<TransactionUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<OperationUiState> = _uiState.asStateFlow()
 
     fun changeAmount(amount: String) {
         _uiState.update {
@@ -108,7 +81,7 @@ class TransactionViewModel : ViewModel() {
         fun provideFactory(): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return TransactionViewModel() as T
+                return OperationViewModel() as T
             }
         }
     }
