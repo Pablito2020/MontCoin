@@ -6,8 +6,8 @@ sealed class CreditCardState {
     class FoundCard(val userId: String) : CreditCardState()
 }
 
-sealed class MontCoinTransactionState {
-    object TransactionSuccess : MontCoinTransactionState()
-    object DoingTransaction : MontCoinTransactionState()
-    class TransactionError(val message: String) : MontCoinTransactionState()
+sealed class MontCoinOperationState {
+    object Success : MontCoinOperationState()
+    object DoingIt : MontCoinOperationState()
+    class Error(val message: String) : MontCoinOperationState()
 }

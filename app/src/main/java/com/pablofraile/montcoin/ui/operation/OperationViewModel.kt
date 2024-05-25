@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 data class OperationUiState(
     val amount: Amount,
     val card: CreditCardState,
-    val transaction: MontCoinTransactionState? = null
+    val operation: MontCoinOperationState? = null
 )
 
 
@@ -36,8 +36,12 @@ class OperationViewModel : ViewModel() {
 
     fun changeCardState(card: CreditCardState) {
         when (card) {
-            CreditCardState.StoppedSearching, CreditCardState.SearchingCard -> {
+            CreditCardState.StoppedSearching -> {
                 _uiState.update { it.copy(card = card) }
+            }
+            CreditCardState.SearchingCard -> {
+                if (!uiState.value.amount.isEmpty() && uiState.value.amount.isValid())
+                    _uiState.update { it.copy(card = card) }
             }
             is CreditCardState.FoundCard -> {
                 viewModelScope.launch {
@@ -59,7 +63,7 @@ class OperationViewModel : ViewModel() {
     private fun markTransactionAsInvalid(message: String) {
         _uiState.update {
             it.copy(
-                transaction = MontCoinTransactionState.TransactionError(
+                operation = MontCoinOperationState.Error(
                     message = message
                 )
             )
@@ -67,12 +71,12 @@ class OperationViewModel : ViewModel() {
     }
 
     private suspend fun writeTransaction(user: String, amount: Int) {
-        _uiState.update { it.copy(transaction = MontCoinTransactionState.DoingTransaction) }
+        _uiState.update { it.copy(operation = MontCoinOperationState.DoingIt) }
         val goodTransaction = true
         delay(2000)
         print("Doing transaction $amount on user $user")
         if (goodTransaction)
-            _uiState.update { it.copy(transaction = MontCoinTransactionState.TransactionSuccess) }
+            _uiState.update { it.copy(operation = MontCoinOperationState.Success) }
         else
             markTransactionAsInvalid(message = "Transaction failed!")
     }

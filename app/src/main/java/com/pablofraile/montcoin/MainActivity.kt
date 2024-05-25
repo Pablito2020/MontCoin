@@ -15,7 +15,6 @@ import com.pablofraile.montcoin.ui.theme.MontCoinTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             MontCoinTheme {
                 val model =

@@ -37,7 +37,6 @@ fun OperationScreen(
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
         AmountTextBox(amount = amount, isValid = amountIsValid, onAmountChange = onAmountChange)
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,7 +90,7 @@ fun OperationScreenPreview() {
     OperationScreen(
         amount = "100",
         amountIsValid = true,
-        card = CreditCardState.StoppedSearching,
+        card = CreditCardState.SearchingCard,
         onStart = {},
         onStop = {},
         onAmountChange = {}
