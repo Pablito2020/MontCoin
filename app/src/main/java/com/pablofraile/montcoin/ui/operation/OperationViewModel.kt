@@ -3,97 +3,65 @@ package com.pablofraile.montcoin.ui.operation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pablofraile.montcoin.nfc.NfcValues
+import com.pablofraile.montcoin.nfc.ReadTag
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-
-data class OperationUiState(
-    val amount: Amount,
-    val card: CreditCardState,
-    val operation: MontCoinOperationState? = null
-)
 
 
-class OperationViewModel : ViewModel() {
+class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow(
-            OperationUiState(
-                amount = Amount(value=""),
-                card = CreditCardState.StoppedSearching
-            )
-        )
-    val uiState: StateFlow<OperationUiState> = _uiState.asStateFlow()
-
-    fun changeAmount(amount: String) {
-        _uiState.update {
-            it.copy(amount = Amount(value=amount))
-        }
+    private val _amount = MutableStateFlow(Amount(value = ""))
+    val amount: StateFlow<Amount> = _amount
+    fun changeAmount(amount: String) = _amount.update {
+        it.copy(value = amount)
     }
 
-    fun changeCardState(card: CreditCardState) {
-        when (card) {
-            CreditCardState.StoppedSearching -> {
-                _uiState.update { it.copy(card = card) }
-            }
-            CreditCardState.SearchingCard -> {
-                if (!uiState.value.amount.isEmpty() && uiState.value.amount.isValid())
-                    _uiState.update { it.copy(card = card) }
-            }
-            is CreditCardState.FoundCard -> {
-                viewModelScope.launch {
-                    handleFoundCard(user = card.userId)
-                    _uiState.update { it.copy(card=CreditCardState.SearchingCard) }
-                }
-            }
-        }
+    private val _cardState: MutableStateFlow<CreditCardState> =
+        MutableStateFlow(CreditCardState.StoppedSearching)
+    val cardState: StateFlow<CreditCardState> = _cardState
+    fun changeCardState(card: CreditCardState) = _cardState.update { card }
+
+    private val historyNfcValues: MutableStateFlow<NfcValues> = MutableStateFlow(NfcValues())
+    private val nfcValues = nfc.combine(historyNfcValues) { new, current ->
+        NfcValues(currentTag = new, lastTag = current.currentTag)
     }
 
-    fun clearCurrentOperation() {
-        _uiState.update {
-            it.copy(operation = null)
-        }
-    }
+    val operationStatus = combine(amount, cardState, nfcValues) { amount, card, nfc ->
+        if (amount.isValid() && card == CreditCardState.SearchingCard && nfc.isDifferentTag ())
+            return@combine writeTransaction("user", amount.toInt())
+        return@combine null
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
 
-    private suspend fun handleFoundCard(user: String) {
-        val amount =  _uiState.value.amount
-        if (amount.isValid() && !amount.isEmpty())
-            writeTransaction(user = user, amount = amount.toInt())
-        else
-            markTransactionAsInvalid(message = "Invalid Amount!")
-    }
 
-    private fun markTransactionAsInvalid(message: String) {
-        _uiState.update {
-            it.copy(
-                operation = MontCoinOperationState.Error(
-                    message = message
-                )
-            )
-        }
-    }
+    private val _isDoingOperation = MutableStateFlow(false)
+    val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun writeTransaction(user: String, amount: Int) {
-        _uiState.update { it.copy(operation = MontCoinOperationState.DoingIt) }
+
+    private suspend fun writeTransaction(user: String, amount: Int): MontCoinOperationState {
+        _isDoingOperation.emit(true)
         val goodTransaction = true
         delay(2000)
-        print("Doing transaction $amount on user $user")
+        _isDoingOperation.emit(false)
         if (goodTransaction)
-            _uiState.update { it.copy(operation = MontCoinOperationState.Success) }
-        else
-            markTransactionAsInvalid(message = "Transaction failed!")
+            return MontCoinOperationState.Success
+        return MontCoinOperationState.Error("Error writing transaction")
     }
 
     companion object {
-        fun provideFactory(): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return OperationViewModel() as T
+        fun provideFactory(nfc: Flow<ReadTag?>): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return OperationViewModel(nfc) as T
+                }
             }
-        }
     }
 
 }

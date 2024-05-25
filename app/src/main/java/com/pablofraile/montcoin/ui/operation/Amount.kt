@@ -9,7 +9,7 @@ data class Amount(val value: String) {
     fun isValid(): Boolean {
         try {
             value.toInt()
-            return true
+            return !isEmpty()
         } catch (e: NumberFormatException) {
             return false
         }

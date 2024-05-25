@@ -1,5 +1,7 @@
 package com.pablofraile.montcoin.ui.operation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.ui.LoadingAnimation
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterial3Api
 @Composable
 fun OperationScreen(
@@ -41,7 +44,9 @@ fun OperationScreen(
     amountIsValid: Boolean,
     card: CreditCardState,
     operation: MontCoinOperationState?,
+    isDoingOperation: Boolean,
     onOperationErrorReaded: () -> Unit,
+    onOperationCorrectReaded: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     onAmountChange: (String) -> Unit,
@@ -52,7 +57,7 @@ fun OperationScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ShowOperationUi(operation = operation, onOperationErrorReaded = onOperationErrorReaded)
+        ShowOperationUi(isDoingOperation=isDoingOperation, operation = operation, onOperationErrorReaded = onOperationErrorReaded, onOperationCorrectReaded= onOperationCorrectReaded)
         AmountTextBox(
             amount = amount,
             isValid = amountIsValid,
@@ -61,39 +66,42 @@ fun OperationScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         ActionButton(cardState = card, onStart = onStart, onStop = onStop)
-        if (card is CreditCardState.SearchingCard) {
+        if (card == CreditCardState.SearchingCard) {
             Spacer(modifier = Modifier.height(16.dp))
-            LoadingAnimation(modifier = Modifier)
+            LoadingAnimation()
         }
     }
 }
 
 @Composable
 fun ShowOperationUi(
+    isDoingOperation: Boolean,
     operation: MontCoinOperationState?,
-    onOperationErrorReaded: () -> Unit
+    onOperationErrorReaded: () -> Unit,
+    onOperationCorrectReaded: () -> Unit,
 ) {
+    if (isDoingOperation) ShowOperationDoingDialog()
     if (operation == null) return
     when (operation) {
-        MontCoinOperationState.DoingIt -> ShowOperationDoingDialog()
         is MontCoinOperationState.Error -> ErrorOperationDialog(
             operation = operation,
             onOperationErrorReaded = onOperationErrorReaded
         )
-
-        MontCoinOperationState.Success -> ShowCorrectOperationSnackBar()
+        MontCoinOperationState.Success -> ShowSnackBar(
+            text = "Operation Done correctly!",
+            onClosedSnackBar = onOperationCorrectReaded
+        )
     }
 }
 
 @Composable
-fun ShowCorrectOperationSnackBar() {
+fun ShowSnackBar(text: String, onClosedSnackBar: () -> Unit = {}) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = snackbarHostState) {
         scope.launch {
-            snackbarHostState.showSnackbar(
-                "Operation Done correctly!"
-            )
+            snackbarHostState.showSnackbar(text)
+            onClosedSnackBar()
         }
     }
 }
@@ -172,7 +180,6 @@ fun ActionButton(cardState: CreditCardState, onStart: () -> Unit, onStop: () -> 
             when (cardState) {
                 is CreditCardState.StoppedSearching -> onStart()
                 is CreditCardState.SearchingCard -> onStop()
-                is CreditCardState.FoundCard -> {}
             }
         }
     ) {
@@ -180,12 +187,12 @@ fun ActionButton(cardState: CreditCardState, onStart: () -> Unit, onStop: () -> 
             text = when (cardState) {
                 is CreditCardState.StoppedSearching -> "Start"
                 is CreditCardState.SearchingCard -> "Stop"
-                is CreditCardState.FoundCard -> "Stop"
             }
         )
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
@@ -194,10 +201,12 @@ fun OperationScreenPreview() {
         amount = "100",
         amountIsValid = true,
         operation = MontCoinOperationState.Success,
-        card = CreditCardState.FoundCard("123"),
+        card = CreditCardState.SearchingCard,
         onOperationErrorReaded = {},
         onStart = {},
         onStop = {},
-        onAmountChange = {}
+        onAmountChange = {},
+        isDoingOperation = false,
+        onOperationCorrectReaded = {},
     )
 }
