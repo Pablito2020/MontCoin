@@ -4,7 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pablofraile.montcoin.model.Amount
+import com.pablofraile.montcoin.model.Result
 import com.pablofraile.montcoin.nfc.ReadTag
+import com.pablofraile.montcoin.nfc.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -27,19 +30,19 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
     val amount: StateFlow<Amount> = _amount
     fun changeAmount(amount: String) = _amount.update { it.copy(value = amount) }
 
-    private val _sensor: MutableStateFlow<NfcSensor> = MutableStateFlow(NfcSensor.Stopped)
-    val sensor: StateFlow<NfcSensor> = _sensor
-    private fun changeCardState(card: NfcSensor) = _sensor.update { card }
-    fun searchDevices() = changeCardState(NfcSensor.Searching)
-    fun stopSearchingDevices() = changeCardState(NfcSensor.Stopped)
+    private val _sensor: MutableStateFlow<Sensor> = MutableStateFlow(Sensor.Stopped)
+    val sensor: StateFlow<Sensor> = _sensor
+    private fun changeCardState(card: Sensor) = _sensor.update { card }
+    fun searchDevices() = changeCardState(Sensor.Searching)
+    fun stopSearchingDevices() = changeCardState(Sensor.Stopped)
 
     val result = nfc.flatMapLatest { tag ->
         combine(amount, sensor, ::Pair).take(1).map { (amount, sensor) ->
             Triple(tag, amount, sensor)
         }
     }.transform { (tag, amount, sensor) ->
-        if (amount.isValid() && sensor == NfcSensor.Searching && tag != null) {
-            val result = doOperation(tag, amount.toInt())
+        if (amount.isValid() && sensor == Sensor.Searching && tag != null) {
+            val result = doOperation(tag, amount)
             _showOperationResult.emit(true)
             emit(result)
         }
@@ -52,14 +55,14 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun doOperation(tag: ReadTag, amount: Int): OperationResult {
+    private suspend fun doOperation(tag: ReadTag, amount: Amount): Result {
         _isDoingOperation.emit(true)
         val hasErrors = false
         Log.d("OperationViewModel", "Doing operation: ${tag.readOperation} with amount $amount")
         delay(2000)
         _isDoingOperation.emit(false)
-        return if (hasErrors) OperationResult.Error("Error writing transaction")
-        else OperationResult.Success
+        return if (hasErrors) Result.Error("Error writing transaction")
+        else Result.Success
     }
 
     companion object {

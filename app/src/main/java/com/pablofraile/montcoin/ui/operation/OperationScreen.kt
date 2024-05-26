@@ -33,6 +33,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pablofraile.montcoin.model.Result
+import com.pablofraile.montcoin.nfc.Sensor
 import com.pablofraile.montcoin.ui.LoadingAnimation
 import kotlinx.coroutines.launch
 
@@ -43,11 +45,11 @@ fun OperationScreen(
     amount: String,
     amountIsValid: Boolean,
     showOperationResult: Boolean,
-    card: NfcSensor,
-    operation: OperationResult?,
+    card: Sensor,
+    operation: Result?,
     isDoingOperation: Boolean,
-    onOperationErrorReaded: () -> Unit,
-    onOperationCorrectReaded: () -> Unit,
+    onOperationErrorRead: () -> Unit,
+    onOperationCorrectRead: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     onAmountChange: (String) -> Unit,
@@ -58,7 +60,7 @@ fun OperationScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ShowOperationUi(isDoingOperation=isDoingOperation, showOperationResult=showOperationResult, operation = operation, onOperationErrorReaded = onOperationErrorReaded, onOperationCorrectReaded= onOperationCorrectReaded)
+        ShowOperationUi(isDoingOperation=isDoingOperation, showOperationResult=showOperationResult, operation = operation, onOperationErrorRead = onOperationErrorRead, onOperationCorrectRead= onOperationCorrectRead)
         AmountTextBox(
             amount = amount,
             isValid = amountIsValid,
@@ -67,7 +69,7 @@ fun OperationScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         ActionButton(cardState = card, onStart = onStart, onStop = onStop)
-        if (card == NfcSensor.Searching) {
+        if (card == Sensor.Searching) {
             Spacer(modifier = Modifier.height(16.dp))
             LoadingAnimation()
         }
@@ -78,20 +80,20 @@ fun OperationScreen(
 fun ShowOperationUi(
     isDoingOperation: Boolean,
     showOperationResult: Boolean,
-    operation: OperationResult?,
-    onOperationErrorReaded: () -> Unit,
-    onOperationCorrectReaded: () -> Unit,
+    operation: Result?,
+    onOperationErrorRead: () -> Unit,
+    onOperationCorrectRead: () -> Unit,
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
     if (!showOperationResult || operation == null) return
     when (operation) {
-        is OperationResult.Error -> ErrorOperationDialog(
+        is Result.Error -> ErrorOperationDialog(
             operation = operation,
-            onOperationErrorReaded = onOperationErrorReaded
+            onOperationErrorRead = onOperationErrorRead
         )
-        OperationResult.Success -> ShowSnackBar(
+        Result.Success -> ShowSnackBar(
             text = "Operation Done correctly!",
-            onClosedSnackBar = onOperationCorrectReaded
+            onClosedSnackBar = onOperationCorrectRead
         )
     }
 }
@@ -126,13 +128,13 @@ fun ShowOperationDoingDialog(
 
 @Composable
 fun ErrorOperationDialog(
-    operation: OperationResult.Error,
-    onOperationErrorReaded: () -> Unit
+    operation: Result.Error,
+    onOperationErrorRead: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = {},
         confirmButton = @Composable {
-            TextButton(onClick = onOperationErrorReaded) {
+            TextButton(onClick = onOperationErrorRead) {
                 Text("Ok")
             }
         },
@@ -177,19 +179,19 @@ fun AmountTextBox(
 }
 
 @Composable
-fun ActionButton(cardState: NfcSensor, onStart: () -> Unit, onStop: () -> Unit) {
+fun ActionButton(cardState: Sensor, onStart: () -> Unit, onStop: () -> Unit) {
     Button(
         onClick = {
             when (cardState) {
-                is NfcSensor.Stopped -> onStart()
-                is NfcSensor.Searching -> onStop()
+                is Sensor.Stopped -> onStart()
+                is Sensor.Searching -> onStop()
             }
         }
     ) {
         Text(
             text = when (cardState) {
-                is NfcSensor.Stopped -> "Start"
-                is NfcSensor.Searching -> "Stop"
+                is Sensor.Stopped -> "Start"
+                is Sensor.Searching -> "Stop"
             }
         )
     }
@@ -203,14 +205,14 @@ fun OperationScreenPreview() {
     OperationScreen(
         amount = "100",
         amountIsValid = true,
-        operation = OperationResult.Success,
-        card = NfcSensor.Searching,
-        onOperationErrorReaded = {},
+        operation = Result.Success,
+        card = Sensor.Searching,
+        onOperationErrorRead = {},
         onStart = {},
         onStop = {},
         onAmountChange = {},
         isDoingOperation = false,
         showOperationResult = false,
-        onOperationCorrectReaded = {},
+        onOperationCorrectRead = {},
     )
 }

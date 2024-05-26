@@ -7,7 +7,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
@@ -76,7 +75,6 @@ open class NfcActivityTemplate : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.e("NfcActivityTemplate", "onNewIntent")
         intent?.let { nfcIntent ->
             val scope = CoroutineScope(Dispatchers.IO)
             val readOperation = UUID.randomUUID()

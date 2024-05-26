@@ -42,8 +42,8 @@ class MainActivity : NfcActivityTemplate() {
                     onAmountChange = model::changeAmount,
                     isDoingOperation = isDoingOperation,
                     showOperationResult = showResult,
-                    onOperationErrorReaded = model::cleanOperationResult,
-                    onOperationCorrectReaded = model::cleanOperationResult,
+                    onOperationErrorRead = model::cleanOperationResult,
+                    onOperationCorrectRead = model::cleanOperationResult,
                 )
             }
 
