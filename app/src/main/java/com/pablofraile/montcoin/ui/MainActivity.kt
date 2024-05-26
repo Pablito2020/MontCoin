@@ -13,7 +13,7 @@ class MainActivity : NfcActivityTemplate() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MontCoinApp(data = data)
+            MontCoinApp()
         }
     }
 

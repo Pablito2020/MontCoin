@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MontCoinApp(data: Flow<ReadTag?>) {
+fun MontCoinApp() {
     MontCoinTheme {
         val navController = rememberNavController()
         val navigationActions = remember(navController) {
@@ -50,7 +50,6 @@ fun MontCoinApp(data: Flow<ReadTag?>) {
         ) {
             Row {
                 MontCoinNavGraph(
-                    isExpandedScreen = false,
                     navController = navController,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
                 )
