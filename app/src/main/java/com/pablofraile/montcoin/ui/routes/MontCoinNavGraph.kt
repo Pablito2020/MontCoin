@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pablofraile.montcoin.nfc.NfcActivityTemplate
+import com.pablofraile.montcoin.nfc.NfcReader
 import com.pablofraile.montcoin.ui.operation.OperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationViewModel
 import com.pablofraile.montcoin.ui.operations.OperationsRoute
@@ -31,7 +32,7 @@ fun MontCoinNavGraph(
         modifier = modifier
     ) {
         composable(route = MontCoinDestinations.OPERATION_ROUTE) { navBackStackEntry ->
-            val flow = (LocalContext.current as NfcActivityTemplate).data
+            val flow = NfcReader.nfc
             val model: OperationViewModel =
                 viewModel(factory = OperationViewModel.provideFactory(flow))
             OperationRoute(

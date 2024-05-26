@@ -7,12 +7,10 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -21,12 +19,10 @@ data class ReadTag(val tag: Tag, val readOperation: UUID)
 open class NfcActivityTemplate : ComponentActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
-    var data: MutableStateFlow<ReadTag?> = MutableStateFlow(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        Log.e("NfcActivityTemplate", "Flow: $data")
     }
 
     private fun enableNfcForegroundDispatch() {
@@ -78,17 +74,12 @@ open class NfcActivityTemplate : ComponentActivity() {
         super.onNewIntent(intent)
         intent?.let { nfcIntent ->
             val scope = CoroutineScope(Dispatchers.IO)
-            val readOperation = UUID.randomUUID()
-            Log.e("NfcActivityTemplate", "New intent: $nfcIntent")
-            val readTag = ReadTag(
-                nfcIntent.getParcelableCompatibility(
-                    NfcAdapter.EXTRA_TAG,
-                    Tag::class.java
-                )!!,
-                readOperation
+            val tag = nfcIntent.getParcelableCompatibility(
+                NfcAdapter.EXTRA_TAG,
+                Tag::class.java
             )
             scope.launch {
-                this@NfcActivityTemplate.data.emit(readTag)
+                NfcReader.send(tag)
             }
         }
     }
