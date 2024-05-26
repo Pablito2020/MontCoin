@@ -1,6 +1,10 @@
 package com.pablofraile.montcoin.model
 
-data class Operation(val userId: Id, val amount: Amount)
+import java.util.Date
+
+data class Operation(val user: User, val amount: Amount, val date: Date)
+
+typealias Operations = List<Operation>
 
 data class Amount(val value: String) {
 
@@ -14,7 +18,10 @@ data class Amount(val value: String) {
     }
 }
 
-sealed class Result {
-    data object Success : Result()
-    class Error(val message: String) : Result()
+sealed class WriteOperationResult {
+    data object Success : WriteOperationResult()
+    class Error(val message: String) : WriteOperationResult()
 }
+
+data class WriteOperation(val userId: Id, val amount: Amount)
+

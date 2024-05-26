@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.ui.transactions
+package com.pablofraile.montcoin.ui.operations
 
 import android.os.Build
 import android.util.Log
@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
-import com.pablofraile.montcoin.model.Transaction
-import com.pablofraile.montcoin.model.Transactions
+import com.pablofraile.montcoin.model.Operation
+import com.pablofraile.montcoin.model.Operations
 import com.pablofraile.montcoin.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,34 +18,34 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
 
-class TransactionsViewModel : ViewModel() {
+class OperationsViewModel : ViewModel() {
 
     private val _index = MutableStateFlow(10)
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val _transactions: MutableStateFlow<Transactions> = MutableStateFlow(getFirstIteration())
+    private val _operations: MutableStateFlow<Operations> = MutableStateFlow(getFirstIteration())
     @RequiresApi(Build.VERSION_CODES.O)
-    val transactions = _transactions
+    val operations = _operations
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun refreshTransactions() {
+    suspend fun refreshOperations() {
         delay(2000)
-        _transactions.value = getFirstIteration()
+        _operations.value = getFirstIteration()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun loadMoreOperations() {
         val begin = _index.value + 1
         val end = begin + 10
-        val newTransacions = mutableListOf<Transaction>()
+        val newTransacions = mutableListOf<Operation>()
         for (i in begin..end)
             newTransacions.add(getMockOperation(i))
-        val newResult = _transactions.value.plus(newTransacions)
+        val newResult = _operations.value.plus(newTransacions)
         val scope = CoroutineScope(Dispatchers.IO)
         Log.e("Current", "Current is: ${newResult.map{it.user.name}}")
         _index.value = end + 1
         scope.launch {
-            _transactions.emit(newResult)
+            _operations.emit(newResult)
         }
     }
 
@@ -54,7 +54,7 @@ class TransactionsViewModel : ViewModel() {
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return TransactionsViewModel() as T
+                    return OperationsViewModel() as T
                 }
             }
     }
@@ -63,18 +63,18 @@ class TransactionsViewModel : ViewModel() {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun getFirstIteration(): List<Transaction> {
-    val transactions = mutableListOf<Transaction>()
+fun getFirstIteration(): List<Operation> {
+    val operations = mutableListOf<Operation>()
     for (i in 0..10)
-        transactions.add(getMockOperation(i))
-    return transactions
+        operations.add(getMockOperation(i))
+    return operations
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun getMockOperation(iteration: Int): Transaction {
+fun getMockOperation(iteration: Int): Operation {
     val random = (0..1000).random().toString()
     val user = User(Id("Id-$iteration"), "User $iteration")
     val amount = Amount(random)
     val date = Date.from(Instant.now())
-    return Transaction(user, amount, date)
+    return Operation(user, amount, date)
 }

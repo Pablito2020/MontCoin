@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.model.Amount
-import com.pablofraile.montcoin.model.Result
+import com.pablofraile.montcoin.model.WriteOperationResult
 import com.pablofraile.montcoin.nfc.ReadTag
 import com.pablofraile.montcoin.nfc.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,14 +55,14 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun doOperation(tag: ReadTag, amount: Amount): Result {
+    private suspend fun doOperation(tag: ReadTag, amount: Amount): WriteOperationResult {
         _isDoingOperation.emit(true)
         val hasErrors = false
         Log.d("OperationViewModel", "Doing operation: ${tag.readOperation} with amount $amount")
         delay(2000)
         _isDoingOperation.emit(false)
-        return if (hasErrors) Result.Error("Error writing transaction")
-        else Result.Success
+        return if (hasErrors) WriteOperationResult.Error("Error writing transaction")
+        else WriteOperationResult.Success
     }
 
     companion object {

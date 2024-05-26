@@ -32,16 +32,16 @@ fun AppDrawer(
             modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp)
         )
         NavigationDrawerItem(
-            label = { Text(text="Operacions") },
+            label = { Text(text="Maneja") },
             icon = { Icon(Icons.Filled.Euro, null) },
             selected = currentRoute == MontCoinDestinations.OPERATION_ROUTE,
             onClick = { navigateToOperation(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
-            label = { Text("Transaccions") },
+            label = { Text("Operacions") },
             icon = { Icon(Icons.Filled.FeaturedPlayList, null) },
-            selected = currentRoute == MontCoinDestinations.TRANSACTIONS_ROUTE,
+            selected = currentRoute == MontCoinDestinations.OPERATIONS_ROUTE,
             onClick = { navigateToTransactions(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )

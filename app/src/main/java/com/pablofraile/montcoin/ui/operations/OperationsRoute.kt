@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.ui.transactions
+package com.pablofraile.montcoin.ui.operations
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -10,17 +10,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TransactionsRoute(
-    model: TransactionsViewModel,
+fun OperationsRoute(
+    model: OperationsViewModel,
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
-    val transactions by model.transactions.collectAsStateWithLifecycle()
-    TransactionsScreen(
+    val transactions by model.operations.collectAsStateWithLifecycle()
+    OperationsScreen(
         openDrawer = openDrawer,
         snackbarHostState = snackbarHostState,
-        transactions = transactions,
-        onRefresh = model::refreshTransactions,
+        operations = transactions,
+        onRefresh = model::refreshOperations,
         loadMoreItems = model::loadMoreOperations,
     )
 }

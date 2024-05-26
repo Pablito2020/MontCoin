@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pablofraile.montcoin.model.Result
+import com.pablofraile.montcoin.model.WriteOperationResult
 import com.pablofraile.montcoin.nfc.Sensor
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import kotlinx.coroutines.launch
@@ -56,7 +56,7 @@ fun OperationScreen(
     amountIsValid: Boolean,
     showOperationResult: Boolean,
     card: Sensor,
-    operation: Result?,
+    operation: WriteOperationResult?,
     isDoingOperation: Boolean,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
@@ -128,7 +128,7 @@ fun OperationContent(
     amountIsValid: Boolean,
     showOperationResult: Boolean,
     card: Sensor,
-    operation: Result?,
+    operation: WriteOperationResult?,
     isDoingOperation: Boolean,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
@@ -172,7 +172,7 @@ fun OperationContent(
 fun ShowOperationUi(
     isDoingOperation: Boolean,
     showOperationResult: Boolean,
-    operation: Result?,
+    operation: WriteOperationResult?,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
     snackbarHostState: SnackbarHostState
@@ -180,12 +180,12 @@ fun ShowOperationUi(
     if (isDoingOperation) ShowOperationDoingDialog()
     if (!showOperationResult || operation == null) return
     when (operation) {
-        is Result.Error -> ErrorOperationDialog(
+        is WriteOperationResult.Error -> ErrorOperationDialog(
             operation = operation,
             onOperationErrorRead = onOperationErrorRead
         )
 
-        Result.Success -> ShowSnackBar(
+        WriteOperationResult.Success -> ShowSnackBar(
             text = "Operation Done correctly!",
             snackbarHostState = snackbarHostState,
             onClosedSnackBar = onOperationCorrectRead
@@ -221,7 +221,7 @@ fun ShowOperationDoingDialog(
 
 @Composable
 fun ErrorOperationDialog(
-    operation: Result.Error,
+    operation: WriteOperationResult.Error,
     onOperationErrorRead: () -> Unit
 ) {
     AlertDialog(
@@ -298,7 +298,7 @@ fun OperationScreenPreview() {
     OperationContent(
         amount = "100",
         amountIsValid = true,
-        operation = Result.Success,
+        operation = WriteOperationResult.Success,
         card = Sensor.Searching,
         onOperationErrorRead = {},
         onStart = {},

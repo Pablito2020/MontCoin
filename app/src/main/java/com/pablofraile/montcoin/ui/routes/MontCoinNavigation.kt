@@ -9,7 +9,7 @@ import androidx.navigation.NavHostController
  */
 object MontCoinDestinations {
     const val OPERATION_ROUTE = "operation"
-    const val TRANSACTIONS_ROUTE = "transactions"
+    const val OPERATIONS_ROUTE = "operations"
     const val WATCH_INCOMES = "incomes"
 }
 
@@ -32,8 +32,8 @@ class MontCoinNavigationActions(navController: NavHostController) {
             restoreState = true
         }
     }
-    val navigateToTransactions: () -> Unit = {
-        navController.navigate(MontCoinDestinations.TRANSACTIONS_ROUTE) {
+    val navigateToOperations: () -> Unit = {
+        navController.navigate(MontCoinDestinations.OPERATIONS_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

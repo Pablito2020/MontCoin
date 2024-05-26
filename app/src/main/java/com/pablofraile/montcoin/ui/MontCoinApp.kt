@@ -12,13 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.pablofraile.montcoin.nfc.ReadTag
 import com.pablofraile.montcoin.ui.routes.AppDrawer
 import com.pablofraile.montcoin.ui.routes.MontCoinDestinations
 import com.pablofraile.montcoin.ui.routes.MontCoinNavGraph
 import com.pablofraile.montcoin.ui.routes.MontCoinNavigationActions
 import com.pablofraile.montcoin.ui.theme.MontCoinTheme
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -41,7 +39,7 @@ fun MontCoinApp() {
                 AppDrawer(
                     currentRoute = currentRoute,
                     navigateToOperation = navigationActions.navigateToOperation,
-                    navigateToTransactions = navigationActions.navigateToTransactions,
+                    navigateToTransactions = navigationActions.navigateToOperations,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
             },

@@ -13,9 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import com.pablofraile.montcoin.nfc.NfcActivityTemplate
 import com.pablofraile.montcoin.ui.operation.OperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationViewModel
-import com.pablofraile.montcoin.ui.transactions.TransactionsRoute
-import com.pablofraile.montcoin.ui.transactions.TransactionsScreen
-import com.pablofraile.montcoin.ui.transactions.TransactionsViewModel
+import com.pablofraile.montcoin.ui.operations.OperationsRoute
+import com.pablofraile.montcoin.ui.operations.OperationsViewModel
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -40,9 +39,9 @@ fun MontCoinNavGraph(
                 openDrawer = openDrawer,
             )
         }
-        composable(route = MontCoinDestinations.TRANSACTIONS_ROUTE) { navBackStackEntry ->
-            val model: TransactionsViewModel = viewModel(factory = TransactionsViewModel.provideFactory())
-            TransactionsRoute(
+        composable(route = MontCoinDestinations.OPERATIONS_ROUTE) { navBackStackEntry ->
+            val model: OperationsViewModel = viewModel(factory = OperationsViewModel.provideFactory())
+            OperationsRoute(
                 model = model,
                 openDrawer = openDrawer,
             )
