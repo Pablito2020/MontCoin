@@ -28,10 +28,10 @@ class MainActivity : NfcActivityTemplate() {
             MontCoinTheme {
                 val model =
                     viewModel(factory = OperationViewModel.provideFactory(this.data)) as OperationViewModel
-//                val uiState by model.uiState.collectAsStateWithLifecycle()
                 val card by model.cardState.collectAsStateWithLifecycle()
                 val amount by model.amount.collectAsStateWithLifecycle()
-                val operation by model.operationStatus.collectAsStateWithLifecycle()
+                val operation by model.operationResult.collectAsStateWithLifecycle()
+                val showResult by model.showOperationResult.collectAsStateWithLifecycle()
                 val isDoingOperation by model.isDoingOperation.collectAsStateWithLifecycle()
                 OperationScreen(
                     amount = amount.value,
@@ -45,7 +45,10 @@ class MainActivity : NfcActivityTemplate() {
                         model.changeCardState(CreditCardState.StoppedSearching)
                     },
                     onAmountChange = model::changeAmount,
-                    isDoingOperation = isDoingOperation
+                    isDoingOperation = isDoingOperation,
+                    showOperationResult = showResult,
+                    onOperationErrorReaded = model::cleanOperationResult,
+                    onOperationCorrectReaded = model::cleanOperationResult,
                 )
             }
 

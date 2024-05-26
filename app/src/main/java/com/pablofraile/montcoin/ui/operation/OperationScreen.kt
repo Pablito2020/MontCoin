@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 fun OperationScreen(
     amount: String,
     amountIsValid: Boolean,
+    showOperationResult: Boolean,
     card: CreditCardState,
     operation: MontCoinOperationState?,
     isDoingOperation: Boolean,
@@ -57,7 +58,7 @@ fun OperationScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ShowOperationUi(isDoingOperation=isDoingOperation, operation = operation, onOperationErrorReaded = onOperationErrorReaded, onOperationCorrectReaded= onOperationCorrectReaded)
+        ShowOperationUi(isDoingOperation=isDoingOperation, showOperationResult=showOperationResult, operation = operation, onOperationErrorReaded = onOperationErrorReaded, onOperationCorrectReaded= onOperationCorrectReaded)
         AmountTextBox(
             amount = amount,
             isValid = amountIsValid,
@@ -76,12 +77,13 @@ fun OperationScreen(
 @Composable
 fun ShowOperationUi(
     isDoingOperation: Boolean,
+    showOperationResult: Boolean,
     operation: MontCoinOperationState?,
     onOperationErrorReaded: () -> Unit,
     onOperationCorrectReaded: () -> Unit,
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
-    if (operation == null) return
+    if (!showOperationResult || operation == null) return
     when (operation) {
         is MontCoinOperationState.Error -> ErrorOperationDialog(
             operation = operation,
@@ -96,6 +98,7 @@ fun ShowOperationUi(
 
 @Composable
 fun ShowSnackBar(text: String, onClosedSnackBar: () -> Unit = {}) {
+    onClosedSnackBar()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = snackbarHostState) {
@@ -207,6 +210,7 @@ fun OperationScreenPreview() {
         onStop = {},
         onAmountChange = {},
         isDoingOperation = false,
+        showOperationResult = false,
         onOperationCorrectReaded = {},
     )
 }

@@ -1,7 +1,5 @@
 package com.pablofraile.montcoin.ui.operation
 
-import com.pablofraile.montcoin.nfc.ReadTag
-
 sealed class CreditCardState {
     data object StoppedSearching : CreditCardState()
     data object SearchingCard : CreditCardState()
