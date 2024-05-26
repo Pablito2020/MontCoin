@@ -43,8 +43,8 @@ fun OperationScreen(
     amount: String,
     amountIsValid: Boolean,
     showOperationResult: Boolean,
-    card: CreditCardState,
-    operation: MontCoinOperationState?,
+    card: NfcSensor,
+    operation: OperationResult?,
     isDoingOperation: Boolean,
     onOperationErrorReaded: () -> Unit,
     onOperationCorrectReaded: () -> Unit,
@@ -67,7 +67,7 @@ fun OperationScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         ActionButton(cardState = card, onStart = onStart, onStop = onStop)
-        if (card == CreditCardState.SearchingCard) {
+        if (card == NfcSensor.Searching) {
             Spacer(modifier = Modifier.height(16.dp))
             LoadingAnimation()
         }
@@ -78,18 +78,18 @@ fun OperationScreen(
 fun ShowOperationUi(
     isDoingOperation: Boolean,
     showOperationResult: Boolean,
-    operation: MontCoinOperationState?,
+    operation: OperationResult?,
     onOperationErrorReaded: () -> Unit,
     onOperationCorrectReaded: () -> Unit,
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
     if (!showOperationResult || operation == null) return
     when (operation) {
-        is MontCoinOperationState.Error -> ErrorOperationDialog(
+        is OperationResult.Error -> ErrorOperationDialog(
             operation = operation,
             onOperationErrorReaded = onOperationErrorReaded
         )
-        MontCoinOperationState.Success -> ShowSnackBar(
+        OperationResult.Success -> ShowSnackBar(
             text = "Operation Done correctly!",
             onClosedSnackBar = onOperationCorrectReaded
         )
@@ -126,7 +126,7 @@ fun ShowOperationDoingDialog(
 
 @Composable
 fun ErrorOperationDialog(
-    operation: MontCoinOperationState.Error,
+    operation: OperationResult.Error,
     onOperationErrorReaded: () -> Unit
 ) {
     AlertDialog(
@@ -177,19 +177,19 @@ fun AmountTextBox(
 }
 
 @Composable
-fun ActionButton(cardState: CreditCardState, onStart: () -> Unit, onStop: () -> Unit) {
+fun ActionButton(cardState: NfcSensor, onStart: () -> Unit, onStop: () -> Unit) {
     Button(
         onClick = {
             when (cardState) {
-                is CreditCardState.StoppedSearching -> onStart()
-                is CreditCardState.SearchingCard -> onStop()
+                is NfcSensor.Stopped -> onStart()
+                is NfcSensor.Searching -> onStop()
             }
         }
     ) {
         Text(
             text = when (cardState) {
-                is CreditCardState.StoppedSearching -> "Start"
-                is CreditCardState.SearchingCard -> "Stop"
+                is NfcSensor.Stopped -> "Start"
+                is NfcSensor.Searching -> "Stop"
             }
         )
     }
@@ -203,8 +203,8 @@ fun OperationScreenPreview() {
     OperationScreen(
         amount = "100",
         amountIsValid = true,
-        operation = MontCoinOperationState.Success,
-        card = CreditCardState.SearchingCard,
+        operation = OperationResult.Success,
+        card = NfcSensor.Searching,
         onOperationErrorReaded = {},
         onStart = {},
         onStop = {},
