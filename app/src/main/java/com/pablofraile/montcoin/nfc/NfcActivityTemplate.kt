@@ -7,6 +7,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
@@ -20,12 +21,12 @@ data class ReadTag(val tag: Tag, val readOperation: UUID)
 open class NfcActivityTemplate : ComponentActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
-    lateinit var data: MutableStateFlow<ReadTag?>
+    var data: MutableStateFlow<ReadTag?> = MutableStateFlow(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        data = MutableStateFlow(null)
+        Log.e("NfcActivityTemplate", "Flow: $data")
     }
 
     private fun enableNfcForegroundDispatch() {
@@ -78,6 +79,7 @@ open class NfcActivityTemplate : ComponentActivity() {
         intent?.let { nfcIntent ->
             val scope = CoroutineScope(Dispatchers.IO)
             val readOperation = UUID.randomUUID()
+            Log.e("NfcActivityTemplate", "New intent: $nfcIntent")
             val readTag = ReadTag(
                 nfcIntent.getParcelableCompatibility(
                     NfcAdapter.EXTRA_TAG,
