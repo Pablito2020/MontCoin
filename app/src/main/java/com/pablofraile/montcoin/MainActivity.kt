@@ -5,6 +5,7 @@ package com.pablofraile.montcoin
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +34,7 @@ class MainActivity : NfcActivityTemplate() {
                 val operation by model.operationResult.collectAsStateWithLifecycle()
                 val showResult by model.showOperationResult.collectAsStateWithLifecycle()
                 val isDoingOperation by model.isDoingOperation.collectAsStateWithLifecycle()
+                Log.e("main", "Show result: $showResult")
                 OperationScreen(
                     amount = amount.value,
                     amountIsValid = amount.isValid(),

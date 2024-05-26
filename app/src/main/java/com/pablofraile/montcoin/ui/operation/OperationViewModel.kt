@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -24,12 +26,9 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
 
     private val _amount = MutableStateFlow(Amount(value = ""))
     val amount: StateFlow<Amount> = _amount
-    fun changeAmount(amount: String) = _amount.update {
-        it.copy(value = amount)
-    }
+    fun changeAmount(amount: String) = _amount.update { it.copy(value = amount) }
 
-    private val _cardState: MutableStateFlow<CreditCardState> =
-        MutableStateFlow(CreditCardState.StoppedSearching)
+    private val _cardState: MutableStateFlow<CreditCardState> = MutableStateFlow(CreditCardState.StoppedSearching)
     val cardState: StateFlow<CreditCardState> = _cardState
     fun changeCardState(card: CreditCardState) = _cardState.update { card }
 
@@ -40,18 +39,25 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
         uiOperationState.take(1).map { (amountValue, cardStateValue) ->
             Triple(tag, amountValue, cardStateValue)
         }
-    }.map { (tag, amountValue, cardStateValue) ->
+    }.transform { (tag, amountValue, cardStateValue) ->
         if (amountValue.isValid() && cardStateValue == CreditCardState.SearchingCard && tag != null) {
-            Log.d("OperationViewModel", "Transaction ${tag.readOperation}, Amount: ${amountValue.toInt()}")
-            return@map writeTransaction("user", amountValue.toInt())
+            val res = writeTransaction("user", amountValue.toInt())
+            _showOperationResult.emit(true)
+            emit(res)
         }
-        return@map null
     }.stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
 
-
     private val _showOperationResult = MutableStateFlow(false)
-    val showOperationResult: StateFlow<Boolean> = _showOperationResult
+    val showOperationResult = _showOperationResult
     fun cleanOperationResult() = _showOperationResult.update { false }
+
+    init {
+        viewModelScope.launch {
+            showOperationResult.collect {
+                Log.e("OperationViewModel", "Show result: $it")
+            }
+        }
+    }
 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
@@ -59,7 +65,7 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
 
     private suspend fun writeTransaction(user: String, amount: Int): MontCoinOperationState {
         _isDoingOperation.emit(true)
-        val goodTransaction = true
+        val goodTransaction = false
         delay(2000)
         _isDoingOperation.emit(false)
         if (goodTransaction)
