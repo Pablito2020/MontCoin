@@ -7,29 +7,28 @@ import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Transaction
 import com.pablofraile.montcoin.model.Transactions
 import com.pablofraile.montcoin.model.User
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class TransactionsViewModel : ViewModel() {
 
-    private val _transactions = MutableStateFlow(
-        Transactions(
-            listOf(
-                Transaction(user = User(Id("1"), "User 1"), amount = Amount("100")),
-                Transaction(user = User(Id("2"), "User 2"), amount = Amount("300")),
-                Transaction(user = User(Id("3"), "User 3"), amount = Amount("-1000")),
-            )
+    private val _transactions: MutableStateFlow<Transactions> = MutableStateFlow(
+        listOf(
+            Transaction(user = User(Id("1"), "User 1"), amount = Amount("100")),
+            Transaction(user = User(Id("2"), "User 2"), amount = Amount("300")),
+            Transaction(user = User(Id("3"), "User 3"), amount = Amount("-1000")),
         )
     )
     val transactions = _transactions
-    fun refreshTransactions() {
-        _transactions.value = Transactions(
+    suspend fun refreshTransactions() {
+        delay(2000)
+        _transactions.value =
             listOf(
                 Transaction(user = User(Id("1"), "User 1"), amount = Amount("100")),
                 Transaction(user = User(Id("2"), "User 2"), amount = Amount("300")),
                 Transaction(user = User(Id("3"), "User 3"), amount = Amount("-1000")),
                 Transaction(user = User(Id("4"), "User 4"), amount = Amount("500")),
             )
-        )
     }
 
     companion object {

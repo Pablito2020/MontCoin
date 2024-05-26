@@ -16,6 +16,7 @@ fun TransactionsRoute(
     TransactionsScreen(
         openDrawer = openDrawer,
         snackbarHostState = snackbarHostState,
-        transactions = transactions
+        transactions = transactions,
+        onRefresh = model::refreshTransactions,
     )
 }
