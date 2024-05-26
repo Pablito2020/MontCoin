@@ -1,6 +1,5 @@
 package com.pablofraile.montcoin.ui.operations
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -101,7 +100,7 @@ fun OperationsScreen(
 fun OperationsContent(
     operations: Operations,
     modifier: Modifier = Modifier,
-    onRefresh: suspend () -> Unit = {},
+    onRefresh: suspend () -> Unit,
     loadMoreItems: () -> Unit = {},
     snackbarHostState: SnackbarHostState
 ) {
@@ -121,7 +120,7 @@ fun OperationsContent(
             items(operations) { transaction ->
                 OperationItem(transaction, modifier = modifier)
                 val index = operations.indexOf(transaction)
-                if ( index == operations.size - 1)
+                if (index == operations.size - 1)
                     loadMoreItems()
             }
         }

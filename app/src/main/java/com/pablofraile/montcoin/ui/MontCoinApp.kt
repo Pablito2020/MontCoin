@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.pablofraile.montcoin.data.AppContainer
 import com.pablofraile.montcoin.ui.routes.AppDrawer
 import com.pablofraile.montcoin.ui.routes.MontCoinDestinations
 import com.pablofraile.montcoin.ui.routes.MontCoinNavGraph
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MontCoinApp() {
+fun MontCoinApp(container: AppContainer) {
     MontCoinTheme {
         val navController = rememberNavController()
         val navigationActions = remember(navController) {
@@ -48,6 +49,7 @@ fun MontCoinApp() {
         ) {
             Row {
                 MontCoinNavGraph(
+                    container=container,
                     navController = navController,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
                 )

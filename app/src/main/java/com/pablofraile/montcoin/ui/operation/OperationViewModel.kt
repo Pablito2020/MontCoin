@@ -4,7 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.model.Amount
+import com.pablofraile.montcoin.model.Id
+import com.pablofraile.montcoin.model.User
+import com.pablofraile.montcoin.model.WriteOperation
 import com.pablofraile.montcoin.model.WriteOperationResult
 import com.pablofraile.montcoin.nfc.ReadTag
 import com.pablofraile.montcoin.nfc.Sensor
@@ -24,7 +28,7 @@ import kotlinx.coroutines.flow.update
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
+class OperationViewModel(nfc: Flow<ReadTag?>, val repo: OperationsRepository) : ViewModel() {
 
     private val _amount = MutableStateFlow(Amount(value = ""))
     val amount: StateFlow<Amount> = _amount
@@ -59,18 +63,19 @@ class OperationViewModel(nfc: Flow<ReadTag?>) : ViewModel() {
         _isDoingOperation.emit(true)
         val hasErrors = false
         Log.d("OperationViewModel", "Doing operation: ${tag.readOperation} with amount $amount")
-        delay(2000)
+        val mockUser = Id("test")
+        val result = repo.execute(WriteOperation(mockUser, amount))
         _isDoingOperation.emit(false)
         return if (hasErrors) WriteOperationResult.Error("Error writing transaction")
         else WriteOperationResult.Success
     }
 
     companion object {
-        fun provideFactory(nfc: Flow<ReadTag?>): ViewModelProvider.Factory =
+        fun provideFactory(nfc: Flow<ReadTag?>, operationsRepository: OperationsRepository): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return OperationViewModel(nfc) as T
+                    return OperationViewModel(nfc, operationsRepository) as T
                 }
             }
     }

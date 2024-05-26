@@ -73,7 +73,7 @@ fun OperationScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Operations",
+                        text = "Opera",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
