@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.ui
+package com.pablofraile.montcoin.ui.common
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.foundation.Canvas

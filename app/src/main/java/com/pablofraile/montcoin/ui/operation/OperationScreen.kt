@@ -1,7 +1,9 @@
 package com.pablofraile.montcoin.ui.operation
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +13,20 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,11 +45,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Result
 import com.pablofraile.montcoin.nfc.Sensor
-import com.pablofraile.montcoin.ui.LoadingAnimation
+import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OperationScreen(
     amount: String,
@@ -53,14 +63,96 @@ fun OperationScreen(
     onStart: () -> Unit,
     onStop: () -> Unit,
     onAmountChange: (String) -> Unit,
+    openDrawer: () -> Unit,
+    snackbarHostState: SnackbarHostState
+) {
+    val context = LocalContext.current
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Operations",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = openDrawer) {
+                        Icon(imageVector = Icons.Filled.GraphicEq, contentDescription = null)
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            Toast.makeText(
+                                context,
+                                "Search is not yet implemented in this configuration",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "search"
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        OperationContent(
+            amount = amount,
+            amountIsValid = amountIsValid,
+            showOperationResult = showOperationResult,
+            card = card,
+            operation = operation,
+            isDoingOperation = isDoingOperation,
+            onOperationErrorRead = onOperationErrorRead,
+            onOperationCorrectRead = onOperationCorrectRead,
+            onStart = onStart,
+            onStop = onStop,
+            onAmountChange = onAmountChange,
+            modifier = Modifier.padding(innerPadding),
+            snackbarHostState = snackbarHostState
+        )
+    }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+@ExperimentalMaterial3Api
+@Composable
+fun OperationContent(
+    amount: String,
+    amountIsValid: Boolean,
+    showOperationResult: Boolean,
+    card: Sensor,
+    operation: Result?,
+    isDoingOperation: Boolean,
+    onOperationErrorRead: () -> Unit,
+    onOperationCorrectRead: () -> Unit,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onAmountChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
-        ShowOperationUi(isDoingOperation=isDoingOperation, showOperationResult=showOperationResult, operation = operation, onOperationErrorRead = onOperationErrorRead, onOperationCorrectRead= onOperationCorrectRead)
+        ShowOperationUi(
+            isDoingOperation = isDoingOperation,
+            showOperationResult = showOperationResult,
+            operation = operation,
+            onOperationErrorRead = onOperationErrorRead,
+            onOperationCorrectRead = onOperationCorrectRead,
+            snackbarHostState = snackbarHostState
+        )
         AmountTextBox(
             amount = amount,
             isValid = amountIsValid,
@@ -83,6 +175,7 @@ fun ShowOperationUi(
     operation: Result?,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
     if (!showOperationResult || operation == null) return
@@ -91,17 +184,17 @@ fun ShowOperationUi(
             operation = operation,
             onOperationErrorRead = onOperationErrorRead
         )
+
         Result.Success -> ShowSnackBar(
             text = "Operation Done correctly!",
+            snackbarHostState = snackbarHostState,
             onClosedSnackBar = onOperationCorrectRead
         )
     }
 }
 
 @Composable
-fun ShowSnackBar(text: String, onClosedSnackBar: () -> Unit = {}) {
-    onClosedSnackBar()
-    val snackbarHostState = remember { SnackbarHostState() }
+fun ShowSnackBar(text: String, snackbarHostState: SnackbarHostState, onClosedSnackBar: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = snackbarHostState) {
         scope.launch {
@@ -202,7 +295,7 @@ fun ActionButton(cardState: Sensor, onStart: () -> Unit, onStop: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun OperationScreenPreview() {
-    OperationScreen(
+    OperationContent(
         amount = "100",
         amountIsValid = true,
         operation = Result.Success,
