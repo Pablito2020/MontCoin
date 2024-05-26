@@ -1,7 +1,7 @@
 package com.pablofraile.montcoin.ui.transactions
 
+import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,8 +16,8 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,11 +29,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pablofraile.montcoin.model.Transaction
 import com.pablofraile.montcoin.model.Transactions
-import com.pablofraile.montcoin.ui.operation.ShowSnackBar
 import kotlinx.coroutines.launch
 
 
@@ -54,6 +49,7 @@ fun TransactionsScreen(
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState,
     transactions: Transactions,
+    loadMoreItems: () -> Unit,
     onRefresh: suspend () -> Unit,
 ) {
     val context = LocalContext.current
@@ -95,7 +91,8 @@ fun TransactionsScreen(
             transactions = transactions,
             modifier = Modifier.padding(innerPadding),
             onRefresh = onRefresh,
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            loadMoreItems = loadMoreItems
         )
     }
 }
@@ -106,22 +103,28 @@ fun TransactionsContent(
     transactions: Transactions,
     modifier: Modifier = Modifier,
     onRefresh: suspend () -> Unit = {},
+    loadMoreItems: () -> Unit = {},
     snackbarHostState: SnackbarHostState
 ) {
     val coroutineScope = rememberCoroutineScope()
     val state = rememberPullToRefreshState()
-    if (state.isRefreshing){
+    if (state.isRefreshing) {
         LaunchedEffect(true) {
             onRefresh()
-            val showSnackBar = coroutineScope.launch {snackbarHostState.showSnackbar("Refreshed Transactions!")}
+            val showSnackBar =
+                coroutineScope.launch { snackbarHostState.showSnackbar("Refreshed Transactions!") }
             state.endRefresh()
             showSnackBar.join()
         }
     }
-    Box(modifier= modifier.nestedScroll(state.nestedScrollConnection)) {
+    Box(modifier = modifier.nestedScroll(state.nestedScrollConnection)) {
         LazyColumn(modifier = modifier) {
-            items(transactions) {
-                TransactionItem(transaction = it, modifier = modifier)
+            items(transactions) { transaction ->
+                TransactionItem(transaction, modifier = modifier)
+                val index = transactions.indexOf(transaction)
+                Log.e("UI:", "Index is: $index of transaction ${transaction.user.name}")
+                if ( index == transactions.size - 1)
+                    loadMoreItems()
             }
         }
         PullToRefreshContainer(
