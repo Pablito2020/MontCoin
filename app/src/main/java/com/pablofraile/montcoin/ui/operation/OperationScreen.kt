@@ -52,12 +52,9 @@ import kotlinx.coroutines.launch
 fun OperationScreen(
     amount: String,
     amountIsValid: Boolean,
-    showOperationResult: Boolean,
     card: Sensor,
     operation: Result<Unit>?,
     isDoingOperation: Boolean,
-    onOperationErrorRead: () -> Unit,
-    onOperationCorrectRead: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     onAmountChange: (String) -> Unit,
@@ -102,12 +99,9 @@ fun OperationScreen(
         OperationContent(
             amount = amount,
             amountIsValid = amountIsValid,
-            showOperationResult = showOperationResult,
             card = card,
             operation = operation,
             isDoingOperation = isDoingOperation,
-            onOperationErrorRead = onOperationErrorRead,
-            onOperationCorrectRead = onOperationCorrectRead,
             onStart = onStart,
             onStop = onStop,
             onAmountChange = onAmountChange,
@@ -124,12 +118,9 @@ fun OperationScreen(
 fun OperationContent(
     amount: String,
     amountIsValid: Boolean,
-    showOperationResult: Boolean,
     card: Sensor,
     operation: Result<Unit>?,
     isDoingOperation: Boolean,
-    onOperationErrorRead: () -> Unit,
-    onOperationCorrectRead: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     onAmountChange: (String) -> Unit,
@@ -145,10 +136,7 @@ fun OperationContent(
     ) {
         ShowOperationUi(
             isDoingOperation = isDoingOperation,
-            showOperationResult = showOperationResult,
             operation = operation,
-            onOperationErrorRead = onOperationErrorRead,
-            onOperationCorrectRead = onOperationCorrectRead,
             snackbarHostState = snackbarHostState
         )
         AmountTextBox(
@@ -169,27 +157,19 @@ fun OperationContent(
 @Composable
 fun ShowOperationUi(
     isDoingOperation: Boolean,
-    showOperationResult: Boolean,
     operation: Result<Unit>?,
-    onOperationErrorRead: () -> Unit,
-    onOperationCorrectRead: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
-    if (!showOperationResult || operation == null) return
-    operation.fold(
+    operation?.fold(
         onSuccess = {
             ShowSnackBar(
                 text = "Operation Done correctly!",
                 snackbarHostState = snackbarHostState,
-                onClosedSnackBar = onOperationCorrectRead
             )
         },
         onFailure = {
-            ErrorOperationDialog(
-                message = it.message ?: "Unknown Error",
-                onOperationErrorRead = onOperationErrorRead
-            )
+            ErrorOperationDialog(message = it.message ?: "Unknown Error")
         }
     )
 }
@@ -227,7 +207,7 @@ fun ShowOperationDoingDialog(
 @Composable
 fun ErrorOperationDialog(
     message: String,
-    onOperationErrorRead: () -> Unit
+    onOperationErrorRead: () -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = {},
@@ -304,12 +284,9 @@ fun OperationScreenPreview() {
         amountIsValid = true,
         operation = Result.success(Unit),
         card = Sensor.Searching,
-        onOperationErrorRead = {},
         onStart = {},
         onStop = {},
         onAmountChange = {},
         isDoingOperation = false,
-        showOperationResult = false,
-        onOperationCorrectRead = {},
     )
 }

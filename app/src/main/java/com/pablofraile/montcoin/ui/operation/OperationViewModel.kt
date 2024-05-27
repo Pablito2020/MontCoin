@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
@@ -37,21 +37,14 @@ class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsReposi
     fun searchDevices() = changeCardState(Sensor.Searching)
     fun stopSearchingDevices() = changeCardState(Sensor.Stopped)
 
-    val result = nfc.flatMapLatest { tag ->
+    val operationResult = nfc.flatMapLatest { tag ->
         combine(amount, sensor, ::Pair).take(1).map { (amount, sensor) ->
             Triple(tag, amount, sensor)
         }
     }.transform { (tag, amount, sensor) ->
-        if (amount.isValid() && sensor == Sensor.Searching && tag != null) {
-            val result = doOperation(tag, amount)
-            _showOperationResult.emit(true)
-            emit(result)
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
-
-    private val _showOperationResult = MutableStateFlow(false)
-    val showOperationResult = _showOperationResult
-    fun cleanOperationResult() = _showOperationResult.update { false }
+        if (amount.isValid() && sensor == Sensor.Searching && tag != null)
+            emit(doOperation(tag, amount))
+    }.shareIn(viewModelScope, SharingStarted.Eagerly)
 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation

@@ -2,7 +2,6 @@ package com.pablofraile.montcoin.ui.operation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,21 +17,17 @@ fun OperationRoute(
 ) {
     val card by model.sensor.collectAsStateWithLifecycle()
     val amount by model.amount.collectAsStateWithLifecycle()
-    val operation by model.result.collectAsStateWithLifecycle()
-    val showResult by model.showOperationResult.collectAsStateWithLifecycle()
+    val operation by model.operationResult.collectAsStateWithLifecycle(initialValue = null)
     val isDoingOperation by model.isDoingOperation.collectAsStateWithLifecycle()
     OperationScreen(
         amount = amount.value,
         amountIsValid = amount.isValid(),
         card = card,
-        operation = operation,
         onStart = model::searchDevices,
         onStop = model::stopSearchingDevices,
         onAmountChange = model::changeAmount,
         isDoingOperation = isDoingOperation,
-        showOperationResult = showResult,
-        onOperationErrorRead = model::cleanOperationResult,
-        onOperationCorrectRead = model::cleanOperationResult,
+        operation = operation,
         openDrawer = openDrawer,
         snackbarHostState = snackbarHostState
     )
