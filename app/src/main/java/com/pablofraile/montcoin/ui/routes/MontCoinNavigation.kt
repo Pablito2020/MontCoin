@@ -10,7 +10,7 @@ import androidx.navigation.NavHostController
 object MontCoinDestinations {
     const val OPERATION_ROUTE = "operation"
     const val OPERATIONS_ROUTE = "operations"
-    const val WATCH_INCOMES = "incomes"
+    const val WRITE_CARD = "write_card"
 }
 
 /**
@@ -41,8 +41,8 @@ class MontCoinNavigationActions(navController: NavHostController) {
             restoreState = true
         }
     }
-    val navigateToIncomes: () -> Unit = {
-        navController.navigate(MontCoinDestinations.WATCH_INCOMES) {
+    val navigateToWriteCard: () -> Unit = {
+        navController.navigate(MontCoinDestinations.WRITE_CARD) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

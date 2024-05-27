@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.ui.operations
+package com.pablofraile.montcoin.ui.common
 
 sealed class Sensor {
     data object Stopped : Sensor()

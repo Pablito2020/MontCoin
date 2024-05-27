@@ -33,7 +33,7 @@ fun MontCoinApp(container: AppContainer) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute =
             navBackStackEntry?.destination?.route ?: MontCoinDestinations.OPERATION_ROUTE
-        val sizeAwareDrawerState =  rememberDrawerState(DrawerValue.Closed)
+        val sizeAwareDrawerState = rememberDrawerState(DrawerValue.Closed)
 
         ModalNavigationDrawer(
             drawerContent = {
@@ -41,6 +41,7 @@ fun MontCoinApp(container: AppContainer) {
                     currentRoute = currentRoute,
                     navigateToOperation = navigationActions.navigateToOperation,
                     navigateToTransactions = navigationActions.navigateToOperations,
+                    navigateToWriteCard = navigationActions.navigateToWriteCard,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
             },
@@ -49,7 +50,7 @@ fun MontCoinApp(container: AppContainer) {
         ) {
             Row {
                 MontCoinNavGraph(
-                    container=container,
+                    container = container,
                     navController = navController,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
                 )

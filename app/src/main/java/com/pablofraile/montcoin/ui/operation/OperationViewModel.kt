@@ -10,7 +10,7 @@ import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
-import com.pablofraile.montcoin.ui.operations.Sensor
+import com.pablofraile.montcoin.ui.common.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

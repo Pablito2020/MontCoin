@@ -4,10 +4,11 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material.icons.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
@@ -24,6 +25,7 @@ fun AppDrawer(
     currentRoute: String,
     navigateToOperation: () -> Unit,
     navigateToTransactions: () -> Unit,
+    navigateToWriteCard: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -32,7 +34,7 @@ fun AppDrawer(
             modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp)
         )
         NavigationDrawerItem(
-            label = { Text(text="Maneja") },
+            label = { Text(text = "Maneja") },
             icon = { Icon(Icons.Filled.Euro, null) },
             selected = currentRoute == MontCoinDestinations.OPERATION_ROUTE,
             onClick = { navigateToOperation(); closeDrawer() },
@@ -40,17 +42,17 @@ fun AppDrawer(
         )
         NavigationDrawerItem(
             label = { Text("Operacions") },
-            icon = { Icon(Icons.Filled.FeaturedPlayList, null) },
+            icon = { Icon(Icons.AutoMirrored.Filled.FeaturedPlayList, null) },
             selected = currentRoute == MontCoinDestinations.OPERATIONS_ROUTE,
             onClick = { navigateToTransactions(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         // Add Blanck component to separate the last item
         NavigationDrawerItem(
-            label = { Text("Configuració") },
-            icon = { Icon(Icons.Filled.Settings, null) },
+            label = { Text("Tarjeta") },
+            icon = { Icon(Icons.Filled.CreditCard, null) },
             selected = false,
-            onClick = { /* TODO */ },
+            onClick = { navigateToWriteCard(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
@@ -79,6 +81,7 @@ fun PreviewAppDrawer() {
             currentRoute = MontCoinDestinations.OPERATION_ROUTE,
             navigateToOperation = {},
             navigateToTransactions = {},
+            navigateToWriteCard = {},
             closeDrawer = {},
         )
     }

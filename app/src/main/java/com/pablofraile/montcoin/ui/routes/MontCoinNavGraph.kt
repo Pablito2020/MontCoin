@@ -14,6 +14,8 @@ import com.pablofraile.montcoin.ui.operation.OperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationViewModel
 import com.pablofraile.montcoin.ui.operations.OperationsRoute
 import com.pablofraile.montcoin.ui.operations.OperationsViewModel
+import com.pablofraile.montcoin.ui.write.WriteCardRoute
+import com.pablofraile.montcoin.ui.write.WriteCardViewModel
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -31,18 +33,29 @@ fun MontCoinNavGraph(
         modifier = modifier
     ) {
         composable(route = MontCoinDestinations.OPERATION_ROUTE) { navBackStackEntry ->
-            val model: OperationViewModel = viewModel(factory = OperationViewModel.provideFactory(container.cardRepository, container.operationsRepository))
+            val model: OperationViewModel = viewModel(
+                factory = OperationViewModel.provideFactory(
+                    container.cardRepository,
+                    container.operationsRepository
+                )
+            )
             OperationRoute(
                 model = model,
                 openDrawer = openDrawer,
             )
         }
         composable(route = MontCoinDestinations.OPERATIONS_ROUTE) { navBackStackEntry ->
-            val model: OperationsViewModel = viewModel(factory = OperationsViewModel.provideFactory(container.operationsRepository))
+            val model: OperationsViewModel =
+                viewModel(factory = OperationsViewModel.provideFactory(container.operationsRepository))
             OperationsRoute(
                 model = model,
                 openDrawer = openDrawer,
             )
+        }
+        composable(route = MontCoinDestinations.WRITE_CARD) { navBackStackEntry ->
+            val model: WriteCardViewModel =
+                viewModel(factory = WriteCardViewModel.provideFactory(container.cardRepository))
+            WriteCardRoute(model = model, openDrawer = openDrawer)
         }
     }
 }
