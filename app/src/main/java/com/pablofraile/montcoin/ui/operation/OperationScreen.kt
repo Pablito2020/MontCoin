@@ -33,7 +33,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -181,9 +180,8 @@ fun ShowSnackBar(
     snackbarHostState: SnackbarHostState,
     onClosedSnackBar: () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = operation) {
-        scope.launch {
+        launch {
             snackbarHostState.showSnackbar("Moved ${operation.amount.value} to ${operation.user.name}")
             onClosedSnackBar()
         }
@@ -248,6 +246,7 @@ fun AmountTextBox(
     OutlinedTextField(
         value = amount,
         isError = !isValid,
+        supportingText = { if (!isValid) Text("Invalid Amount") },
         onValueChange = onAmountChange,
         keyboardOptions = keyboardConfig,
         keyboardActions = keyboardActions,

@@ -31,11 +31,18 @@ class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsReposi
 
     private val _amount = MutableStateFlow(Amount(value = ""))
     val amount: StateFlow<Amount> = _amount
-    fun changeAmount(amount: String) = _amount.update { it.copy(value = amount) }
+    fun changeAmount(amount: String) {
+        changeCardState(Sensor.Stopped)
+        _amount.update { it.copy(value = amount) }
+    }
 
     private val _sensor: MutableStateFlow<Sensor> = MutableStateFlow(Sensor.Stopped)
     val sensor: StateFlow<Sensor> = _sensor
-    private fun changeCardState(card: Sensor) = _sensor.update { card }
+    private fun changeCardState(card: Sensor) {
+        if (!_amount.value.isValid() && card == Sensor.Searching) return
+        _sensor.update { card }
+    }
+
     fun searchDevices() = changeCardState(Sensor.Searching)
     fun stopSearchingDevices() = changeCardState(Sensor.Stopped)
 
