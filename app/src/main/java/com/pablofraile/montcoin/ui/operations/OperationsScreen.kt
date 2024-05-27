@@ -145,7 +145,6 @@ fun OperationItem(operation: Operation, modifier: Modifier) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // User Name
                 Text(
                     text = "User: ${operation.user.name}",
                     fontSize = 18.sp,
@@ -154,7 +153,6 @@ fun OperationItem(operation: Operation, modifier: Modifier) {
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // User Id
                 Text(
                     text = "Date: ${operation.date}",
                     fontSize = 14.sp,

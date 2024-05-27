@@ -7,26 +7,40 @@ import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.Sensor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class WriteCardViewModel(private val cardRepository: CardRepository) : ViewModel() {
 
     private val _writeResult = MutableSharedFlow<Result<User>>()
     val writeResult = _writeResult
 
-    private val _isWriting = MutableStateFlow(false)
-    val isWriting = _isWriting
+    private var writingJob: Job? = null
 
-    private val _sensor = MutableStateFlow(Sensor.Searching)
+    private val _sensor: MutableStateFlow<Sensor> = MutableStateFlow(Sensor.Stopped)
     val sensor = _sensor
+    private fun changeCardState(card: Sensor) {
+        when(card) {
+            Sensor.Stopped -> writingJob?.cancel()
+            Sensor.Searching -> {
+                val scope = CoroutineScope(Dispatchers.IO)
+                writingJob = scope.launch { writeCard()}
+            }
+        }
+        _sensor.update { card }
+    }
+    fun startSearching() = changeCardState(Sensor.Searching)
+    fun stopSearching() = changeCardState(Sensor.Stopped)
 
-    suspend fun writeCard() {
-        _isWriting.value = true
-        val user = User(Id("1"), "Pablo Fraile", Amount("1000"))
+    private suspend fun writeCard() {
+        val user = User(Id("RealId1"), "Pablo Fraile", Amount("1000"))
         val result = cardRepository.writeToCard(user)
         _writeResult.emit(result)
-        _isWriting.value = false
     }
 
     companion object {

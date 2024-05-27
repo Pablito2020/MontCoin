@@ -72,17 +72,13 @@ abstract class NfcActivityTemplate : ComponentActivity() {
         super.onNewIntent(intent)
         intent?.let { nfcIntent ->
             val scope = CoroutineScope(Dispatchers.IO)
-            val tag = nfcIntent.getParcelableCompatibility(
-                NfcAdapter.EXTRA_TAG,
-                Tag::class.java
-            )
             scope.launch {
-                onTagRead(tag)
+                onTagRead(intent)
             }
         }
     }
 
-    abstract suspend fun onTagRead(tag: Tag?)
+    abstract suspend fun onTagRead(intent: Intent?)
 
 }
 

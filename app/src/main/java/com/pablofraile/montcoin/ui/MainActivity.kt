@@ -1,6 +1,6 @@
 package com.pablofraile.montcoin.ui
 
-import android.nfc.Tag
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -20,10 +20,10 @@ class MainActivity : NfcActivityTemplate() {
         }
     }
 
-    override suspend fun onTagRead(tag: Tag?) {
+    override suspend fun onTagRead(intent: Intent?) {
         val nfc =
             ((application as MontCoinApplication).container.cardRepository as NfcCardRepository)
-        nfc.send(tag)
+        nfc.send(intent)
     }
 
 }
