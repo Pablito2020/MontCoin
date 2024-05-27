@@ -21,12 +21,11 @@ object NfcCardRepository : CardRepository {
 
     private val _intents: MutableSharedFlow<Intent?> = MutableSharedFlow()
     private val _tags: Flow<Tag?> = _intents.filterNotNull().map { getTagFromIntent(it) }
-    private val _users: Flow<User> = _intents.filterNotNull().transform {
+    private val _users: Flow<Result<User>> = _intents.filterNotNull().map {
         // TODO Here we have to parse the tag!
         val userId = it.toUserId()
-        if (userId.isSuccess) {
-            val user = User(userId.getOrNull()!!, "Pablo Fraile", Amount("1000"))
-            emit(user)
+        userId.map { id ->
+            User(id, "Pablo Fraile", Amount("1000"))
         }
     }
 
@@ -35,7 +34,7 @@ object NfcCardRepository : CardRepository {
         return NfcTagWriter.write(tag, user.toNfcTag()).map { user }
     }
 
-    override fun observeUsers(): Flow<User> = _users
+    override fun observeUsers(): Flow<Result<User>> = _users
 
     suspend fun send(intent: Intent?) = _intents.emit(intent)
 

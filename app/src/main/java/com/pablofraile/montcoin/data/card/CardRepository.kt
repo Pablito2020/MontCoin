@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface CardRepository {
     suspend fun writeToCard(user: User): Result<User>
-    fun observeUsers(): Flow<User>
+    fun observeUsers(): Flow<Result<User>>
 }

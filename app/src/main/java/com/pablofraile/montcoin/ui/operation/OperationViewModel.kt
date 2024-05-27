@@ -57,6 +57,13 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
+    private suspend fun doOperation(user: Result<User>, amount: Amount): Result<Operation> {
+        return user.fold(
+            onSuccess = { doOperation(it, amount) },
+            onFailure = { Result.failure(it) }
+        )
+    }
+
     private suspend fun doOperation(user: User, amount: Amount): Result<Operation> {
         _isDoingOperation.emit(true)
         Log.d("OperationViewModel", "Doing operation for user: ${user.name} with amount $amount")
