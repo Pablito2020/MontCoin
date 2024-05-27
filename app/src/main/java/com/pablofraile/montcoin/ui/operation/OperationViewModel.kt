@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
+import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.WriteOperation
 import com.pablofraile.montcoin.nfc.ReadTag
 import com.pablofraile.montcoin.nfc.Sensor
@@ -25,7 +26,8 @@ import kotlinx.coroutines.flow.update
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsRepository) : ViewModel() {
+class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsRepository) :
+    ViewModel() {
 
     private val _amount = MutableStateFlow(Amount(value = ""))
     val amount: StateFlow<Amount> = _amount
@@ -44,12 +46,12 @@ class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsReposi
     }.transform { (tag, amount, sensor) ->
         if (amount.isValid() && sensor == Sensor.Searching && tag != null)
             emit(doOperation(tag, amount))
-    }.shareIn(viewModelScope, SharingStarted.Eagerly)
+    }.shareIn(viewModelScope, SharingStarted.Lazily)
 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun doOperation(tag: ReadTag, amount: Amount): Result<Unit> {
+    private suspend fun doOperation(tag: ReadTag, amount: Amount): Result<Operation> {
         _isDoingOperation.emit(true)
         Log.d("OperationViewModel", "Doing operation: ${tag.readOperation} with amount $amount")
         val mockUser = Id("test")
@@ -59,7 +61,10 @@ class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsReposi
     }
 
     companion object {
-        fun provideFactory(nfc: Flow<ReadTag?>, operationsRepository: OperationsRepository): ViewModelProvider.Factory =
+        fun provideFactory(
+            nfc: Flow<ReadTag?>,
+            operationsRepository: OperationsRepository
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {

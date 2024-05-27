@@ -17,7 +17,7 @@ class InMemoryOperationRepository : OperationsRepository {
     val operations: MutableStateFlow<Operations> = MutableStateFlow(emptyList())
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun execute(operation: WriteOperation): Result<Unit> {
+    override suspend fun execute(operation: WriteOperation): Result<Operation> {
         delay(2000)
         val newOperation = Operation(
             user = User(id = operation.userId, name = "FakeUser", amount = operation.amount),
@@ -25,7 +25,7 @@ class InMemoryOperationRepository : OperationsRepository {
             date = Date.from(Instant.now())
         )
         operations.value += newOperation
-        return Result.success(Unit)
+        return Result.success(newOperation)
     }
 
     override fun observeOperations(): Flow<Operations> = operations

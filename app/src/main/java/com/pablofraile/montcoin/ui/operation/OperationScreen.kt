@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.nfc.Sensor
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import kotlinx.coroutines.launch
@@ -53,7 +54,7 @@ fun OperationScreen(
     amount: String,
     amountIsValid: Boolean,
     card: Sensor,
-    operation: Result<Unit>?,
+    operation: Result<Operation>?,
     isDoingOperation: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -119,7 +120,7 @@ fun OperationContent(
     amount: String,
     amountIsValid: Boolean,
     card: Sensor,
-    operation: Result<Unit>?,
+    operation: Result<Operation>?,
     isDoingOperation: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -157,14 +158,14 @@ fun OperationContent(
 @Composable
 fun ShowOperationUi(
     isDoingOperation: Boolean,
-    operation: Result<Unit>?,
+    operation: Result<Operation>?,
     snackbarHostState: SnackbarHostState
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
     operation?.fold(
         onSuccess = {
             ShowSnackBar(
-                text = "Operation Done correctly!",
+                operation = it,
                 snackbarHostState = snackbarHostState,
             )
         },
@@ -176,14 +177,14 @@ fun ShowOperationUi(
 
 @Composable
 fun ShowSnackBar(
-    text: String,
+    operation: Operation,
     snackbarHostState: SnackbarHostState,
     onClosedSnackBar: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = snackbarHostState) {
+    LaunchedEffect(key1 = operation) {
         scope.launch {
-            snackbarHostState.showSnackbar(text)
+            snackbarHostState.showSnackbar("Moved ${operation.amount.value} to ${operation.user.name}")
             onClosedSnackBar()
         }
     }
@@ -282,7 +283,7 @@ fun OperationScreenPreview() {
     OperationContent(
         amount = "100",
         amountIsValid = true,
-        operation = Result.success(Unit),
+        operation = null,
         card = Sensor.Searching,
         onStart = {},
         onStop = {},
