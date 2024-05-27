@@ -1,14 +1,13 @@
 package com.pablofraile.montcoin.ui.operation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.card.CardRepository
 import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.model.Amount
+import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
-import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
 import com.pablofraile.montcoin.ui.common.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,29 +44,37 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
     fun searchDevices() = changeCardState(Sensor.Searching)
     fun stopSearchingDevices() = changeCardState(Sensor.Stopped)
 
-    val operationResult = cardRepository.observeUsers().flatMapLatest { user ->
+    val operationResult = cardRepository.observeUsersId().flatMapLatest { user ->
         combine(amount, sensor, ::Pair).take(1).map { (amount, sensor) ->
             Triple(user, amount, sensor)
         }
     }.transform { (tag, amount, sensor) ->
-        if (amount.isValid() && sensor == Sensor.Searching)
-            emit(doOperation(tag, amount))
+        if (amount.isValid() && sensor == Sensor.Searching) {
+            val result = doOperation(tag, amount)
+            if (result.isFailure) _errorMessage.emit(
+                result.exceptionOrNull()?.message ?: "Unknown Error"
+            )
+            else emit(result.getOrThrow())
+        }
     }.shareIn(viewModelScope, SharingStarted.Lazily)
+
+    private val _errorMessage: MutableStateFlow<String?> = MutableStateFlow(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+    fun cleanError() = _errorMessage.update { null }
 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun doOperation(user: Result<User>, amount: Amount): Result<Operation> {
-        return user.fold(
+    private suspend fun doOperation(userId: Result<Id>, amount: Amount): Result<Operation> {
+        return userId.fold(
             onSuccess = { doOperation(it, amount) },
             onFailure = { Result.failure(it) }
         )
     }
 
-    private suspend fun doOperation(user: User, amount: Amount): Result<Operation> {
+    private suspend fun doOperation(userId: Id, amount: Amount): Result<Operation> {
         _isDoingOperation.emit(true)
-        Log.d("OperationViewModel", "Doing operation for user: ${user.name} with amount $amount")
-        val result = repo.execute(WriteOperation(user.id, amount))
+        val result = repo.execute(WriteOperation(userId, amount))
         _isDoingOperation.emit(false)
         return result
     }

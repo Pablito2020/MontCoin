@@ -42,8 +42,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Operation
-import com.pablofraile.montcoin.ui.common.Sensor
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
+import com.pablofraile.montcoin.ui.common.Sensor
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -53,7 +53,9 @@ fun OperationScreen(
     amount: String,
     amountIsValid: Boolean,
     card: Sensor,
-    operation: Result<Operation>?,
+    operation: Operation?,
+    errorMessage: String?,
+    closeError: () -> Unit,
     isDoingOperation: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -102,6 +104,8 @@ fun OperationScreen(
             card = card,
             operation = operation,
             isDoingOperation = isDoingOperation,
+            errorMessage = errorMessage,
+            closeError = closeError,
             onStart = onStart,
             onStop = onStop,
             onAmountChange = onAmountChange,
@@ -119,7 +123,9 @@ fun OperationContent(
     amount: String,
     amountIsValid: Boolean,
     card: Sensor,
-    operation: Result<Operation>?,
+    operation: Operation?,
+    errorMessage: String?,
+    closeError: () -> Unit,
     isDoingOperation: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -137,7 +143,9 @@ fun OperationContent(
         ShowOperationUi(
             isDoingOperation = isDoingOperation,
             operation = operation,
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            errorMessage = errorMessage,
+            closeError = closeError
         )
         AmountTextBox(
             amount = amount,
@@ -157,21 +165,17 @@ fun OperationContent(
 @Composable
 fun ShowOperationUi(
     isDoingOperation: Boolean,
-    operation: Result<Operation>?,
-    snackbarHostState: SnackbarHostState
+    operation: Operation?,
+    snackbarHostState: SnackbarHostState,
+    errorMessage: String?,
+    closeError: () -> Unit
 ) {
-    if (isDoingOperation) ShowOperationDoingDialog()
-    operation?.fold(
-        onSuccess = {
-            ShowSnackBar(
-                operation = it,
-                snackbarHostState = snackbarHostState,
-            )
-        },
-        onFailure = {
-            ErrorOperationDialog(message = it.message ?: "Unknown Error")
-        }
-    )
+    if (isDoingOperation)
+        ShowOperationDoingDialog()
+    if (operation != null)
+        ShowSnackBar(operation = operation, snackbarHostState = snackbarHostState)
+    if (errorMessage != null)
+        ErrorOperationDialog(message = errorMessage, onOk = closeError)
 }
 
 @Composable
@@ -206,12 +210,12 @@ fun ShowOperationDoingDialog(
 @Composable
 fun ErrorOperationDialog(
     message: String,
-    onOperationErrorRead: () -> Unit = {}
+    onOk: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = {},
         confirmButton = @Composable {
-            TextButton(onClick = onOperationErrorRead) {
+            TextButton(onClick = onOk) {
                 Text("Ok")
             }
         },
@@ -288,5 +292,7 @@ fun OperationScreenPreview() {
         onStop = {},
         onAmountChange = {},
         isDoingOperation = false,
+        errorMessage = null,
+        closeError = {},
     )
 }

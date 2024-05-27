@@ -14,12 +14,15 @@ fun WriteCardRoute(
 ) {
     val sensor by model.sensor.collectAsStateWithLifecycle()
     val writeResult by model.writeResult.collectAsStateWithLifecycle(initialValue = null)
+    val errorMessage by model.errorMessage.collectAsStateWithLifecycle()
     WriteCardScreen(
         sensor = sensor,
         writeResult = writeResult,
         onStart = model::startSearching,
         onStop = model::stopSearching,
         openDrawer = openDrawer,
+        errorMessage = errorMessage,
+        onOkError = model::clearErrorMessage,
         snackbarHostState = snackbarHostState
     )
 }

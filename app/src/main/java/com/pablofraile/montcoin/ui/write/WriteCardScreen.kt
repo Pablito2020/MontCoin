@@ -30,15 +30,17 @@ import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import com.pablofraile.montcoin.ui.common.Sensor
 import com.pablofraile.montcoin.ui.operation.ActionButton
 import com.pablofraile.montcoin.ui.operation.ErrorOperationDialog
-import com.pablofraile.montcoin.ui.operation.ShowOperationDoingDialog
 import kotlinx.coroutines.launch
+import java.util.Date
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteCardScreen(
     sensor: Sensor,
-    writeResult: Result<User>?,
+    writeResult: Pair<User, Date>?,
+    errorMessage: String?,
+    onOkError: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     openDrawer: () -> Unit,
@@ -85,6 +87,8 @@ fun WriteCardScreen(
             writeResult = writeResult,
             onStart = onStart,
             onStop = onStop,
+            errorMessage = errorMessage,
+            onOkError = onOkError,
             snackbarHostState = snackbarHostState,
             modifier = modifier
         )
@@ -94,13 +98,13 @@ fun WriteCardScreen(
 
 @Composable
 fun ShowSnackBar(
-    user: User,
+    user: Pair<User, Date>,
     snackbarHostState: SnackbarHostState,
     onClosedSnackBar: () -> Unit = {}
 ) {
-    LaunchedEffect(key1 = user) {
+    LaunchedEffect(key1 = user.second) {
         launch {
-            snackbarHostState.showSnackbar("Written card for ${user.name}")
+            snackbarHostState.showSnackbar("Written card for ${user.first.name}")
             onClosedSnackBar()
         }
     }
@@ -110,7 +114,9 @@ fun ShowSnackBar(
 @Composable
 fun WriteCardContent(
     sensor: Sensor,
-    writeResult: Result<User>?,
+    writeResult: Pair<User, Date>?,
+    errorMessage: String?,
+    onOkError: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -128,15 +134,13 @@ fun WriteCardContent(
             Spacer(modifier = Modifier.height(16.dp))
             LoadingAnimation()
         }
-        writeResult?.fold(
-            onSuccess = {
-                ShowSnackBar(
-                    user = it,
-                    snackbarHostState = snackbarHostState
-                )
-            },
-            onFailure = {
-                ErrorOperationDialog(message = it.message ?: "Unknown error")
-            })
+        if (writeResult != null)
+            ShowSnackBar(
+                user = writeResult,
+                snackbarHostState = snackbarHostState
+            )
+        if (errorMessage != null) {
+            ErrorOperationDialog(message = errorMessage, onOk = onOkError)
+        }
     }
 }

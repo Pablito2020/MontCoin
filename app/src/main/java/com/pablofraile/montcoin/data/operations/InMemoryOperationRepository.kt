@@ -20,7 +20,7 @@ class InMemoryOperationRepository : OperationsRepository {
     override suspend fun execute(operation: WriteOperation): Result<Operation> {
         delay(2000)
         val newOperation = Operation(
-            user = User(id = operation.userId, name = "FakeUser", amount = operation.amount),
+            user = User(id = operation.userId, name = "User-${operation.userId.value}", amount = operation.amount),
             amount = operation.amount,
             date = Date.from(Instant.now())
         )

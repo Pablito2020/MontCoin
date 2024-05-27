@@ -27,6 +27,7 @@ fun OperationRoute(
     val amount by model.amount.collectAsStateWithLifecycle()
     val operation by model.operationResult.collectAsStateWithLifecycle(initialValue = null)
     val isDoingOperation by model.isDoingOperation.collectAsStateWithLifecycle()
+    val errorMessage by model.errorMessage.collectAsStateWithLifecycle()
     OperationScreen(
         amount = amount.value,
         amountIsValid = amount.isValid(),
@@ -35,6 +36,8 @@ fun OperationRoute(
         onStop = model::stopSearchingDevices,
         onAmountChange = model::changeAmount,
         isDoingOperation = isDoingOperation,
+        errorMessage = errorMessage,
+        closeError = model::cleanError,
         operation = operation,
         openDrawer = openDrawer,
         snackbarHostState = snackbarHostState
