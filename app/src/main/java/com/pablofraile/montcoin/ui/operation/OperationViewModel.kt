@@ -4,15 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pablofraile.montcoin.data.card.CardRepository
 import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.model.Amount
-import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
+import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
-import com.pablofraile.montcoin.nfc.ReadTag
-import com.pablofraile.montcoin.nfc.Sensor
+import com.pablofraile.montcoin.ui.operations.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,7 @@ import kotlinx.coroutines.flow.update
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsRepository) :
+class OperationViewModel(cardRepository: CardRepository, private val repo: OperationsRepository) :
     ViewModel() {
 
     private val _amount = MutableStateFlow(Amount(value = ""))
@@ -46,36 +45,35 @@ class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsReposi
     fun searchDevices() = changeCardState(Sensor.Searching)
     fun stopSearchingDevices() = changeCardState(Sensor.Stopped)
 
-    val operationResult = nfc.flatMapLatest { tag ->
+    val operationResult = cardRepository.observeUsers().flatMapLatest { user ->
         combine(amount, sensor, ::Pair).take(1).map { (amount, sensor) ->
-            Triple(tag, amount, sensor)
+            Triple(user, amount, sensor)
         }
     }.transform { (tag, amount, sensor) ->
-        if (amount.isValid() && sensor == Sensor.Searching && tag != null)
+        if (amount.isValid() && sensor == Sensor.Searching)
             emit(doOperation(tag, amount))
     }.shareIn(viewModelScope, SharingStarted.Lazily)
 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun doOperation(tag: ReadTag, amount: Amount): Result<Operation> {
+    private suspend fun doOperation(user: User, amount: Amount): Result<Operation> {
         _isDoingOperation.emit(true)
-        Log.d("OperationViewModel", "Doing operation: ${tag.readOperation} with amount $amount")
-        val mockUser = Id("test")
-        val result = repo.execute(WriteOperation(mockUser, amount))
+        Log.d("OperationViewModel", "Doing operation for user: ${user.name} with amount $amount")
+        val result = repo.execute(WriteOperation(user.id, amount))
         _isDoingOperation.emit(false)
         return result
     }
 
     companion object {
         fun provideFactory(
-            nfc: Flow<ReadTag?>,
+            cardRepository: CardRepository,
             operationsRepository: OperationsRepository
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return OperationViewModel(nfc, operationsRepository) as T
+                    return OperationViewModel(cardRepository, operationsRepository) as T
                 }
             }
     }

@@ -1,4 +1,4 @@
-package com.pablofraile.montcoin.nfc
+package com.pablofraile.montcoin.utils
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -7,16 +7,14 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
 
-data class ReadTag(val tag: Tag, val readOperation: UUID)
-
-open class NfcActivityTemplate : ComponentActivity() {
+abstract class NfcActivityTemplate : ComponentActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
 
@@ -79,9 +77,19 @@ open class NfcActivityTemplate : ComponentActivity() {
                 Tag::class.java
             )
             scope.launch {
-                NfcReader.send(tag)
+                onTagRead(tag)
             }
         }
     }
 
+    abstract suspend fun onTagRead(tag: Tag?)
+
+}
+
+internal fun <T : Parcelable> Intent.getParcelableCompatibility(key: String, type: Class<T>): T? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelableExtra(key, type)
+    } else {
+        getParcelableExtra(key)
+    }
 }

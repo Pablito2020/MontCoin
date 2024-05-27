@@ -42,7 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Operation
-import com.pablofraile.montcoin.nfc.Sensor
+import com.pablofraile.montcoin.ui.operations.Sensor
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import kotlinx.coroutines.launch
 
