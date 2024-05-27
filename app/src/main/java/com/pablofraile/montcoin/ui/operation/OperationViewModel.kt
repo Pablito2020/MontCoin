@@ -7,13 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
-import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
-import com.pablofraile.montcoin.model.WriteOperationResult
 import com.pablofraile.montcoin.nfc.ReadTag
 import com.pablofraile.montcoin.nfc.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,7 +25,7 @@ import kotlinx.coroutines.flow.update
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class OperationViewModel(nfc: Flow<ReadTag?>, val repo: OperationsRepository) : ViewModel() {
+class OperationViewModel(nfc: Flow<ReadTag?>, private val repo: OperationsRepository) : ViewModel() {
 
     private val _amount = MutableStateFlow(Amount(value = ""))
     val amount: StateFlow<Amount> = _amount
@@ -59,15 +56,13 @@ class OperationViewModel(nfc: Flow<ReadTag?>, val repo: OperationsRepository) : 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation
 
-    private suspend fun doOperation(tag: ReadTag, amount: Amount): WriteOperationResult {
+    private suspend fun doOperation(tag: ReadTag, amount: Amount): Result<Unit> {
         _isDoingOperation.emit(true)
-        val hasErrors = false
         Log.d("OperationViewModel", "Doing operation: ${tag.readOperation} with amount $amount")
         val mockUser = Id("test")
         val result = repo.execute(WriteOperation(mockUser, amount))
         _isDoingOperation.emit(false)
-        return if (hasErrors) WriteOperationResult.Error("Error writing transaction")
-        else WriteOperationResult.Success
+        return result
     }
 
     companion object {

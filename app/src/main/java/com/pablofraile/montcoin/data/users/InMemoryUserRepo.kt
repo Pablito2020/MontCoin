@@ -1,6 +1,5 @@
 package com.pablofraile.montcoin.data.users
 
-import com.pablofraile.montcoin.data.Result
 import com.pablofraile.montcoin.model.User
 import kotlinx.coroutines.flow.Flow
 
@@ -14,7 +13,7 @@ class InMemoryUserRepo: UsersRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun fetchUsers(): Result<Nothing> {
+    override suspend fun fetchUsers(): Result<Unit> {
         TODO("Not yet implemented")
     }
 

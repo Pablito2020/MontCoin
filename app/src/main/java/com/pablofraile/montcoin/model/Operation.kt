@@ -18,10 +18,4 @@ data class Amount(val value: String) {
     }
 }
 
-sealed class WriteOperationResult {
-    data object Success : WriteOperationResult()
-    class Error(val message: String) : WriteOperationResult()
-}
-
 data class WriteOperation(val userId: Id, val amount: Amount)
-

@@ -35,7 +35,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -43,7 +42,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pablofraile.montcoin.model.WriteOperationResult
 import com.pablofraile.montcoin.nfc.Sensor
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import kotlinx.coroutines.launch
@@ -56,7 +54,7 @@ fun OperationScreen(
     amountIsValid: Boolean,
     showOperationResult: Boolean,
     card: Sensor,
-    operation: WriteOperationResult?,
+    operation: Result<Unit>?,
     isDoingOperation: Boolean,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
@@ -128,7 +126,7 @@ fun OperationContent(
     amountIsValid: Boolean,
     showOperationResult: Boolean,
     card: Sensor,
-    operation: WriteOperationResult?,
+    operation: Result<Unit>?,
     isDoingOperation: Boolean,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
@@ -172,29 +170,36 @@ fun OperationContent(
 fun ShowOperationUi(
     isDoingOperation: Boolean,
     showOperationResult: Boolean,
-    operation: WriteOperationResult?,
+    operation: Result<Unit>?,
     onOperationErrorRead: () -> Unit,
     onOperationCorrectRead: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     if (isDoingOperation) ShowOperationDoingDialog()
     if (!showOperationResult || operation == null) return
-    when (operation) {
-        is WriteOperationResult.Error -> ErrorOperationDialog(
-            operation = operation,
-            onOperationErrorRead = onOperationErrorRead
-        )
-
-        WriteOperationResult.Success -> ShowSnackBar(
-            text = "Operation Done correctly!",
-            snackbarHostState = snackbarHostState,
-            onClosedSnackBar = onOperationCorrectRead
-        )
-    }
+    operation.fold(
+        onSuccess = {
+            ShowSnackBar(
+                text = "Operation Done correctly!",
+                snackbarHostState = snackbarHostState,
+                onClosedSnackBar = onOperationCorrectRead
+            )
+        },
+        onFailure = {
+            ErrorOperationDialog(
+                message = it.message ?: "Unknown Error",
+                onOperationErrorRead = onOperationErrorRead
+            )
+        }
+    )
 }
 
 @Composable
-fun ShowSnackBar(text: String, snackbarHostState: SnackbarHostState, onClosedSnackBar: () -> Unit = {}) {
+fun ShowSnackBar(
+    text: String,
+    snackbarHostState: SnackbarHostState,
+    onClosedSnackBar: () -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = snackbarHostState) {
         scope.launch {
@@ -221,7 +226,7 @@ fun ShowOperationDoingDialog(
 
 @Composable
 fun ErrorOperationDialog(
-    operation: WriteOperationResult.Error,
+    message: String,
     onOperationErrorRead: () -> Unit
 ) {
     AlertDialog(
@@ -239,11 +244,10 @@ fun ErrorOperationDialog(
             Text("Couldn't do operation!")
         },
         text = @Composable {
-            Text("Error Message: ${operation.message}")
+            Text("Error Message: $message")
         })
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AmountTextBox(
     amount: String,
@@ -298,7 +302,7 @@ fun OperationScreenPreview() {
     OperationContent(
         amount = "100",
         amountIsValid = true,
-        operation = WriteOperationResult.Success,
+        operation = Result.success(Unit),
         card = Sensor.Searching,
         onOperationErrorRead = {},
         onStart = {},
