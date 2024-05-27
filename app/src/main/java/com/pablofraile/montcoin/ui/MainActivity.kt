@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import com.pablofraile.montcoin.MontCoinApplication
-import com.pablofraile.montcoin.data.card.NfcCardRepository
+import com.pablofraile.montcoin.data.card.nfc.NfcCardRepository
 import com.pablofraile.montcoin.utils.NfcActivityTemplate
 
 class MainActivity : NfcActivityTemplate() {

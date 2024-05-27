@@ -2,7 +2,7 @@ package com.pablofraile.montcoin.data
 
 import android.content.Context
 import com.pablofraile.montcoin.data.card.CardRepository
-import com.pablofraile.montcoin.data.card.NfcCardRepository
+import com.pablofraile.montcoin.data.card.nfc.NfcCardRepository
 import com.pablofraile.montcoin.data.operations.InMemoryOperationRepository
 import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.data.users.InMemoryUserRepo

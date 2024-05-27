@@ -4,8 +4,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -15,6 +17,12 @@ fun OperationRoute(
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle){
+        onDispose {
+            model.stopSearchingDevices()
+        }
+    }
     val card by model.sensor.collectAsStateWithLifecycle()
     val amount by model.amount.collectAsStateWithLifecycle()
     val operation by model.operationResult.collectAsStateWithLifecycle(initialValue = null)
