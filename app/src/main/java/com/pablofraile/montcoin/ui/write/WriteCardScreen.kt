@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.User
+import com.pablofraile.montcoin.ui.common.Autocomplete
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import com.pablofraile.montcoin.ui.common.Sensor
 import com.pablofraile.montcoin.ui.operation.ActionButton
@@ -39,6 +40,8 @@ import java.util.Date
 fun WriteCardScreen(
     sensor: Sensor,
     writeResult: Pair<User, Date>?,
+    users: List<User>,
+    onSelectedUser: (User) -> Unit,
     errorMessage: String?,
     onOkError: () -> Unit,
     onStart: () -> Unit,
@@ -85,6 +88,8 @@ fun WriteCardScreen(
         WriteCardContent(
             sensor = sensor,
             writeResult = writeResult,
+            users = users,
+            onSelectedUser = onSelectedUser,
             onStart = onStart,
             onStop = onStop,
             errorMessage = errorMessage,
@@ -116,12 +121,21 @@ fun WriteCardContent(
     sensor: Sensor,
     writeResult: Pair<User, Date>?,
     errorMessage: String?,
+    users: List<User>,
+    onSelectedUser: (User) -> Unit,
     onOkError: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
+    Autocomplete(
+        label = "Search User",
+        items = users,
+        modifier = modifier,
+        onItemSelected = onSelectedUser,
+        toString = { it.name })
+    Spacer(modifier = modifier.height(16.dp))
     Column(
         modifier = modifier
             .fillMaxSize()

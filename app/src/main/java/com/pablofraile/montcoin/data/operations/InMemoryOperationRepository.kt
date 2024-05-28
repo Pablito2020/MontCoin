@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.Date
 import java.util.UUID
 
-class InMemoryOperationRepository : OperationsRepository {
+class InMemoryOperationRepository: OperationsRepository {
 
     val operations: MutableStateFlow<Operations> = MutableStateFlow(emptyList())
 

@@ -54,7 +54,7 @@ fun MontCoinNavGraph(
         }
         composable(route = MontCoinDestinations.WRITE_CARD) { navBackStackEntry ->
             val model: WriteCardViewModel =
-                viewModel(factory = WriteCardViewModel.provideFactory(container.cardRepository))
+                viewModel(factory = WriteCardViewModel.provideFactory(container.cardRepository, container.usersRepository))
             WriteCardRoute(model = model, openDrawer = openDrawer)
         }
     }

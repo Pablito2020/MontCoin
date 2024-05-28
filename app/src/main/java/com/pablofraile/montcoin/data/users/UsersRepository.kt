@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface UsersRepository {
     suspend fun getUserById(id: String): Result<User?>
-    fun observeUsers(): Flow<User>
-    suspend fun fetchUsers(): Result<Unit>
+    suspend fun getUsers(): Result<List<User>>
+    fun observeUsers(): Flow<List<User>>
 }
