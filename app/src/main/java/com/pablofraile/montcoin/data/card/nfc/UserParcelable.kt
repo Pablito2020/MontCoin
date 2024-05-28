@@ -26,7 +26,7 @@ fun User.toNfcTag(): NfcParcelable {
 }
 
 fun Intent.toUserId(): Result<Id> {
-    try{
+    try {
         val parcelables = this.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
         with(parcelables) {
             val inNdefMessage = this?.get(0) as NdefMessage
@@ -35,6 +35,6 @@ fun Intent.toUserId(): Result<Id> {
             return Result.success(Id(identifier))
         }
     } catch (e: Exception) {
-        return Result.failure(e)
+        return Result.failure(IllegalAccessError("Couldn't read id from NFC tag. Are you sure it's a MontCoin tag?"))
     }
 }
