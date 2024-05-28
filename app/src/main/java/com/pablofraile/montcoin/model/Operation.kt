@@ -1,8 +1,9 @@
 package com.pablofraile.montcoin.model
 
 import java.util.Date
+import java.util.UUID
 
-data class Operation(val user: User, val amount: Amount, val date: Date)
+data class Operation(val id: UUID, val user: User, val amount: Amount, val date: Date)
 
 typealias Operations = List<Operation>
 

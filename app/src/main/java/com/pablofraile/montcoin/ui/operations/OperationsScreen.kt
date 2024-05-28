@@ -93,7 +93,8 @@ fun OperationsScreen(
             loadMoreItems = loadMoreItems,
             refreshedMessage = "Loaded last Operations!",
             snackbarHostState = snackbarHostState,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            cachingKey = { it.id }
         )
     }
 }

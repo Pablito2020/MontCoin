@@ -28,7 +28,8 @@ fun <T> InfiniteScroll(
     loadMoreItems: () -> Unit,
     refreshedMessage: String,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    cachingKey: ((item: T) -> Any)? = null,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val state = rememberPullToRefreshState()
@@ -43,7 +44,7 @@ fun <T> InfiniteScroll(
     }
     Box(modifier = modifier.nestedScroll(state.nestedScrollConnection)) {
         LazyColumn(modifier = Modifier.padding(top=2.dp, start=2.dp).fillMaxHeight()) {
-            items(elements) { element ->
+            items(elements, key=cachingKey) { element ->
                 Box(modifier = Modifier.animateItemPlacement()) {
                     itemRender(element, modifier)
                 }
