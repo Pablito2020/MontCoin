@@ -7,16 +7,14 @@ data class Operation(val id: UUID, val user: User, val amount: Amount, val date:
 
 typealias Operations = List<Operation>
 
-data class Amount(val value: String) {
+data class Amount(val value: Int) {
+    override fun toString(): String = value.toString()
+}
 
-    fun isValid(): Boolean {
-        return value.toIntOrNull() != null && value.isNotEmpty()
-    }
-
-    fun toInt(): Int {
-        require(isValid()) { "Can't convert amount if it has an invalid number" }
-        return value.toInt()
-    }
+internal fun String.isValidAmount(): Boolean = this.toIntOrNull() != null && this.isNotEmpty()
+internal fun String.toAmount(): Result<Amount> {
+    if (!isValidAmount()) return Result.failure(IllegalArgumentException("Invalid Amount"))
+    return Result.success(Amount(this.toInt()))
 }
 
 data class WriteOperation(val userId: Id, val amount: Amount)

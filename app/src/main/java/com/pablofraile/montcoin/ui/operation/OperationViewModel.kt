@@ -9,6 +9,8 @@ import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.WriteOperation
+import com.pablofraile.montcoin.model.isValidAmount
+import com.pablofraile.montcoin.model.toAmount
 import com.pablofraile.montcoin.ui.common.Sensor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,17 +29,17 @@ import kotlinx.coroutines.flow.update
 class OperationViewModel(cardRepository: CardRepository, private val repo: OperationsRepository) :
     ViewModel() {
 
-    private val _amount = MutableStateFlow(Amount(value = ""))
-    val amount: StateFlow<Amount> = _amount
+    private val _amount = MutableStateFlow("")
+    val amount: StateFlow<String> = _amount
     fun changeAmount(amount: String) {
         changeCardState(Sensor.Stopped)
-        _amount.update { it.copy(value = amount) }
+        _amount.update { amount }
     }
 
     private val _sensor: MutableStateFlow<Sensor> = MutableStateFlow(Sensor.Stopped)
     val sensor: StateFlow<Sensor> = _sensor
     private fun changeCardState(card: Sensor) {
-        if (!_amount.value.isValid() && card == Sensor.Searching) return
+        if (!_amount.value.isValidAmount() && card == Sensor.Searching) return
         _sensor.update { card }
     }
 
@@ -48,12 +50,10 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
         combine(amount, sensor, ::Pair).take(1).map { (amount, sensor) ->
             Triple(user, amount, sensor)
         }
-    }.transform { (tag, amount, sensor) ->
-        if (amount.isValid() && sensor == Sensor.Searching) {
-            val result = doOperation(tag, amount)
-            if (result.isFailure) _errorMessage.emit(
-                result.exceptionOrNull()?.message ?: "Unknown Error"
-            )
+    }.transform { (tag, value, sensor) ->
+        if (value.isValidAmount() && sensor == Sensor.Searching) {
+            val result = doOperation(tag, value.toAmount().getOrThrow())
+            if (result.isFailure) _errorMessage.emit(result.exceptionOrNull()?.message)
             else emit(result.getOrThrow())
         }
     }.shareIn(viewModelScope, SharingStarted.Lazily)

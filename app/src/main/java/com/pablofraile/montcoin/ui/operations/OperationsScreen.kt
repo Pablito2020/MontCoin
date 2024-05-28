@@ -101,7 +101,7 @@ fun OperationsScreen(
 
 @Composable
 fun OperationItem(operation: Operation, modifier: Modifier = Modifier) {
-    val amountValue = operation.amount.toInt()
+    val amountValue = operation.amount.value
     val amountColor = if (amountValue >= 0) Color.Green else Color.Red
     Card(modifier = Modifier.padding(start = 2.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)) {
         Row(
@@ -136,7 +136,7 @@ fun OperationItem(operation: Operation, modifier: Modifier = Modifier) {
                 )
             }
             Text(
-                text = operation.amount.value,
+                text = operation.amount.toString(),
                 fontSize = 20.sp,
                 color = amountColor,
                 fontWeight = FontWeight.Bold

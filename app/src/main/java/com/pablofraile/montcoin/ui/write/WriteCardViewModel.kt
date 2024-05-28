@@ -44,7 +44,7 @@ class WriteCardViewModel(private val cardRepository: CardRepository) : ViewModel
     fun stopSearching() = changeCardState(Sensor.Stopped)
 
     private suspend fun writeCard() {
-        val user = User(Id("RealId1"), "Pablo Fraile", Amount("1000"))
+        val user = User(Id("RealId1"), "Pablo Fraile", Amount(1000))
         val result = cardRepository.writeToCard(user)
         if (result.isFailure) errorMessage.emit(
             result.exceptionOrNull()!!.message ?: "Unknown Error"

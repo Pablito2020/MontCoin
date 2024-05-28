@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pablofraile.montcoin.model.isValidAmount
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -29,8 +30,8 @@ fun OperationRoute(
     val isDoingOperation by model.isDoingOperation.collectAsStateWithLifecycle()
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle()
     OperationScreen(
-        amount = amount.value,
-        amountIsValid = amount.isValid(),
+        amount = amount,
+        amountIsValid = amount.isValidAmount(),
         card = card,
         onStart = model::searchDevices,
         onStop = model::stopSearchingDevices,
