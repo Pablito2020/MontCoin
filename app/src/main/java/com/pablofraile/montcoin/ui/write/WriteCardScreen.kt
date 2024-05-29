@@ -29,9 +29,11 @@ import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.Autocomplete
 import com.pablofraile.montcoin.ui.common.LoadingAnimation
 import com.pablofraile.montcoin.ui.common.Sensor
+import com.pablofraile.montcoin.ui.common.UserChip
 import com.pablofraile.montcoin.ui.operation.ActionButton
 import com.pablofraile.montcoin.ui.operation.ErrorOperationDialog
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import java.util.Date
 
 
@@ -41,11 +43,13 @@ fun WriteCardScreen(
     sensor: Sensor,
     writeResult: Pair<User, Date>?,
     users: List<User>,
+    selectedUser: User?,
     onSelectedUser: (User) -> Unit,
     errorMessage: String?,
     onOkError: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
+    onClearUser: () -> Unit,
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
@@ -90,10 +94,12 @@ fun WriteCardScreen(
             writeResult = writeResult,
             users = users,
             onSelectedUser = onSelectedUser,
+            selectedUser = selectedUser,
             onStart = onStart,
             onStop = onStop,
             errorMessage = errorMessage,
             onOkError = onOkError,
+            onClearUser = onClearUser,
             snackbarHostState = snackbarHostState,
             modifier = modifier
         )
@@ -122,28 +128,34 @@ fun WriteCardContent(
     writeResult: Pair<User, Date>?,
     errorMessage: String?,
     users: List<User>,
+    selectedUser: User?,
     onSelectedUser: (User) -> Unit,
+    onClearUser: () -> Unit,
     onOkError: () -> Unit,
     onStart: () -> Unit,
     onStop: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
-    Autocomplete(
-        label = "Search User",
-        items = users,
-        modifier = modifier,
-        onItemSelected = onSelectedUser,
-        toString = { it.name })
-    Spacer(modifier = modifier.height(16.dp))
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        ActionButton(cardState = sensor, onStart = onStart, onStop = onStop)
+    if (selectedUser == null ) {
+        Autocomplete(
+            label = "Search User",
+            items = users,
+            modifier = modifier,
+            onItemSelected = onSelectedUser,
+            toString = { it.name })
+        Spacer(modifier = modifier.height(16.dp))
+    } else {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            UserChip(userName = selectedUser.name, onClose = onClearUser)
+            ActionButton(cardState = sensor, onStart = onStart, onStop = onStop)
+        }
         if (sensor == Sensor.Searching) {
             Spacer(modifier = Modifier.height(16.dp))
             LoadingAnimation()

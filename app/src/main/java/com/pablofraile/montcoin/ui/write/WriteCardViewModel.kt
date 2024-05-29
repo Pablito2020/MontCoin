@@ -43,7 +43,7 @@ class WriteCardViewModel(
         _selectedUser.value = user
     }
 
-    fun clearSelectedUser(user: User) {
+    fun clearSelectedUser() {
         _selectedUser.value = null
     }
     val users = usersRepository.observeUsers().stateIn(
