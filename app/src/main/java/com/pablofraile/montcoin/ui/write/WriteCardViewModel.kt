@@ -7,18 +7,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.card.CardRepository
 import com.pablofraile.montcoin.data.users.UsersRepository
-import com.pablofraile.montcoin.model.Amount
-import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
-import com.pablofraile.montcoin.ui.common.Sensor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
@@ -29,14 +24,6 @@ class WriteCardViewModel(
     private val usersRepository: UsersRepository
 ) : ViewModel() {
 
-    private val _writeResult = MutableSharedFlow<Pair<User, Date>>()
-    val writeResult = _writeResult
-
-    private var writingJob: Job? = null
-
-    private val _sensor: MutableStateFlow<Sensor> = MutableStateFlow(Sensor.Stopped)
-    val sensor = _sensor
-
     private val _selectedUser = MutableStateFlow<User?>(null)
     val selectedUser = _selectedUser
     fun selectUser(user: User) {
@@ -46,32 +33,36 @@ class WriteCardViewModel(
     fun clearSelectedUser() {
         _selectedUser.value = null
     }
+
     val users = usersRepository.observeUsers().stateIn(
         viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = emptyList()
     )
-    suspend fun updateUsers() = usersRepository.getUsers()
 
-    private fun changeCardState(card: Sensor) {
-        when (card) {
-            Sensor.Stopped -> writingJob?.cancel()
-            Sensor.Searching -> {
-                val scope = CoroutineScope(Dispatchers.IO)
-                writingJob = scope.launch { writeCard() }
-            }
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing
+
+    fun updateUsers() {
+        val scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            _isRefreshing.value = true
+            usersRepository.getUsers()
+            _isRefreshing.value = false
         }
-        _sensor.update { card }
     }
 
-    fun startSearching() = changeCardState(Sensor.Searching)
-    fun stopSearching() = changeCardState(Sensor.Stopped)
-
-    private suspend fun writeCard() {
-        val user = selectedUser.value ?: return
-        val result = cardRepository.writeToCard(user)
-        if (result.isFailure) errorMessage.emit(
-            result.exceptionOrNull()!!.message ?: "Unknown Error"
-        )
-        else _writeResult.emit(Pair(result.getOrThrow(), Date.from(Instant.now())))
+    val writeResult = selectedUser.transform {
+        if (it != null) {
+            val result = cardRepository.writeToCard(it)
+            if (result.isFailure) {
+                errorMessage.emit(
+                    result.exceptionOrNull()!!.message ?: "Unknown Error"
+                )
+                _selectedUser.value = null
+            } else {
+                _selectedUser.value = null
+                emit(Pair(result.getOrThrow(), Date.from(Instant.now())))
+            }
+        }
     }
 
     private val _errorMessage: MutableStateFlow<String?> = MutableStateFlow(null)

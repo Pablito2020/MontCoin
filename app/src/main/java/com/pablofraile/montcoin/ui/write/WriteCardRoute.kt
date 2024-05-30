@@ -15,23 +15,22 @@ fun WriteCardRoute(
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
-    val sensor by model.sensor.collectAsStateWithLifecycle()
     val writeResult by model.writeResult.collectAsStateWithLifecycle(initialValue = null)
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle()
     val users by model.users.collectAsStateWithLifecycle()
     val selectedUser by model.selectedUser.collectAsStateWithLifecycle()
+    val isRefreshing by model.isRefreshing.collectAsStateWithLifecycle()
     WriteCardScreen(
-        sensor = sensor,
         writeResult = writeResult,
         users = users,
         onSelectedUser = model::selectUser,
-        onStart = model::startSearching,
-        onStop = model::stopSearching,
         openDrawer = openDrawer,
         errorMessage = errorMessage,
         onOkError = model::clearErrorMessage,
         snackbarHostState = snackbarHostState,
         selectedUser=selectedUser,
+        onRefresh = model::updateUsers,
+        isRefreshing = isRefreshing,
         onClearUser=model::clearSelectedUser,
     )
 }

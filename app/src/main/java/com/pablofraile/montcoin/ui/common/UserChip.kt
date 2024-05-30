@@ -22,11 +22,13 @@ import com.pablofraile.montcoin.R
 @Composable
 fun UserChip(
     userName: String,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = Color(0xFFE1D7F4)
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier
@@ -35,7 +37,7 @@ fun UserChip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.user), // replace with your image resource or use rememberImagePainter for loading from URL
+                painter = painterResource(id = R.drawable.user),
                 contentDescription = null,
                 modifier = Modifier
                     .size(32.dp)
@@ -46,7 +48,7 @@ fun UserChip(
             Text(
                 text = userName,
                 fontSize = 14.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(
