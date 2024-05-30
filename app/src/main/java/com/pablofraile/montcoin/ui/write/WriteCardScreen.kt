@@ -29,7 +29,7 @@ import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.Autocomplete
-import com.pablofraile.montcoin.ui.common.LoadingAnimation
+import com.pablofraile.montcoin.ui.common.SearchingAnimation
 import com.pablofraile.montcoin.ui.common.UserChip
 import com.pablofraile.montcoin.ui.operation.ErrorOperationDialog
 import kotlinx.coroutines.launch
@@ -153,7 +153,7 @@ fun WriteCardContent(
                 onClose = onClearUser,
                 modifier = Modifier.padding(15.dp)
             )
-            LoadingAnimation()
+            SearchingAnimation()
         }
     }
     if (writeResult != null)

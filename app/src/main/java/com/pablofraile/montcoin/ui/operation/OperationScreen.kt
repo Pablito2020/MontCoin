@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Operation
-import com.pablofraile.montcoin.ui.common.LoadingAnimation
+import com.pablofraile.montcoin.ui.common.SearchingAnimation
 import com.pablofraile.montcoin.ui.common.Sensor
 import kotlinx.coroutines.launch
 
@@ -158,7 +158,7 @@ fun OperationContent(
         ActionButton(cardState = card, onStart = onStart, onStop = onStop)
         if (card == Sensor.Searching) {
             Spacer(modifier = Modifier.height(16.dp))
-            LoadingAnimation()
+            SearchingAnimation()
         }
     }
 }
