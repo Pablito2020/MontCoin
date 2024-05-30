@@ -14,6 +14,8 @@ import com.pablofraile.montcoin.ui.operation.OperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationViewModel
 import com.pablofraile.montcoin.ui.operations.OperationsRoute
 import com.pablofraile.montcoin.ui.operations.OperationsViewModel
+import com.pablofraile.montcoin.ui.users.UsersRoute
+import com.pablofraile.montcoin.ui.users.UsersViewModel
 import com.pablofraile.montcoin.ui.write.WriteCardRoute
 import com.pablofraile.montcoin.ui.write.WriteCardViewModel
 
@@ -56,6 +58,10 @@ fun MontCoinNavGraph(
             val model: WriteCardViewModel =
                 viewModel(factory = WriteCardViewModel.provideFactory(container.cardRepository, container.usersRepository))
             WriteCardRoute(model = model, openDrawer = openDrawer)
+        }
+        composable(route = MontCoinDestinations.LIST_USERS) { navBackStackEntry ->
+            val model: UsersViewModel = viewModel(factory = UsersViewModel.provideFactory(container.usersRepository))
+            UsersRoute(model = model, openDrawer = openDrawer)
         }
     }
 }

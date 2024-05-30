@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material.icons.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
@@ -26,6 +27,7 @@ fun AppDrawer(
     navigateToOperation: () -> Unit,
     navigateToTransactions: () -> Unit,
     navigateToWriteCard: () -> Unit,
+    navigateToListUsers: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -47,11 +49,17 @@ fun AppDrawer(
             onClick = { navigateToTransactions(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
-        // Add Blanck component to separate the last item
+        NavigationDrawerItem(
+            label = { Text("Users") },
+            icon = { Icon(Icons.Filled.People, null) },
+            selected = currentRoute == MontCoinDestinations.LIST_USERS,
+            onClick = { navigateToListUsers(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
         NavigationDrawerItem(
             label = { Text("Tarjeta") },
             icon = { Icon(Icons.Filled.CreditCard, null) },
-            selected = false,
+            selected = currentRoute == MontCoinDestinations.WRITE_CARD,
             onClick = { navigateToWriteCard(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
@@ -82,6 +90,7 @@ fun PreviewAppDrawer() {
             navigateToOperation = {},
             navigateToTransactions = {},
             navigateToWriteCard = {},
+            navigateToListUsers = {},
             closeDrawer = {},
         )
     }

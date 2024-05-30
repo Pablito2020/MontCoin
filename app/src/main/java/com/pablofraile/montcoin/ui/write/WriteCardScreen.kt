@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,7 +64,7 @@ fun WriteCardScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = openDrawer) {
-                        Icon(imageVector = Icons.Filled.GraphicEq, contentDescription = null)
+                        Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
                     }
                 },
                 actions = {

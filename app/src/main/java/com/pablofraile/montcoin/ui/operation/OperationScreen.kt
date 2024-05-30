@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -76,7 +77,7 @@ fun OperationScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = openDrawer) {
-                        Icon(imageVector = Icons.Filled.GraphicEq, contentDescription = null)
+                        Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
                     }
                 },
                 actions = {
