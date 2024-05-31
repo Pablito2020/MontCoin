@@ -52,6 +52,7 @@ fun MontCoinApp(container: AppContainer) {
             Row {
                 MontCoinNavGraph(
                     container = container,
+                    navigationActions = navigationActions,
                     navController = navController,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
                 )

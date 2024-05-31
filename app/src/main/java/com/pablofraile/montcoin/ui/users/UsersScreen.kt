@@ -65,6 +65,7 @@ fun UsersScreen(
     currentOrder: Order,
     errorMessage: String?,
     search: String,
+    onClick: (User) -> Unit,
     onSearchChange: (String) -> Unit,
     openDrawer: () -> Unit,
     onChangeOrder: (Order) -> Unit,
@@ -112,6 +113,7 @@ fun UsersScreen(
             onRefresh = onRefresh,
             isLoading = isLoading,
             searchValue = search,
+            onClick = onClick,
             onSearchChange = onSearchChange,
             currentOrder = currentOrder,
             onChangeOrder = onChangeOrder,
@@ -129,6 +131,7 @@ fun UsersContents(
     users: List<User> = emptyList(),
     isLoading: Boolean = false,
     searchValue: String = "",
+    onClick: (User) -> Unit = {},
     errorMessage: String? = null,
     onChangeOrder: (Order) -> Unit = { _ -> },
     onRefresh: suspend () -> Unit = {},
@@ -158,6 +161,7 @@ fun UsersContents(
             OutlinedTextField(
                 value = searchValue,
                 onValueChange = onSearchChange,
+                label={ Text("Search User") },
                 keyboardOptions = keyboardConfig,
                 keyboardActions = keyboardActions,
                 modifier = Modifier.weight(6f),
@@ -182,7 +186,7 @@ fun UsersContents(
                 )
             }
         } else {
-            ListUsers(users, onRefresh, snackbarHostState)
+            ListUsers(users, onClick, onRefresh, snackbarHostState)
         }
     }
 }
@@ -190,6 +194,7 @@ fun UsersContents(
 @Composable
 private fun ListUsers(
     users: List<User>,
+    onClick: (User) -> Unit,
     onRefresh: suspend () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -197,7 +202,7 @@ private fun ListUsers(
         InfiniteScroll(
             elements = users,
             itemRender = @Composable { user, m ->
-                UserItem(user = user)
+                UserItem(user = user, onClick=onClick)
             },
             onRefresh = onRefresh,
             loadMoreItems = { },
@@ -219,7 +224,8 @@ fun RowScope.ListOrderDropDown(
     Box(
         modifier
             .fillMaxWidth()
-            .align(Alignment.CenterVertically),
+            .align(Alignment.CenterVertically)
+        ,
     ) {
         Menu(
             currentElement = currentOrder, elements = listOf(
@@ -234,11 +240,12 @@ fun RowScope.ListOrderDropDown(
 }
 
 @Composable
-fun UserItem(user: User) {
+fun UserItem(user: User, onClick: (User) -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth(),
+        onClick = { onClick(user) }
     ) {
 
         Row(
@@ -301,35 +308,6 @@ fun UserItem(user: User) {
             }
 
         }
-//
-//
-//        Row(
-//            modifier = Modifier.padding(8.dp)
-//        ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.user),
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .size(40.dp)
-//                    .clip(CircleShape)
-//                    .padding(1.dp)
-//                    .align(Alignment.CenterVertically),
-//                contentScale = ContentScale.Crop
-//            )
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Column(modifier = Modifier.fillMaxWidth()) {
-//                Text(text = user.name, fontSize = MaterialTheme.typography.headlineSmall.fontSize)
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Text(
-//                    text = "Coins ${user.amount} \uD83D\uDCB0"
-//                )
-//                Spacer(modifier = Modifier.height(4.dp))
-//                Text(
-//                    text = "\uD83D\uDD25 ${user.numberOfOperations}"
-//                )
-//            }
-//        }
-//    }
     }
 }
 

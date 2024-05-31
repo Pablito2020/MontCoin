@@ -2,12 +2,16 @@ package com.pablofraile.montcoin.ui.routes
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.pablofraile.montcoin.model.User
 
 
 /**
  * Destinations used in the [MontCoinApp].
  */
 object MontCoinDestinations {
+    const val USER_ROUTE = "user"
     const val OPERATION_ROUTE = "operation"
     const val OPERATIONS_ROUTE = "operations"
     const val WRITE_CARD = "write_card"
@@ -56,6 +60,12 @@ class MontCoinNavigationActions(navController: NavHostController) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToUser: (user: User) -> Unit = { user ->
+        navController.navigate("${MontCoinDestinations.USER_ROUTE}/${user.id.value}") {
             launchSingleTop = true
             restoreState = true
         }

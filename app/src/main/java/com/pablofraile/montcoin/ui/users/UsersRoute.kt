@@ -7,11 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pablofraile.montcoin.model.User
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun UsersRoute(
     model: UsersViewModel,
+    onUserClick: (User) -> Unit,
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
@@ -26,6 +28,7 @@ fun UsersRoute(
         errorMessage = errorMessage,
         currentOrder = order,
         search = search,
+        onClick = onUserClick,
         onSearchChange = model::setSearch,
         onChangeOrder = model::setOrder,
         openDrawer = openDrawer,
