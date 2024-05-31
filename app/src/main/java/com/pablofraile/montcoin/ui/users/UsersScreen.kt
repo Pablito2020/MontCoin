@@ -3,20 +3,27 @@ package com.pablofraile.montcoin.ui.users
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,12 +38,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.pablofraile.montcoin.R
+import com.pablofraile.montcoin.model.Amount
+import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.InfiniteScroll
 import com.pablofraile.montcoin.ui.common.Menu
@@ -182,7 +198,7 @@ private fun ListUsers(
         InfiniteScroll(
             elements = users,
             itemRender = @Composable { user, m ->
-                Text(text = user.name, modifier = m)
+                UserItem(user = user)
             },
             onRefresh = onRefresh,
             loadMoreItems = { },
@@ -217,10 +233,106 @@ fun RowScope.ListOrderDropDown(
     }
 }
 
+@Composable
+fun UserItem(user: User) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.user),
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                BasicText(
+                    text = user.name,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    BasicText(
+                        text = "${user.amount.value} \uD83E\uDE99",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Light
+                        )
+                    )
+                    BasicText(
+                        text = "${user.numberOfOperations} \uD83D\uDCB3",
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Light
+                        )
+                    )
+                }
+            }
+
+        }
+//
+//
+//        Row(
+//            modifier = Modifier.padding(8.dp)
+//        ) {
+//            Image(
+//                painter = painterResource(id = R.drawable.user),
+//                contentDescription = null,
+//                modifier = Modifier
+//                    .size(40.dp)
+//                    .clip(CircleShape)
+//                    .padding(1.dp)
+//                    .align(Alignment.CenterVertically),
+//                contentScale = ContentScale.Crop
+//            )
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Column(modifier = Modifier.fillMaxWidth()) {
+//                Text(text = user.name, fontSize = MaterialTheme.typography.headlineSmall.fontSize)
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Text(
+//                    text = "Coins ${user.amount} \uD83D\uDCB0"
+//                )
+//                Spacer(modifier = Modifier.height(4.dp))
+//                Text(
+//                    text = "\uD83D\uDD25 ${user.numberOfOperations}"
+//                )
+//            }
+//        }
+//    }
+    }
+}
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun UsersScreenPreview() {
-    UsersContents(isLoading = true, currentOrder = Order.UserName)
+    UsersContents(
+        users =
+        listOf(
+            User(Id("1"), "Pablo", Amount(100))
+        ), isLoading = false, currentOrder = Order.UserName
+    )
 }
