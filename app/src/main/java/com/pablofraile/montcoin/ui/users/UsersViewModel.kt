@@ -39,9 +39,10 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
         }.map { (users, order, search) ->
             when (order) {
                 Order.UserName -> users.sortedBy { user -> user.name }
-                Order.Amount -> users.sortedBy { user -> user.amount.value }
+                Order.AmountAscendant -> users.sortedBy { user -> user.amount.value }
                 Order.NumberOperationsAscendant -> users.sortedBy { user -> user.numberOfOperations }
                 Order.NumberOperationsDescendant -> users.sortedByDescending { user -> user.numberOfOperations }
+                Order.AmountDescendant -> users.sortedByDescending { user -> user.amount.value }
             }.filter {
                 it.name.contains(search, ignoreCase = true)
             }

@@ -224,9 +224,10 @@ fun RowScope.ListOrderDropDown(
         Menu(
             currentElement = currentOrder, elements = listOf(
                 MenuAction("Name", Order.UserName),
-                MenuAction("Amount", Order.Amount),
-                MenuAction("Operations (Asc)", Order.NumberOperationsAscendant),
-                MenuAction("Operations (Desc)", Order.NumberOperationsDescendant)
+                MenuAction("Amount Ascendant", Order.AmountAscendant),
+                MenuAction("Amount Descendant", Order.AmountDescendant),
+                MenuAction("Operations Ascendant", Order.NumberOperationsAscendant),
+                MenuAction("Operations Descendant", Order.NumberOperationsDescendant)
             ), onElementSelected = onChangeOrder
         )
     }
