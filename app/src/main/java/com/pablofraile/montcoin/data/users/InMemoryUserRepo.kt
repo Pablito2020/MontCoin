@@ -19,9 +19,9 @@ class InMemoryUserRepo : UsersRepository {
         delay(2000)
         return Result.success(
             listOf(
-                User(Id("1"), "Pablo", Amount(1000)),
-                User(Id("2"), "Coto", Amount(2000)),
-                User(Id("3"), "Pauju", Amount(2000))
+                User(Id("1"), "Pablo Fraile Alonso", Amount(1000)),
+                User(Id("2"), "Coto Croto Lamo", Amount(2000)),
+                User(Id("3"), "Paujurado El Rey, The King", Amount(2000))
             )
         )
     }

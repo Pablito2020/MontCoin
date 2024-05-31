@@ -49,7 +49,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.pablofraile.montcoin.R
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
@@ -258,11 +257,20 @@ fun UserItem(user: User) {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Column {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                val typography = when(user.name.length) {
+                    in 0..20 -> MaterialTheme.typography.headlineMedium
+                    in 21..30 -> MaterialTheme.typography.headlineSmall
+                    in 30..40 -> MaterialTheme.typography.bodyLarge
+                    in 40..50 -> MaterialTheme.typography.bodyMedium
+                    else -> MaterialTheme.typography.bodySmall
+                }
                 BasicText(
                     text = user.name,
                     style = TextStyle(
-                        fontSize = 16.sp,
+                        fontSize = typography.fontSize,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                         fontWeight = FontWeight.Bold
                     )
@@ -275,17 +283,17 @@ fun UserItem(user: User) {
                     BasicText(
                         text = "${user.amount.value} \uD83E\uDE99",
                         style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontWeight = FontWeight.Light
+                            fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
                         )
                     )
                     BasicText(
                         text = "${user.numberOfOperations} \uD83D\uDCB3",
                         style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontWeight = FontWeight.Light
+                            fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
                         )
                     )
                 }
@@ -332,7 +340,7 @@ fun UsersScreenPreview() {
     UsersContents(
         users =
         listOf(
-            User(Id("1"), "Pablo", Amount(100))
+            User(Id("1"), "Pablo Fraile Alonso Aarstarstarstarstarst", Amount(100))
         ), isLoading = false, currentOrder = Order.UserName
     )
 }
