@@ -208,7 +208,9 @@ private fun ListUsers(
 @Composable
 fun RowScope.SimpleDropdown(modifier: Modifier = Modifier) {
     @Composable
-    fun ChevronDown(): ImageVector {
+    fun ChevronDown(
+        color: Color
+    ): ImageVector {
         return remember {
             ImageVector.Builder(
                 name = "ChevronDown",
@@ -220,7 +222,7 @@ fun RowScope.SimpleDropdown(modifier: Modifier = Modifier) {
                 path(
                     fill = null,
                     fillAlpha = 1.0f,
-                    stroke = SolidColor(Color(0xFF000000)),
+                    stroke = SolidColor(color),
                     strokeAlpha = 1.0f,
                     strokeLineWidth = 2f,
                     strokeLineCap = StrokeCap.Round,
@@ -249,14 +251,16 @@ fun RowScope.SimpleDropdown(modifier: Modifier = Modifier) {
             MenuButton(
                 Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .background(Color.White)
-                    .border(1.dp, Color(0xFFBDBDBD), RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Image(ChevronDown(), null)
+                    Image(ChevronDown(
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    ), null)
                 }
             }
 
@@ -264,27 +268,31 @@ fun RowScope.SimpleDropdown(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(RoundedCornerShape(6.dp))
-                    .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(6.dp))
-                    .background(Color.White),
+                    .border(1.dp, MaterialTheme.colorScheme.surfaceTint, RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.surface),
                 hideTransition = fadeOut(),
             ) {
+
+                val color = MaterialTheme.colorScheme.onSurface
                 MenuItem(
                     modifier = Modifier.clip(RoundedCornerShape(6.dp)),
                     onClick = { /* TODO handle click */ }) {
                     BasicText(
                         "Name",
-                        Modifier
+                        color={ color },
+                        modifier = Modifier
                             .wrapContentWidth()
                             .wrapContentHeight()
                             .padding(vertical = 10.dp, horizontal = 10.dp)
                     )
                 }
-                MenuItem(
+            MenuItem(
                     modifier = Modifier.clip(RoundedCornerShape(6.dp)),
                     onClick = { /* TODO handle click */ }) {
                     BasicText(
                         "Money",
-                        Modifier
+                        color = {color},
+                        modifier = Modifier
                             .wrapContentWidth()
                             .wrapContentHeight()
                             .padding(vertical = 10.dp, horizontal = 10.dp)
