@@ -1,7 +1,6 @@
 package com.pablofraile.montcoin.ui.users
 
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -72,7 +70,6 @@ fun UsersScreen(
     onRefresh: suspend () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    val context = LocalContext.current
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
@@ -89,20 +86,7 @@ fun UsersScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            Toast.makeText(
-                                context,
-                                "Search is not yet implemented in this configuration",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "search"
-                        )
-                    }
+                    ListOrderDropDown(currentOrder = currentOrder, onChangeOrder = onChangeOrder, modifier = Modifier.align(Alignment.CenterVertically))
                 }
             )
         }
@@ -115,9 +99,6 @@ fun UsersScreen(
             searchValue = search,
             onClick = onClick,
             onSearchChange = onSearchChange,
-            currentOrder = currentOrder,
-            onChangeOrder = onChangeOrder,
-            errorMessage = errorMessage,
             snackbarHostState = snackbarHostState,
             modifier = modifier
         )
@@ -126,14 +107,11 @@ fun UsersScreen(
 
 @Composable
 fun UsersContents(
-    currentOrder: Order,
     modifier: Modifier = Modifier,
     users: List<User> = emptyList(),
     isLoading: Boolean = false,
     searchValue: String = "",
     onClick: (User) -> Unit = {},
-    errorMessage: String? = null,
-    onChangeOrder: (Order) -> Unit = { _ -> },
     onRefresh: suspend () -> Unit = {},
     onSearchChange: (String) -> Unit = {},
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
@@ -154,25 +132,20 @@ fun UsersContents(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(10.dp)
                 .align(Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedTextField(
                 value = searchValue,
                 onValueChange = onSearchChange,
-                label={ Text("Search User") },
+                label = { Text("Search User") },
                 keyboardOptions = keyboardConfig,
                 keyboardActions = keyboardActions,
                 modifier = Modifier.weight(6f),
                 leadingIcon = {
                     Icon(Icons.Filled.Search, contentDescription = "Search User")
                 })
-            ListOrderDropDown(
-                currentOrder = currentOrder,
-                onChangeOrder = onChangeOrder,
-                modifier = Modifier.weight(1f)
-            )
         }
         if (isLoading) {
             Box(
@@ -202,7 +175,7 @@ private fun ListUsers(
         InfiniteScroll(
             elements = users,
             itemRender = @Composable { user, m ->
-                UserItem(user = user, onClick=onClick)
+                UserItem(user = user, onClick = onClick)
             },
             onRefresh = onRefresh,
             loadMoreItems = { },
@@ -222,10 +195,7 @@ fun RowScope.ListOrderDropDown(
     onChangeOrder: (Order) -> Unit = { _ -> },
 ) {
     Box(
-        modifier
-            .fillMaxWidth()
-            .align(Alignment.CenterVertically)
-        ,
+        modifier,
     ) {
         Menu(
             currentElement = currentOrder, elements = listOf(
@@ -268,7 +238,7 @@ fun UserItem(user: User, onClick: (User) -> Unit) {
             Column(
                 modifier = Modifier.padding(8.dp)
             ) {
-                val typography = when(user.name.length) {
+                val typography = when (user.name.length) {
                     in 0..20 -> MaterialTheme.typography.headlineMedium
                     in 21..30 -> MaterialTheme.typography.headlineSmall
                     in 30..40 -> MaterialTheme.typography.bodyLarge
@@ -320,6 +290,6 @@ fun UsersScreenPreview() {
         users =
         listOf(
             User(Id("1"), "Pablo Fraile Alonso Aarstarstarstarstarst", Amount(100))
-        ), isLoading = false, currentOrder = Order.UserName
+        ), isLoading = false
     )
 }

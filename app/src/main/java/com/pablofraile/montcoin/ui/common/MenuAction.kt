@@ -97,8 +97,8 @@ fun <T> MenuScope.Menu(
     MenuButton(
         Modifier
             .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.primary)
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -113,7 +113,7 @@ fun <T> MenuScope.Menu(
                 modifier = Modifier
                     .wrapContentWidth()
                     .clip(RoundedCornerShape(6.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.surfaceTint, RoundedCornerShape(6.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
                     .background(MaterialTheme.colorScheme.surface),
                 hideTransition = fadeOut(),
             ) {
@@ -139,7 +139,6 @@ fun <T> MenuScope.MenuItem(value: MenuAction<T>, isSelected: Boolean, onClick: (
             value.text,
             color = { color },
             modifier = Modifier
-                .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(vertical = 10.dp, horizontal = 10.dp)
         )
