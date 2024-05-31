@@ -4,9 +4,11 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -44,7 +47,8 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(
-    user: User,
+    isInitialLoading: Boolean,
+    user: User?,
     operations: List<Operation>,
     goBack: () -> Unit = {},
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
@@ -56,7 +60,7 @@ fun UserScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = user.name,
+                        text = user?.name ?: "Loading...",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -88,7 +92,18 @@ fun UserScreen(
         }
     ) { innerPadding ->
         val modifier = Modifier.padding(innerPadding)
-
+        if (isInitialLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.width(64.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+        } else {
         Column(modifier = modifier.verticalScroll(rememberScrollState())) {
             Box(Modifier.padding(16.dp)) {
                 val accountsProportion = listOf(0.40f, 0.60f)
@@ -111,7 +126,7 @@ fun UserScreen(
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                     Text(
-                        text = "${user.amount} \uD83D\uDCB8",
+                        text = "${user!!.amount} \uD83D\uDCB8",
                         style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
@@ -133,6 +148,7 @@ fun UserScreen(
                 }
             }
         }
+        }
     }
 }
 
@@ -152,6 +168,7 @@ fun UserScreenPreview() {
             amount = Amount(1000),
             numberOfOperations = 10
         ),
+        isInitialLoading = false,
         operations = (0..10).map {
             Operation(
                 id = UUID.randomUUID(),

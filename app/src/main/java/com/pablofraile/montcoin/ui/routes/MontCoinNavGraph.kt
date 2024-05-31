@@ -87,7 +87,6 @@ fun MontCoinNavGraph(
             )
             UserRoute(
                 model = userViewModel,
-                openDrawer = openDrawer,
             )
         }
     }
