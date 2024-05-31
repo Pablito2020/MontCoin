@@ -19,11 +19,14 @@ fun UsersRoute(
     val errorMessage by model.errors.collectAsStateWithLifecycle(null)
     val isLoadingUsers by model.isLoadingUsers.collectAsStateWithLifecycle()
     val order by model.order.collectAsStateWithLifecycle()
+    val search by model.search.collectAsStateWithLifecycle()
     UsersScreen(
         users = users,
         onRefresh = model::fetchUsers,
         errorMessage = errorMessage,
         currentOrder = order,
+        search = search,
+        onSearchChange = model::setSearch,
         onChangeOrder = model::setOrder,
         openDrawer = openDrawer,
         snackbarHostState = snackbarHostState,

@@ -1,6 +1,5 @@
 package com.pablofraile.montcoin.ui.users
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -23,19 +22,28 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
 
     private val _order = MutableStateFlow(Order.UserName)
     val order: StateFlow<Order> = _order
-    fun setOrder(order: Order) {
-        _order.update { order }
-    }
+    fun setOrder(order: Order) = _order.update { order }
+
+    private val _search = MutableStateFlow("")
+    val search: StateFlow<String> = _search
+    fun setSearch(search: String) = _search.update { search }
 
     private val _users = MutableStateFlow<List<User>>(emptyList())
-
     val users: StateFlow<List<User>> =
-        _users.combine(_order) { users, order -> users to order }.map { (users, order) ->
+        combine(_users, _order, _search) { users, order, search ->
+            Triple(
+                users,
+                order,
+                search
+            )
+        }.map { (users, order, search) ->
             when (order) {
                 Order.UserName -> users.sortedBy { user -> user.name }
                 Order.Amount -> users.sortedBy { user -> user.amount.value }
                 Order.NumberOperationsAscendant -> users.sortedBy { user -> user.numberOfOperations }
                 Order.NumberOperationsDescendant -> users.sortedByDescending { user -> user.numberOfOperations }
+            }.filter {
+                it.name.contains(search, ignoreCase = true)
             }
         }.stateIn(viewModelScope, started = SharingStarted.Lazily, emptyList())
 

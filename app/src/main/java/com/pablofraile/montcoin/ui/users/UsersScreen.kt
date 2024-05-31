@@ -48,10 +48,12 @@ fun UsersScreen(
     users: List<User>,
     isLoading: Boolean,
     currentOrder: Order,
+    errorMessage: String?,
+    search: String,
+    onSearchChange: (String) -> Unit,
+    openDrawer: () -> Unit,
     onChangeOrder: (Order) -> Unit,
     onRefresh: suspend () -> Unit,
-    errorMessage: String?,
-    openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     val context = LocalContext.current
@@ -94,8 +96,8 @@ fun UsersScreen(
             users = users,
             onRefresh = onRefresh,
             isLoading = isLoading,
-            searchValue = "",
-            onSearchChange = {},
+            searchValue = search,
+            onSearchChange = onSearchChange,
             currentOrder = currentOrder,
             onChangeOrder = onChangeOrder,
             errorMessage = errorMessage,
