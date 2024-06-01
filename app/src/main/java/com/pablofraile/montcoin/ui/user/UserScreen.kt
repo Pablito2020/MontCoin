@@ -1,9 +1,10 @@
 package com.pablofraile.montcoin.ui.user
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +29,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
@@ -155,20 +157,42 @@ fun UserComponent(
     } else {
         Column(
             modifier = modifier
-                .verticalScroll(rememberScrollState())
                 .fillMaxSize()
         ) {
             if (user != null && percentage != null) {
                 when (percentage) {
                     is Percentage.Empty -> {
-                        Text(
-                            text = "No operations found \uD83E\uDEF0",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
-                            modifier = Modifier
-                                .padding(20.dp)
-                                .align(Alignment.CenterHorizontally)
-                        )
+                        Box(modifier= Modifier
+                            .padding(16.dp)
+                            .align(Alignment.CenterHorizontally)
+                        ) {
+                            Column(modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize(),
+                                verticalArrangement = Arrangement.SpaceEvenly,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Amount",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                                    )
+                                    Text(
+                                        text = "${user.amount} \uD83D\uDCB8",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                                    )
+                                }
+                                HorizontalDivider()
+                                Text(
+                                    text = "No operations found \uD83E\uDEF0",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                            }
+                        }
                     }
                     is PercentageV -> {
                         Box(Modifier.padding(16.dp)) {
@@ -279,15 +303,8 @@ fun UserScreenPreview() {
             numberOfOperations = 10
         ),
         isLoading = false,
-        operations = listOf(
-            Operation(
-                id = UUID.randomUUID(),
-                user = user,
-                amount = Amount(100),
-                date = java.util.Date()
-            )
-        ),
+        operations = emptyList(),
         errorMessage = null,
-        percentage = PercentageV(0.5f, 0.5f)
+        percentage = Percentage.Empty
     )
 }
