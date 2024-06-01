@@ -31,6 +31,9 @@ class UserViewModel(
     private val _operations: MutableStateFlow<Operations> = MutableStateFlow(emptyList())
     val operations = _operations
 
+    private val _isLoadingOperations: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val isLoadingOperations = _isLoadingOperations
+
     val isInitialLoading = _user.combine(_errorMessage) { user, errorMessage ->
         user == null && errorMessage == null
     }.stateIn(
@@ -41,9 +44,15 @@ class UserViewModel(
 
     init {
         viewModelScope.launch {
-            fetchUser()
-            fetchOperations()
+            fetchAll()
         }
+    }
+
+    private suspend fun fetchAll() {
+        _isLoadingOperations.update { true }
+        fetchUser()
+        fetchOperations()
+        _isLoadingOperations.update { false }
     }
 
     private suspend fun fetchUser() {

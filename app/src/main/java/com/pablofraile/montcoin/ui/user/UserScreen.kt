@@ -3,7 +3,7 @@ package com.pablofraile.montcoin.ui.user
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +26,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +48,8 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(
-    isInitialLoading: Boolean,
+    isLoadingUser: Boolean,
+    isLoadingOperations: Boolean,
     user: User?,
     operations: List<Operation>,
     goBack: () -> Unit = {},
@@ -73,28 +75,46 @@ fun UserScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            Toast.makeText(
-                                context,
-                                "Refresh is not yet implemented in this configuration",
-                                Toast.LENGTH_LONG
-                            ).show()
+                    if (isLoadingOperations) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .width(64.dp)
+                        ) {
+                            val state = PullToRefreshState(
+                                positionalThresholdPx = 0.toFloat(),
+                                initialRefreshing = true,
+                                enabled = { true }
+                            )
+                            PullToRefreshDefaults.Indicator(
+                                state = state,
+                                modifier = Modifier.align(Alignment.CenterEnd)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "refresh"
-                        )
+                    } else {
+                        IconButton(
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    "Refresh is not yet implemented in this configuration",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = "refresh"
+                            )
+                        }
                     }
                 }
             )
         }
     ) { innerPadding ->
         val modifier = Modifier.padding(innerPadding)
-        if (isInitialLoading) {
+        if (isLoadingUser) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
@@ -104,50 +124,77 @@ fun UserScreen(
                 )
             }
         } else {
-        Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-            Box(Modifier.padding(16.dp)) {
-                val accountsProportion = listOf(0.40f, 0.60f)
-                val circleColors = listOf(
-                    Color(0xFF73FF94),
-                    Color(0xFFFF7777),
-                )
-                AnimatedCircle(
-                    accountsProportion,
-                    circleColors,
-                    Modifier
-                        .height(300.dp)
-                        .align(Alignment.Center)
-                        .fillMaxWidth()
-                )
-                Column(modifier = Modifier.align(Alignment.Center)) {
-                    Text(
-                        text = "Amount",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+            Column(modifier = modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxSize()) {
+                Box(Modifier.padding(16.dp)) {
+                    val accountsProportion = listOf(0.40f, 0.60f)
+                    val circleColors = listOf(
+                        Color(0xFF73FF94),
+                        Color(0xFFFF7777),
                     )
-                    Text(
-                        text = "${user!!.amount} \uD83D\uDCB8",
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    AnimatedCircle(
+                        accountsProportion,
+                        circleColors,
+                        Modifier
+                            .height(300.dp)
+                            .align(Alignment.Center)
+                            .fillMaxWidth()
                     )
-                }
-            }
-            Spacer(Modifier.height(10.dp))
-            Card {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    operations.forEach { item ->
+                    Column(modifier = Modifier.align(Alignment.Center)) {
                         Text(
-                            text = item.amount.toString(),
+                            text = "Amount",
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .fillMaxWidth()
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
-                        HorizontalDivider()
+                        Text(
+                            text = "${user!!.amount} \uD83D\uDCB8",
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+                HorizontalDivider()
+                if (isLoadingOperations) {
+                    Box(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .fillMaxHeight()
+                            .align(Alignment.CenterHorizontally),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                } else {
+                    if (operations.isEmpty()) {
+                        Text(
+                            text = "No operations found \uD83E\uDEF0",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                            modifier = Modifier.padding(20.dp).align(Alignment.CenterHorizontally)
+                        )
+                    } else {
+                        Card(modifier = Modifier.padding(12.dp)) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                operations.forEach { item ->
+                                    Text(
+                                        text = item.amount.toString(),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .fillMaxWidth()
+                                    )
+                                    HorizontalDivider()
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
         }
     }
 }
@@ -156,10 +203,10 @@ fun UserScreen(
 @Composable
 fun UserScreenPreview() {
     val user = User(
-            id = Id("1"),
-            name = "Pablo Fraile",
-            amount = Amount(1000),
-            numberOfOperations = 10
+        id = Id("1"),
+        name = "Pablo Fraile",
+        amount = Amount(1000),
+        numberOfOperations = 10
     )
     UserScreen(
         user = User(
@@ -168,14 +215,16 @@ fun UserScreenPreview() {
             amount = Amount(1000),
             numberOfOperations = 10
         ),
-        isInitialLoading = false,
-        operations = (0..10).map {
-            Operation(
-                id = UUID.randomUUID(),
-                amount = Amount(it * 100),
-                date = Date.from(Instant.now()),
-                user = user
-            )
-        }
+        isLoadingUser = false,
+        isLoadingOperations = false,
+        operations = emptyList(),
+//        operations = (0..10).map {
+//            Operation(
+//                id = UUID.randomUUID(),
+//                amount = Amount(it * 100),
+//                date = Date.from(Instant.now()),
+//                user = user
+//            )
+//        }
     )
 }
