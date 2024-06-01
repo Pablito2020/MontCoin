@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun UserRoute(
     model: UserViewModel,
+    onGoBack : () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val isLoadingUser by model.isInitialLoading.collectAsStateWithLifecycle()
@@ -16,6 +17,14 @@ fun UserRoute(
     val user by model.user.collectAsStateWithLifecycle()
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle(null)
     val operations by model.operations.collectAsStateWithLifecycle()
-    UserScreen(isLoadingUser = isLoadingUser, isLoadingOperations=isLoadingOperations, user = user, operations = operations)
+    UserScreen(
+        isLoadingUser = isLoadingUser,
+        isLoadingOperations = isLoadingOperations,
+        user = user,
+        operations = operations,
+        onRefresh = model::onRefresh,
+        goBack = onGoBack,
+        snackbarHostState = snackbarHostState
+    )
 }
 

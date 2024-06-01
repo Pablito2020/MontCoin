@@ -2,13 +2,11 @@ package com.pablofraile.montcoin.ui.routes
 
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.pablofraile.montcoin.model.User
 
 
 /**
- * Destinations used in the [MontCoinApp].
+ * Destinations used in the [MontCoin].
  */
 object MontCoinDestinations {
     const val USER_ROUTE = "user"
@@ -70,4 +68,5 @@ class MontCoinNavigationActions(navController: NavHostController) {
             restoreState = true
         }
     }
+    val navigateBack: () -> Unit = { navController.popBackStack() }
 }

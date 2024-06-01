@@ -1,6 +1,5 @@
 package com.pablofraile.montcoin.ui.user
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -41,7 +40,6 @@ import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.AnimatedCircle
-import com.pablofraile.montcoin.ui.common.LoadingAnimation
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,6 +49,7 @@ fun UserScreen(
     isLoadingOperations: Boolean,
     user: User?,
     operations: List<Operation>,
+    onRefresh: () -> Unit = {},
     goBack: () -> Unit = {},
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
 ) {
@@ -92,13 +91,7 @@ fun UserScreen(
                         }
                     } else {
                         IconButton(
-                            onClick = {
-                                Toast.makeText(
-                                    context,
-                                    "Refresh is not yet implemented in this configuration",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
+                            onClick = onRefresh
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
@@ -134,7 +127,7 @@ fun UserScreen(
 }
 
 @Composable
-fun UserComponent (
+fun UserComponent(
     isLoadingOperations: Boolean,
     operations: List<Operation>,
     user: User?,

@@ -42,7 +42,9 @@ class UserViewModel(
         initialValue = true
     )
 
-    init {
+    init { onRefresh() }
+
+    fun onRefresh() {
         viewModelScope.launch {
             fetchAll()
         }

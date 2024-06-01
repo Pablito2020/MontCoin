@@ -11,8 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
-import com.pablofraile.montcoin.MontCoinApplication.Companion.APP_URI
 import com.pablofraile.montcoin.data.AppContainer
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.ui.operation.OperationRoute
@@ -87,6 +85,7 @@ fun MontCoinNavGraph(
             )
             UserRoute(
                 model = userViewModel,
+                onGoBack = navigationActions.navigateBack,
             )
         }
     }
