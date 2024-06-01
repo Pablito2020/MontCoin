@@ -3,6 +3,7 @@ package com.pablofraile.montcoin.ui.user
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,9 +41,7 @@ import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.AnimatedCircle
-import java.time.Instant
-import java.util.Date
-import java.util.UUID
+import com.pablofraile.montcoin.ui.common.LoadingAnimation
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,76 +123,134 @@ fun UserScreen(
                 )
             }
         } else {
-            Column(modifier = modifier
-                .verticalScroll(rememberScrollState())
-                .fillMaxSize()) {
-                Box(Modifier.padding(16.dp)) {
-                    val accountsProportion = listOf(0.40f, 0.60f)
-                    val circleColors = listOf(
-                        Color(0xFF73FF94),
-                        Color(0xFFFF7777),
-                    )
-                    AnimatedCircle(
-                        accountsProportion,
-                        circleColors,
-                        Modifier
-                            .height(300.dp)
-                            .align(Alignment.Center)
-                            .fillMaxWidth()
-                    )
-                    Column(modifier = Modifier.align(Alignment.Center)) {
-                        Text(
-                            text = "Amount",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                        Text(
-                            text = "${user!!.amount} \uD83D\uDCB8",
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                    }
-                }
+            UserComponent(
+                isLoadingOperations = isLoadingOperations,
+                operations = operations,
+                user = user,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+fun UserComponent (
+    isLoadingOperations: Boolean,
+    operations: List<Operation>,
+    user: User?,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+    ) {
+        user?.let { Amount(it) }
+        HorizontalDivider()
+        Operations(
+            isLoading = isLoadingOperations,
+            operations = operations
+        )
+    }
+}
+
+@Composable
+fun Amount(user: User) {
+    Box(Modifier.padding(16.dp)) {
+        val accountsProportion = listOf(0.40f, 0.60f)
+        val circleColors = listOf(
+            Color(0xFF73FF94),
+            Color(0xFFFF7777),
+        )
+        AnimatedCircle(
+            accountsProportion,
+            circleColors,
+            Modifier
+                .height(300.dp)
+                .align(Alignment.Center)
+                .fillMaxWidth()
+        )
+        Column(modifier = Modifier.align(Alignment.Center)) {
+            Text(
+                text = "Amount",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = "${user.amount} \uD83D\uDCB8",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
+@Composable
+fun ColumnScope.Operations(
+    isLoading: Boolean,
+    operations: List<Operation>,
+) {
+    if (isLoading)
+        LoadingCircular()
+    else
+        Operations(operations = operations)
+}
+
+@Composable
+fun ColumnScope.LoadingCircular() {
+    Box(
+        modifier = Modifier
+            .padding(12.dp)
+            .fillMaxHeight()
+            .align(Alignment.CenterHorizontally),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+fun ColumnScope.Operations(
+    operations: List<Operation>,
+) {
+    if (operations.isEmpty())
+        EmptyOperations()
+    else
+        ListOperations(operations = operations)
+}
+
+@Composable
+fun ColumnScope.EmptyOperations() {
+    Text(
+        text = "No operations found \uD83E\uDEF0",
+        style = MaterialTheme.typography.bodyLarge,
+        fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+        modifier = Modifier
+            .padding(20.dp)
+            .align(Alignment.CenterHorizontally)
+    )
+
+}
+
+@Composable
+fun ListOperations(
+    operations: List<Operation>,
+) {
+    Card(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            operations.forEach { item ->
+                Text(
+                    text = item.amount.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                )
                 HorizontalDivider()
-                if (isLoadingOperations) {
-                    Box(
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .fillMaxHeight()
-                            .align(Alignment.CenterHorizontally),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                } else {
-                    if (operations.isEmpty()) {
-                        Text(
-                            text = "No operations found \uD83E\uDEF0",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
-                            modifier = Modifier.padding(20.dp).align(Alignment.CenterHorizontally)
-                        )
-                    } else {
-                        Card(modifier = Modifier.padding(12.dp)) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                operations.forEach { item ->
-                                    Text(
-                                        text = item.amount.toString(),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier
-                                            .padding(4.dp)
-                                            .fillMaxWidth()
-                                    )
-                                    HorizontalDivider()
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }
