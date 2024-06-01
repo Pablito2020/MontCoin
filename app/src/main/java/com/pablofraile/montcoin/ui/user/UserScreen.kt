@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,7 +30,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +38,9 @@ import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.AnimatedCircle
+import com.pablofraile.montcoin.ui.operations.OperationItem
+import com.pablofraile.montcoin.ui.theme.LoseMoneyColor
+import com.pablofraile.montcoin.ui.theme.WinMoneyColor
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,8 +153,8 @@ fun Amount(user: User) {
     Box(Modifier.padding(16.dp)) {
         val accountsProportion = listOf(0.40f, 0.60f)
         val circleColors = listOf(
-            Color(0xFF73FF94),
-            Color(0xFFFF7777),
+            WinMoneyColor,
+            LoseMoneyColor
         )
         AnimatedCircle(
             accountsProportion,
@@ -233,18 +234,12 @@ fun ColumnScope.EmptyOperations() {
 fun ListOperations(
     operations: List<Operation>,
 ) {
-    Card(modifier = Modifier.padding(12.dp)) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            operations.forEach { item ->
-                Text(
-                    text = item.amount.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                )
-                HorizontalDivider()
-            }
+    Column(modifier = Modifier.padding(12.dp)) {
+        operations.forEach { item ->
+            OperationItem(
+                operation = item,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }
