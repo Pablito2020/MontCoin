@@ -18,7 +18,11 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
 
     override val usersRepository: UsersRepository by lazy { InMemoryUserRepo() }
 
-    override val operationsRepository: OperationsRepository by lazy { InMemoryOperationRepository() }
+    override val operationsRepository: OperationsRepository by lazy {
+        InMemoryOperationRepository(
+            userRepository = usersRepository
+        )
+    }
 
     override val cardRepository by lazy { NfcCardRepository }
 

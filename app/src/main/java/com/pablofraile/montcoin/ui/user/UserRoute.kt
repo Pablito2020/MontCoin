@@ -14,6 +14,7 @@ fun UserRoute(
     val isLoadingUser by model.isInitialLoading.collectAsStateWithLifecycle()
     val user by model.user.collectAsStateWithLifecycle()
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle(null)
-    UserScreen(isInitialLoading = isLoadingUser, user = user, operations = emptyList())
+    val operations by model.operations.collectAsStateWithLifecycle()
+    UserScreen(isInitialLoading = isLoadingUser, user = user, operations = operations)
 }
 
