@@ -25,10 +25,11 @@ class WriteCardViewModel(
     private val _selectedUser = MutableStateFlow<User?>(null)
     val selectedUser = _selectedUser
     fun selectUser(user: User) {
-        _selectedUser.value = user
+        _selectedUser.update { user }
     }
+
     fun clearSelectedUser() {
-        _selectedUser.value = null
+        _selectedUser.update { null }
     }
 
     private val _users = MutableStateFlow<List<User>>(emptyList())
@@ -36,14 +37,13 @@ class WriteCardViewModel(
     fun updateUsers() {
         val scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
-            _isRefreshing.value = true
+            _isRefreshing.update { true }
             val users = usersRepository.getUsers()
-            if (users.isSuccess) _users.update{ users.getOrThrow() }
+            if (users.isSuccess) _users.update { users.getOrThrow() }
             else errorMessage.emit(users.exceptionOrNull()?.message ?: "Unknown Error")
-            _isRefreshing.value = false
+            _isRefreshing.update { false }
         }
     }
-
 
     init {
         updateUsers()
@@ -59,9 +59,9 @@ class WriteCardViewModel(
                 errorMessage.emit(
                     result.exceptionOrNull()!!.message ?: "Unknown Error"
                 )
-                _selectedUser.value = null
+                _selectedUser.update { null }
             } else {
-                _selectedUser.value = null
+                _selectedUser.update { null }
                 emit(Pair(result.getOrThrow(), Date.from(Instant.now())))
             }
         }
@@ -70,7 +70,7 @@ class WriteCardViewModel(
     private val _errorMessage: MutableStateFlow<String?> = MutableStateFlow(null)
     val errorMessage = _errorMessage
     fun clearErrorMessage() {
-        _errorMessage.value = null
+        _errorMessage.update { null }
     }
 
     companion object {
