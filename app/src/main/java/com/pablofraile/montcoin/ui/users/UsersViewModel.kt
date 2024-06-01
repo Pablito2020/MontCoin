@@ -1,5 +1,6 @@
 package com.pablofraile.montcoin.ui.users
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -48,7 +49,7 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
             }
         }.stateIn(viewModelScope, started = SharingStarted.Lazily, emptyList())
 
-    private val _errors = MutableSharedFlow<String>()
+    private val _errors = MutableStateFlow<String?>(null)
     val errors = _errors
 
     private val _isLoadingUsers = MutableStateFlow(true)
@@ -58,14 +59,19 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
         val scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
             fetchUsers()
-            _isLoadingUsers.update { false }
         }
     }
 
     suspend fun fetchUsers() {
+        _isLoadingUsers.update { true }
+        _errors.update {null}
+        Log.e("UsersViewModel", "Fetching...")
         val users = usersRepository.getUsers()
+        Log.e("UsersViewModel", "Loaded Users")
         if (users.isSuccess) _users.emit(users.getOrThrow())
         else _errors.emit("Error fetching users: ${users.exceptionOrNull()?.message}")
+        Log.e("UsersViewModel", "Finished fetching....")
+        _isLoadingUsers.update { false }
     }
 
     companion object {

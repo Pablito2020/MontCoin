@@ -3,6 +3,8 @@ package com.pablofraile.montcoin.ui.users
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,13 +17,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,15 +51,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.R
-import com.pablofraile.montcoin.model.Amount
-import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.InfiniteScroll
 import com.pablofraile.montcoin.ui.common.Menu
 import com.pablofraile.montcoin.ui.common.MenuAction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +94,11 @@ fun UsersScreen(
                     }
                 },
                 actions = {
-                    ListOrderDropDown(currentOrder = currentOrder, onChangeOrder = onChangeOrder, modifier = Modifier.align(Alignment.CenterVertically))
+                    ListOrderDropDown(
+                        currentOrder = currentOrder,
+                        onChangeOrder = onChangeOrder,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
                 }
             )
         }
@@ -96,6 +108,7 @@ fun UsersScreen(
             users = users,
             onRefresh = onRefresh,
             isLoading = isLoading,
+            errorMessage = errorMessage,
             searchValue = search,
             onClick = onClick,
             onSearchChange = onSearchChange,
@@ -109,6 +122,7 @@ fun UsersScreen(
 fun UsersContents(
     modifier: Modifier = Modifier,
     users: List<User> = emptyList(),
+    errorMessage: String? = null,
     isLoading: Boolean = false,
     searchValue: String = "",
     onClick: (User) -> Unit = {},
@@ -159,7 +173,51 @@ fun UsersContents(
                 )
             }
         } else {
-            ListUsers(users, onClick, onRefresh, snackbarHostState)
+            if (errorMessage != null) {
+                val coroutineScope = CoroutineScope(Dispatchers.IO)
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Column {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            text = errorMessage
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .clickable {
+                                    coroutineScope.launch {
+                                        onRefresh()
+                                    }
+                                },
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clip(
+                                        ButtonDefaults.shape
+                                    )
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                            ) {
+                                Text("Try again", modifier = Modifier.padding(10.dp))
+                                Icon(
+                                    imageVector = Icons.Filled.Replay,
+                                    contentDescription = "reload",
+                                    modifier = Modifier.padding(10.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                ListUsers(users, onClick, onRefresh, snackbarHostState)
+            }
         }
     }
 }
@@ -287,9 +345,8 @@ fun UserItem(user: User, onClick: (User) -> Unit) {
 @Composable
 fun UsersScreenPreview() {
     UsersContents(
-        users =
-        listOf(
-            User(Id("1"), "Pablo Fraile Alonso Aarstarstarstarstarst", Amount(100))
-        ), isLoading = false
+        users = emptyList(),
+        errorMessage = "Couldn't fetch from API",
+        isLoading = false
     )
 }
