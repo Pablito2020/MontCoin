@@ -48,8 +48,7 @@ import com.pablofraile.montcoin.ui.theme.WinMoneyColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(
-    isLoadingUser: Boolean,
-    isLoadingOperations: Boolean,
+    isLoading: Boolean,
     user: User?,
     operations: List<Operation>,
     errorMessage: String?,
@@ -78,7 +77,7 @@ fun UserScreen(
                     }
                 },
                 actions = {
-                    if (isLoadingOperations) {
+                    if (isLoading) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
@@ -109,25 +108,12 @@ fun UserScreen(
         }
     ) { innerPadding ->
         val modifier = Modifier.padding(innerPadding)
-        if (isLoadingUser) {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.width(64.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
-            }
-        } else {
-            UserComponent(
-                isLoadingOperations = isLoadingOperations,
-                operations = operations,
-                user = user,
-                modifier = modifier
-            )
-        }
+        UserComponent(
+            operations = operations,
+            user = user,
+            modifier = modifier,
+            isLoading = isLoading
+        )
         if (errorMessage != null)
             AlertDialog(
                 onDismissRequest = {},
@@ -136,7 +122,7 @@ fun UserScreen(
                         Text("Go Back")
                     }
                 },
-                dismissButton = @Composable{
+                dismissButton = @Composable {
                     TextButton(onClick = onRetryError) {
                         Text("Retry")
                     }
@@ -155,8 +141,8 @@ fun UserScreen(
 
 @Composable
 fun UserComponent(
-    isLoadingOperations: Boolean,
     operations: List<Operation>,
+    isLoading: Boolean,
     user: User?,
     modifier: Modifier = Modifier,
 ) {
@@ -165,25 +151,43 @@ fun UserComponent(
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
     ) {
-        user?.let { Amount(it) }
-        HorizontalDivider()
-        Operations(
-            isLoading = isLoadingOperations,
-            operations = operations
-        )
+        user?.let {
+            val totalSum =
+                operations.sumOf { op -> if (op.amount.value < 0) op.amount.value * -1 else op.amount.value }
+            if (totalSum == 0) {
+                Amount(it, listOf(1f, 0f))
+            } else {
+                val negative =
+                    operations.sumOf { op -> if (op.amount.value < 0) -1 * op.amount.value else 0 }
+                val positive =
+                    operations.sumOf { op -> if (op.amount.value > 0) op.amount.value else 0 }
+                val percentages = listOf(
+                    positive.toFloat() / totalSum,
+                    negative.toFloat() / totalSum,
+                )
+                Amount(it, percentages)
+            }
+            HorizontalDivider()
+        }
+        if (isLoading) {
+            LoadingCircular()
+        } else {
+            Operations(
+                operations = operations
+            )
+        }
     }
 }
 
 @Composable
-fun Amount(user: User) {
+fun Amount(user: User, percentages: List<Float>) {
     Box(Modifier.padding(16.dp)) {
-        val accountsProportion = listOf(0.40f, 0.60f)
         val circleColors = listOf(
             WinMoneyColor,
             LoseMoneyColor
         )
         AnimatedCircle(
-            accountsProportion,
+            percentages,
             circleColors,
             Modifier
                 .height(300.dp)
@@ -203,17 +207,6 @@ fun Amount(user: User) {
             )
         }
     }
-}
-
-@Composable
-fun ColumnScope.Operations(
-    isLoading: Boolean,
-    operations: List<Operation>,
-) {
-    if (isLoading)
-        LoadingCircular()
-    else
-        Operations(operations = operations)
 }
 
 @Composable
@@ -286,8 +279,8 @@ fun UserScreenPreview() {
             amount = Amount(1000),
             numberOfOperations = 10
         ),
-        isLoadingUser = false,
-        isLoadingOperations = false,
+//        user=null,
+        isLoading = true,
         operations = emptyList(),
         errorMessage = null
     )

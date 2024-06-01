@@ -9,10 +9,6 @@ import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operations
 import com.pablofraile.montcoin.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,16 +28,8 @@ class UserViewModel(
     private val _operations: MutableStateFlow<Operations> = MutableStateFlow(emptyList())
     val operations = _operations
 
-    private val _isLoadingOperations: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    val isLoadingOperations = _isLoadingOperations
-
-    val isInitialLoading = _user.combine(_errorMessage) { user, errorMessage ->
-        user == null && errorMessage == null
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = true
-    )
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val isLoading = _isLoading
 
     init { onRefresh() }
 
@@ -52,16 +40,19 @@ class UserViewModel(
     }
 
     private suspend fun fetchAll() {
-        _isLoadingOperations.update { true }
-        fetchUser()
-        fetchOperations()
-        _isLoadingOperations.update { false }
+        _isLoading.update { true }
+        fetchUser() { fetchOperations() }
+        _isLoading.update { false }
     }
 
-    private suspend fun fetchUser() {
+    private suspend fun fetchUser(onFetched: suspend () -> Unit){
         val user = this.usersRepository.getUserById(userId.value)
-        if (user.isSuccess) _user.update { user.getOrNull() }
-        else _errorMessage.update { user.exceptionOrNull()?.message }
+        if (user.isSuccess) {
+            _user.update { user.getOrNull() }
+            onFetched()
+        } else {
+            _errorMessage.update { user.exceptionOrNull()?.message }
+        }
     }
 
     private suspend fun fetchOperations() {

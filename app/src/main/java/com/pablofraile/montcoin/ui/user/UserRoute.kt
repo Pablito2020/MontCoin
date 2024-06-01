@@ -12,14 +12,12 @@ fun UserRoute(
     onGoBack : () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
-    val isLoadingUser by model.isInitialLoading.collectAsStateWithLifecycle()
-    val isLoadingOperations by model.isLoadingOperations.collectAsStateWithLifecycle()
+    val isLoading by model.isLoading.collectAsStateWithLifecycle()
     val user by model.user.collectAsStateWithLifecycle()
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle(null)
     val operations by model.operations.collectAsStateWithLifecycle()
     UserScreen(
-        isLoadingUser = isLoadingUser,
-        isLoadingOperations = isLoadingOperations,
+        isLoading = isLoading,
         user = user,
         operations = operations,
         onRefresh = model::onRefresh,
