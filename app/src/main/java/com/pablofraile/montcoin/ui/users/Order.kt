@@ -1,6 +1,6 @@
-package com.pablofraile.montcoin.ui.users;
+package com.pablofraile.montcoin.ui.users
 
-public enum Order {
+enum class Order {
     UserName,
     AmountAscendant,
     AmountDescendant,
