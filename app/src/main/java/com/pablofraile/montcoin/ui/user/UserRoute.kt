@@ -24,6 +24,12 @@ fun UserRoute(
         operations = operations,
         onRefresh = model::onRefresh,
         goBack = onGoBack,
+        errorMessage = errorMessage,
+        onOkError = onGoBack,
+        onRetryError = {
+            model.cleanError()
+            model.onRefresh()
+        },
         snackbarHostState = snackbarHostState
     )
 }

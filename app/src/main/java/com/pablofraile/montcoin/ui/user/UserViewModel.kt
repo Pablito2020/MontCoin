@@ -24,6 +24,7 @@ class UserViewModel(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage
+    fun cleanError() = _errorMessage.update { null }
 
     private val _user: MutableStateFlow<User?> = MutableStateFlow(null)
     val user = _user
@@ -68,6 +69,7 @@ class UserViewModel(
         if (operations.isSuccess) _operations.update { operations.getOrNull() ?: emptyList() }
         else _errorMessage.update { operations.exceptionOrNull()?.message }
     }
+
 
     companion object {
         fun provideFactory(

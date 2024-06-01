@@ -14,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,12 +27,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Amount
@@ -50,11 +52,13 @@ fun UserScreen(
     isLoadingOperations: Boolean,
     user: User?,
     operations: List<Operation>,
+    errorMessage: String?,
+    onOkError: () -> Unit = {},
+    onRetryError: () -> Unit = {},
     onRefresh: () -> Unit = {},
     goBack: () -> Unit = {},
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
 ) {
-    val context = LocalContext.current
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
@@ -124,6 +128,28 @@ fun UserScreen(
                 modifier = modifier
             )
         }
+        if (errorMessage != null)
+            AlertDialog(
+                onDismissRequest = {},
+                confirmButton = @Composable {
+                    TextButton(onClick = onOkError) {
+                        Text("Go Back")
+                    }
+                },
+                dismissButton = @Composable{
+                    TextButton(onClick = onRetryError) {
+                        Text("Retry")
+                    }
+                },
+                icon = @Composable {
+                    Icon(Icons.Filled.Warning, contentDescription = "Error")
+                },
+                title = @Composable {
+                    Text("Error Loading the Page!")
+                },
+                text = @Composable {
+                    Text("The error was: $errorMessage.\n Do you want to retry?")
+                })
     }
 }
 
@@ -263,13 +289,6 @@ fun UserScreenPreview() {
         isLoadingUser = false,
         isLoadingOperations = false,
         operations = emptyList(),
-//        operations = (0..10).map {
-//            Operation(
-//                id = UUID.randomUUID(),
-//                amount = Amount(it * 100),
-//                date = Date.from(Instant.now()),
-//                user = user
-//            )
-//        }
+        errorMessage = null
     )
 }
