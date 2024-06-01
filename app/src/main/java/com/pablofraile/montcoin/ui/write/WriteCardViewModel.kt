@@ -4,16 +4,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.card.CardRepository
 import com.pablofraile.montcoin.data.users.UsersRepository
 import com.pablofraile.montcoin.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
@@ -29,26 +27,30 @@ class WriteCardViewModel(
     fun selectUser(user: User) {
         _selectedUser.value = user
     }
-
     fun clearSelectedUser() {
         _selectedUser.value = null
     }
 
-    val users = usersRepository.observeUsers().stateIn(
-        viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = emptyList()
-    )
-
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing
-
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users = _users
     fun updateUsers() {
         val scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
             _isRefreshing.value = true
-            usersRepository.getUsers()
+            val users = usersRepository.getUsers()
+            if (users.isSuccess) _users.update{ users.getOrThrow() }
+            else errorMessage.emit(users.exceptionOrNull()?.message ?: "Unknown Error")
             _isRefreshing.value = false
         }
     }
+
+
+    init {
+        updateUsers()
+    }
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing
 
     val writeResult = selectedUser.transform {
         if (it != null) {

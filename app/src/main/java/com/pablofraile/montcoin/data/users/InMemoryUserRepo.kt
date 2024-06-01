@@ -4,8 +4,6 @@ import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 class InMemoryUserRepo : UsersRepository {
 
@@ -24,14 +22,6 @@ class InMemoryUserRepo : UsersRepository {
                 User(Id("3"), "Paujurado El Rey, The King", Amount(2000))
             )
         )
-    }
-
-    override fun observeUsers(): Flow<List<User>> {
-        return flow {
-            emit(
-                getUsers().getOrNull() ?: emptyList()
-            )
-        }
     }
 
 }
