@@ -43,6 +43,7 @@ import com.pablofraile.montcoin.ui.common.AnimatedCircle
 import com.pablofraile.montcoin.ui.operations.OperationItem
 import com.pablofraile.montcoin.ui.theme.LoseMoneyColor
 import com.pablofraile.montcoin.ui.theme.WinMoneyColor
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +53,7 @@ fun UserScreen(
     user: User?,
     operations: List<Operation>,
     errorMessage: String?,
+    percentage: Percentage?,
     onOkError: () -> Unit = {},
     onRetryError: () -> Unit = {},
     onRefresh: () -> Unit = {},
@@ -111,6 +113,7 @@ fun UserScreen(
         UserComponent(
             operations = operations,
             user = user,
+            percentage = percentage,
             modifier = modifier,
             isLoading = isLoading
         )
@@ -144,78 +147,74 @@ fun UserComponent(
     operations: List<Operation>,
     isLoading: Boolean,
     user: User?,
+    percentage: Percentage?,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize()
-    ) {
-        user?.let {
-            val totalSum =
-                operations.sumOf { op -> if (op.amount.value < 0) op.amount.value * -1 else op.amount.value }
-            if (totalSum == 0) {
-                Amount(it, listOf(1f, 0f))
-            } else {
-                val negative =
-                    operations.sumOf { op -> if (op.amount.value < 0) -1 * op.amount.value else 0 }
-                val positive =
-                    operations.sumOf { op -> if (op.amount.value > 0) op.amount.value else 0 }
-                val percentages = listOf(
-                    positive.toFloat() / totalSum,
-                    negative.toFloat() / totalSum,
-                )
-                Amount(it, percentages)
+    if (isLoading) {
+        LoadingCircular()
+    } else {
+        Column(
+            modifier = modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxSize()
+        ) {
+            if (user != null && percentage != null) {
+                when (percentage) {
+                    is Percentage.Empty -> {
+                        Text(
+                            text = "No operations found \uD83E\uDEF0",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                    }
+                    is PercentageV -> {
+                        Box(Modifier.padding(16.dp)) {
+                            val circleColors = listOf(
+                                WinMoneyColor,
+                                LoseMoneyColor
+                            )
+                            AnimatedCircle(
+                                percentage.toList(),
+                                circleColors,
+                                Modifier
+                                    .height(300.dp)
+                                    .align(Alignment.Center)
+                                    .fillMaxWidth()
+                            )
+                            Column(modifier = Modifier.align(Alignment.Center)) {
+                                Text(
+                                    text = "Amount",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                                Text(
+                                    text = "${user.amount} \uD83D\uDCB8",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                        Operations(
+                            operations = operations
+                        )
+                    }
+                }
             }
-            HorizontalDivider()
-        }
-        if (isLoading) {
-            LoadingCircular()
-        } else {
-            Operations(
-                operations = operations
-            )
         }
     }
 }
 
-@Composable
-fun Amount(user: User, percentages: List<Float>) {
-    Box(Modifier.padding(16.dp)) {
-        val circleColors = listOf(
-            WinMoneyColor,
-            LoseMoneyColor
-        )
-        AnimatedCircle(
-            percentages,
-            circleColors,
-            Modifier
-                .height(300.dp)
-                .align(Alignment.Center)
-                .fillMaxWidth()
-        )
-        Column(modifier = Modifier.align(Alignment.Center)) {
-            Text(
-                text = "Amount",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = "${user.amount} \uD83D\uDCB8",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
-    }
-}
 
 @Composable
-fun ColumnScope.LoadingCircular() {
+fun LoadingCircular() {
     Box(
         modifier = Modifier
             .padding(12.dp)
-            .fillMaxHeight()
-            .align(Alignment.CenterHorizontally),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
@@ -279,9 +278,16 @@ fun UserScreenPreview() {
             amount = Amount(1000),
             numberOfOperations = 10
         ),
-//        user=null,
-        isLoading = true,
-        operations = emptyList(),
-        errorMessage = null
+        isLoading = false,
+        operations = listOf(
+            Operation(
+                id = UUID.randomUUID(),
+                user = user,
+                amount = Amount(100),
+                date = java.util.Date()
+            )
+        ),
+        errorMessage = null,
+        percentage = PercentageV(0.5f, 0.5f)
     )
 }

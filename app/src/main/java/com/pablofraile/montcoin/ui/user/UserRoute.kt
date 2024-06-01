@@ -16,6 +16,7 @@ fun UserRoute(
     val user by model.user.collectAsStateWithLifecycle()
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle(null)
     val operations by model.operations.collectAsStateWithLifecycle()
+    val percentage by model.percentage.collectAsStateWithLifecycle()
     UserScreen(
         isLoading = isLoading,
         user = user,
@@ -24,6 +25,7 @@ fun UserRoute(
         goBack = onGoBack,
         errorMessage = errorMessage,
         onOkError = onGoBack,
+        percentage = percentage,
         onRetryError = {
             model.cleanError()
             model.onRefresh()
