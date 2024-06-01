@@ -6,11 +6,10 @@ import com.pablofraile.montcoin.data.users.UsersRepository
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.Operations
-import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
@@ -32,7 +31,7 @@ class InMemoryOperationRepository(
             amount = operation.amount,
             date = Date.from(Instant.now())
         )
-        operations.value += newOperation
+        operations.update { listOf(newOperation) + it }
         return Result.success(newOperation)
     }
 
@@ -41,12 +40,9 @@ class InMemoryOperationRepository(
         return Result.success(operations.value.filter { it.user.id == userId })
     }
 
-    override fun observeOperations(): Flow<Operations> = operations
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun fetchOperations(currentFetched: Int, toFetch: Int): Result<Unit> {
+    override suspend fun getOperations(page: Int, size: Int): Result<List<Operation>> {
         delay(2000)
-        return Result.success(Unit)
+        return Result.success(operations.value.drop(page * size).take(size))
     }
 
 }

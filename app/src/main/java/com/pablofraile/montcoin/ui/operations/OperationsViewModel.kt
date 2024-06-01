@@ -1,46 +1,54 @@
 package com.pablofraile.montcoin.ui.operations
 
-import androidx.compose.foundation.shape.CornerSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.operations.OperationsRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import com.pablofraile.montcoin.model.Operation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+const val BATCHING = 20
+
 class OperationsViewModel(val operationsRepo: OperationsRepository) : ViewModel() {
-    private var currentFetched = INIT_FETCHED
+
+    private val _fetchedPages = MutableStateFlow(0)
+    private val _op: MutableStateFlow<List<Operation>> = MutableStateFlow(emptyList())
+    val operations = _op
+
+    private val _errorMessages = MutableStateFlow<String?>(null)
+    val errorMessages = _errorMessages
+
+    private val _initialLoading = MutableStateFlow(true)
+    val initialLoading = _initialLoading
+
+    suspend fun fetchFirstPage() {
+        initialLoading.update { true }
+        reload()
+        initialLoading.update { false }
+    }
+
+    suspend fun reload() {
+        _fetchedPages.update { 0 }
+        fetchNextPage()
+    }
+
+    suspend fun fetchNextPage() {
+        val page = _fetchedPages.value
+        val newOperations = operationsRepo.getOperations(page = page, size = BATCHING)
+        if (newOperations.isSuccess) {
+            _fetchedPages.update { it + 1 }
+            if (page == 0) _op.update { newOperations.getOrNull()!! }
+            else _op.update { it + newOperations.getOrNull()!! }
+        } else _errorMessages.update { newOperations.exceptionOrNull()?.message }
+    }
 
     init {
-        loadMoreOperations()
-    }
-
-    val operations = operationsRepo.observeOperations()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = emptyList())
-
-    suspend fun refreshOperations() {
-        currentFetched = 0
-        loadMoreOperationsAsync()
-    }
-
-    fun loadMoreOperations() {
-        val scope = CoroutineScope(Dispatchers.IO)
-        scope.launch {
-            loadMoreOperationsAsync()
+        viewModelScope.launch {
+            fetchFirstPage()
         }
     }
-
-    private suspend fun loadMoreOperationsAsync() {
-        operationsRepo.fetchOperations(
-            currentFetched = currentFetched,
-            toFetch = currentFetched + FETCH_BATCHING
-        )
-        currentFetched += FETCH_BATCHING
-    }
-
 
     companion object {
         fun provideFactory(operationsRepo: OperationsRepository): ViewModelProvider.Factory =
@@ -50,9 +58,6 @@ class OperationsViewModel(val operationsRepo: OperationsRepository) : ViewModel(
                     return OperationsViewModel(operationsRepo = operationsRepo) as T
                 }
             }
-
-        const val INIT_FETCHED = 0
-        const val FETCH_BATCHING = 10
     }
 
 }

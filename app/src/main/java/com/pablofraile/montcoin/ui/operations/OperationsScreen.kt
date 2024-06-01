@@ -2,22 +2,30 @@ package com.pablofraile.montcoin.ui.operations
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoneyOff
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,15 +38,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pablofraile.montcoin.R
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
@@ -47,6 +51,9 @@ import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.InfiniteScroll
 import com.pablofraile.montcoin.ui.theme.LoseMoneyColor
 import com.pablofraile.montcoin.ui.theme.WinMoneyColor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
@@ -57,9 +64,12 @@ import java.util.UUID
 fun OperationsScreen(
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
     operations: Operations,
     loadMoreItems: () -> Unit,
     onRefresh: suspend () -> Unit,
+    onReload: suspend () -> Unit,
 ) {
     val context = LocalContext.current
     Scaffold(
@@ -96,13 +106,71 @@ fun OperationsScreen(
             )
         }
     ) { innerPadding ->
-        Operations(
-            operations = operations,
-            onRefresh = onRefresh,
-            loadMoreItems = loadMoreItems,
-            snackbarHostState = snackbarHostState,
-            modifier = Modifier.padding(innerPadding)
-        )
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.width(64.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+        } else {
+            if (errorMessage != null) {
+                val coroutineScope = CoroutineScope(Dispatchers.IO)
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Column {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            text = errorMessage
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .clickable {
+                                    coroutineScope.launch {
+                                        onRefresh()
+                                    }
+                                },
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clip(
+                                        ButtonDefaults.shape
+                                    )
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                            ) {
+                                Text("Try again", modifier = Modifier.padding(10.dp))
+                                Icon(
+                                    imageVector = Icons.Filled.Replay,
+                                    contentDescription = "reload",
+                                    modifier = Modifier.padding(10.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                Operations(
+                    operations = operations,
+                    onRefresh = onRefresh,
+                    onReload = onReload,
+                    loadMoreItems = loadMoreItems,
+                    snackbarHostState = snackbarHostState,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+        }
     }
 }
 
@@ -110,25 +178,64 @@ fun OperationsScreen(
 fun Operations(
     operations: List<Operation>,
     onRefresh: suspend () -> Unit,
+    onReload: suspend () -> Unit,
     loadMoreItems: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    InfiniteScroll(
-        elements = operations,
-        itemRender = { operation, modifier ->
-            OperationItem(
-                operation = operation,
-                modifier = Modifier.padding(8.dp)
-            )
-        },
-        onRefresh = onRefresh,
-        loadMoreItems = loadMoreItems,
-        refreshedMessage = "Loaded last Operations!",
-        snackbarHostState = snackbarHostState,
-        modifier = modifier,
-        cachingKey = { it.id }
-    )
+    if (operations.isEmpty()) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("No operations found!")
+            Spacer(modifier = Modifier.height(10.dp))
+            val coroutineScope = CoroutineScope(Dispatchers.IO)
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .clickable {
+                        coroutineScope.launch {
+                            onReload()
+                        }
+                    },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(
+                            ButtonDefaults.shape
+                        )
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Text("Refresh", modifier = Modifier.padding(10.dp))
+                    Icon(
+                        imageVector = Icons.Filled.Replay,
+                        contentDescription = "reload",
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+        }
+    } else {
+        InfiniteScroll(
+            elements = operations,
+            itemRender = { operation, modifier ->
+                OperationItem(
+                    operation = operation,
+                    modifier = Modifier.padding(8.dp)
+                )
+            },
+            onRefresh = onRefresh,
+            loadMoreItems = loadMoreItems,
+            refreshedMessage = "Loaded last Operations!",
+            snackbarHostState = snackbarHostState,
+            modifier = modifier,
+            cachingKey = { it.id }
+        )
+    }
 }
 
 @Composable
@@ -140,7 +247,10 @@ fun OperationItem(operation: Operation, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(10.dp)
         ) {
             Column {
-                Text(text = "\uD83D\uDCB0 $amountValue Coins", fontSize = MaterialTheme.typography.headlineSmall.fontSize)
+                Text(
+                    text = "\uD83D\uDCB0 $amountValue Coins",
+                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "To: ${operation.user.name}"
@@ -155,57 +265,23 @@ fun OperationItem(operation: Operation, modifier: Modifier = Modifier) {
                 Image(
                     imageVector = Icons.Default.AttachMoney,
                     contentDescription = "Win Money",
-                    modifier = Modifier.size(24.dp).align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.CenterVertically),
                     colorFilter = ColorFilter.tint(WinMoneyColor)
                 )
             } else {
                 Image(
                     imageVector = Icons.Default.MoneyOff,
                     contentDescription = "Lose Money",
-                    modifier = Modifier.size(24.dp).align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.CenterVertically),
                     colorFilter = ColorFilter.tint(LoseMoneyColor)
                 )
             }
         }
     }
-//        Row(
-//            modifier = Modifier
-//                .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
-//                .animateContentSize(
-//                    animationSpec = tween(
-//                        durationMillis = 200,
-//                        delayMillis = 0,
-//                        easing = LinearEasing,
-//                    ),
-//                )
-//                .clip(MaterialTheme.shapes.medium)
-//                .fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Column(
-//                modifier = Modifier.weight(1f)
-//            ) {
-//                Text(
-//                    text = "User: ${operation.user.name}",
-//                    fontSize = 18.sp,
-//                    fontWeight = FontWeight.Bold
-//                )
-//
-//                Spacer(modifier = Modifier.height(4.dp))
-//
-//                Text(
-//                    text = "Date: ${operation.date}",
-//                    fontSize = 14.sp,
-//                    color = Color.Gray
-//                )
-//            }
-//            Text(
-//                text = operation.amount.toString(),
-//                fontSize = 20.sp,
-//                color = amountColor,
-//                fontWeight = FontWeight.Bold
-//            )
-//        }
 }
 
 @Preview(showBackground = true)
@@ -236,6 +312,8 @@ fun OperationsPreview() {
         snackbarHostState = SnackbarHostState(),
         loadMoreItems = {},
         onRefresh = {},
-        operations = operations
+//        errorMessage = "Error loading operations",
+        operations = emptyList(),
+        onReload = {}
     )
 }
