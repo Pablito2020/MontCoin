@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,7 +43,7 @@ fun AppDrawer(
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
         Text(
-            text = "Actions",
+            text = "Cards",
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
             fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
             color = MaterialTheme.colorScheme.onSurface
@@ -63,7 +64,7 @@ fun AppDrawer(
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
         Text(
-            text = "Watch",
+            text = "Data",
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
             fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
             color = MaterialTheme.colorScheme.onSurface
@@ -80,6 +81,21 @@ fun AppDrawer(
             icon = { Icon(Icons.AutoMirrored.Filled.FeaturedPlayList, null) },
             selected = currentRoute == MontCoinDestinations.OPERATIONS_ROUTE,
             onClick = { navigateToTransactions(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+
+        Text(
+            text = "Sets",
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
+            fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        NavigationDrawerItem(
+            label = { Text("Delete and Send") },
+            icon = { Icon(Icons.Filled.Euro, null) },
+            selected = currentRoute == MontCoinDestinations.LIST_USERS,
+            onClick = { navigateToListUsers(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
