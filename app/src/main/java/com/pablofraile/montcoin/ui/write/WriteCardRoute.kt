@@ -20,17 +20,20 @@ fun WriteCardRoute(
     val users by model.users.collectAsStateWithLifecycle()
     val selectedUser by model.selectedUser.collectAsStateWithLifecycle()
     val isRefreshing by model.isRefreshing.collectAsStateWithLifecycle()
+    val isWriting by model.isWriting.collectAsStateWithLifecycle()
     WriteCardScreen(
-        writeResult = writeResult,
+        errorMessage = errorMessage,
+        openDrawer = openDrawer,
         users = users,
         onSelectedUser = model::selectUser,
-        openDrawer = openDrawer,
-        errorMessage = errorMessage,
         onOkError = model::clearErrorMessage,
         snackbarHostState = snackbarHostState,
         selectedUser=selectedUser,
         onRefresh = model::updateUsers,
         isRefreshing = isRefreshing,
-        onClearUser=model::clearSelectedUser,
+        writing = isWriting,
+        writeResult = writeResult,
+        executeWrite = model::startWriting,
+        onCancelWrite = model::stopWriting
     )
 }

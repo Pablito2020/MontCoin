@@ -94,7 +94,7 @@ fun AppDrawer(
         NavigationDrawerItem(
             label = { Text("Delete and Send") },
             icon = { Icon(Icons.Filled.Euro, null) },
-            selected = currentRoute == MontCoinDestinations.LIST_USERS,
+            selected = false,
             onClick = { navigateToListUsers(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )

@@ -1,5 +1,6 @@
 package com.pablofraile.montcoin.ui.write
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,17 +22,18 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
-import com.pablofraile.montcoin.ui.common.Autocomplete
 import com.pablofraile.montcoin.ui.common.SearchingAnimation
 import com.pablofraile.montcoin.ui.common.UserChip
+import com.pablofraile.montcoin.ui.common.UserSelectable
 import com.pablofraile.montcoin.ui.operation.ErrorOperationDialog
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -39,19 +42,20 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteCardScreen(
+    writing: Boolean,
     writeResult: Pair<User, Date>? = null,
     users: List<User> = emptyList(),
     selectedUser: User? = null,
     errorMessage: String? = null,
-    onSelectedUser: (User) -> Unit = {},
-    onRefresh: () -> Unit = {},
     isRefreshing: Boolean = false,
+    onSelectedUser: (User) -> Unit = {},
+    executeWrite: () -> Unit = {},
+    onRefresh: () -> Unit = {},
     onOkError: () -> Unit = {},
-    onClearUser: () -> Unit = {},
+    onCancelWrite: () -> Unit = {},
     openDrawer: () -> Unit = {},
     snackbarHostState: SnackbarHostState = SnackbarHostState()
 ) {
-    val context = LocalContext.current
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
@@ -68,6 +72,7 @@ fun WriteCardScreen(
                     }
                 },
                 actions = {
+                    if (writing) return@CenterAlignedTopAppBar
                     IconButton(
                         onClick = onRefresh
                     ) {
@@ -91,13 +96,15 @@ fun WriteCardScreen(
     ) { innerPadding ->
         val modifier = Modifier.padding(innerPadding)
         WriteCardContent(
+            writing = writing,
+            executeWrite = executeWrite,
             writeResult = writeResult,
             users = users,
             onSelectedUser = onSelectedUser,
             selectedUser = selectedUser,
             errorMessage = errorMessage,
             onOkError = onOkError,
-            onClearUser = onClearUser,
+            onCancelWrite = onCancelWrite,
             snackbarHostState = snackbarHostState,
             modifier = modifier
         )
@@ -122,12 +129,14 @@ fun ShowSnackBar(
 
 @Composable
 fun WriteCardContent(
+    writing: Boolean,
+    executeWrite: () -> Unit,
     writeResult: Pair<User, Date>?,
     errorMessage: String?,
     users: List<User>,
     selectedUser: User?,
     onSelectedUser: (User) -> Unit,
-    onClearUser: () -> Unit,
+    onCancelWrite: () -> Unit,
     onOkError: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
@@ -139,21 +148,47 @@ fun WriteCardContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        if (selectedUser == null) {
-            Autocomplete(
-                label = "Search User",
-                items = users,
-                modifier = modifier,
-                onItemSelected = onSelectedUser,
-                toString = { it.name })
-        } else {
+        if (writing) {
             Text("Searching card to write", style = MaterialTheme.typography.bodyLarge)
-            UserChip(
-                userName = selectedUser.name,
-                onClose = onClearUser,
-                modifier = Modifier.padding(15.dp)
-            )
+            selectedUser?.name?.let {
+                UserChip(
+                    userName = it,
+                    onClose = onCancelWrite,
+                    modifier = Modifier.padding(15.dp)
+                )
+            }
             SearchingAnimation()
+        } else {
+            val userSelectable = users.map {
+                UserSelectable(it, isSelected = it.id == selectedUser?.id)
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                UserSelectable(
+                    users = userSelectable,
+                    onUserClicked = onSelectedUser,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .weight(0.8f)
+                )
+                val animatedAlpha by animateFloatAsState(
+                    targetValue = if (selectedUser != null) 1.0f else 0f,
+                    label = "alpha"
+                )
+                Button(
+                    onClick = executeWrite,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .graphicsLayer {
+                            alpha = animatedAlpha
+                        }
+
+                ) {
+                    Text("Write to card")
+                }
+            }
         }
     }
     if (writeResult != null)
@@ -169,6 +204,12 @@ fun WriteCardContent(
 @Composable
 fun WriteCardPreview() {
     WriteCardScreen(
+        writing = false,
+        users = listOf(
+            User(Id("1"), "Pablo", Amount(1000)),
+            User(Id("2"), "Juan", Amount(2000)),
+            User(Id("3"), "Pedro", Amount(3000)),
+        ),
         selectedUser = User(Id("1"), "Pablo", Amount(1000)),
     )
 }

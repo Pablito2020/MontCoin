@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material.icons.sharp.SupervisedUserCircle
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
@@ -36,9 +39,10 @@ data class UserSelectable(val user: User, val isSelected: Boolean)
 fun UserSelectable(
     users: List<UserSelectable>,
     onUserClicked: (User) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .padding(top = 2.dp, start = 2.dp)
             .fillMaxHeight()
     ) {
@@ -73,8 +77,9 @@ fun UserSelectableItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Image(
-                imageVector = Icons.Sharp.SupervisedUserCircle,
+            Icon(
+                imageVector = Icons.Default.SupervisedUserCircle,
+                tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = null,
                 modifier = Modifier.size(58.dp)
             )
@@ -94,6 +99,7 @@ fun UserSelectableItem(
 
 
 @Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 fun UsersScreenPreview() {
     UserSelectable(

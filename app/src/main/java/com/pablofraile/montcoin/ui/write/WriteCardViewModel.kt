@@ -10,6 +10,7 @@ import com.pablofraile.montcoin.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,12 +26,18 @@ class WriteCardViewModel(
     private val _selectedUser = MutableStateFlow<User?>(null)
     val selectedUser = _selectedUser
     fun selectUser(user: User) {
-        _selectedUser.update { user }
+        if (_selectedUser.value == user) _selectedUser.update { null }
+        else _selectedUser.update { user }
     }
 
-    fun clearSelectedUser() {
-        _selectedUser.update { null }
+    private val _isWriting = MutableStateFlow(false)
+    fun startWriting() {
+        _isWriting.update { true }
     }
+    fun stopWriting() {
+        _isWriting.update { false }
+    }
+    val isWriting = _isWriting
 
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users = _users
@@ -52,16 +59,15 @@ class WriteCardViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing
 
-    val writeResult = selectedUser.transform {
-        if (it != null) {
-            val result = cardRepository.writeToCard(it)
+    val writeResult = combine(selectedUser, isWriting, ::Pair).transform {(user, isWriting) ->
+        if (user != null && isWriting) {
+            val result = cardRepository.writeToCard(user)
+            _isWriting.update { false }
             if (result.isFailure) {
                 errorMessage.emit(
                     result.exceptionOrNull()!!.message ?: "Unknown Error"
                 )
-                _selectedUser.update { null }
             } else {
-                _selectedUser.update { null }
                 emit(Pair(result.getOrThrow(), Date.from(Instant.now())))
             }
         }
