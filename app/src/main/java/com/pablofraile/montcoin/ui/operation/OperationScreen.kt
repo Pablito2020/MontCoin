@@ -237,7 +237,7 @@ fun AmountTextBox(
     amount: String,
     isValid: Boolean,
     onAmountChange: (String) -> Unit,
-    onDone: () -> Unit
+    onDone: () -> Unit = {}
 ) {
     val keyboardConfig = KeyboardOptions(
         keyboardType = KeyboardType.Number,

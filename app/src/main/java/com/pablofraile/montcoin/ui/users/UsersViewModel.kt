@@ -65,12 +65,9 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
     suspend fun fetchUsers() {
         _isLoadingUsers.update { true }
         _errors.update {null}
-        Log.e("UsersViewModel", "Fetching...")
         val users = usersRepository.getUsers()
-        Log.e("UsersViewModel", "Loaded Users")
         if (users.isSuccess) _users.emit(users.getOrThrow())
         else _errors.emit("Error fetching users: ${users.exceptionOrNull()?.message}")
-        Log.e("UsersViewModel", "Finished fetching....")
         _isLoadingUsers.update { false }
     }
 

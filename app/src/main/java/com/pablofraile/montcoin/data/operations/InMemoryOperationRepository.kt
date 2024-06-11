@@ -3,6 +3,8 @@ package com.pablofraile.montcoin.data.operations
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.pablofraile.montcoin.data.users.UsersRepository
+import com.pablofraile.montcoin.model.BulkOperation
+import com.pablofraile.montcoin.model.BulkOperationResult
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.Operations
@@ -33,6 +35,12 @@ class InMemoryOperationRepository(
         )
         operations.update { listOf(newOperation) + it }
         return Result.success(newOperation)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun execute(operations: BulkOperation): Result<BulkOperationResult> {
+        delay(2000)
+        return Result.success(BulkOperationResult(operations.users, operations.amount, Date.from(Instant.now())))
     }
 
     override suspend fun getOperationsFor(userId: Id): Result<List<Operation>> {

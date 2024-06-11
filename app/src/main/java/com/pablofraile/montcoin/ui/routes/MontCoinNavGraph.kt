@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import com.pablofraile.montcoin.data.AppContainer
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.ui.bulk.BulkOperationRoute
+import com.pablofraile.montcoin.ui.bulk.BulkOperationViewModel
 import com.pablofraile.montcoin.ui.operation.OperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationViewModel
 import com.pablofraile.montcoin.ui.operations.OperationsRoute
@@ -90,7 +91,14 @@ fun MontCoinNavGraph(
             )
         }
         composable(route = MontCoinDestinations.BULK_OPERATION) { navBackStackEntry ->
+            val bulkOperationViewModel: BulkOperationViewModel = viewModel(
+                factory = BulkOperationViewModel.provideFactory(
+                    usersRepository = container.usersRepository,
+                    operationsRepository = container.operationsRepository
+                )
+            )
             BulkOperationRoute(
+                viewModel = bulkOperationViewModel,
                 openDrawer = openDrawer,
             )
         }
