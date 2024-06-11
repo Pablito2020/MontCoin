@@ -52,7 +52,7 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
     private val _errors = MutableStateFlow<String?>(null)
     val errors = _errors
 
-    private val _isLoadingUsers = MutableStateFlow(true)
+    private val _isLoadingUsers = MutableStateFlow(false)
     val isLoadingUsers: StateFlow<Boolean> = _isLoadingUsers
 
     init {
@@ -66,9 +66,9 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
         _isLoadingUsers.update { true }
         _errors.update {null}
         val users = usersRepository.getUsers()
+        _isLoadingUsers.update { false }
         if (users.isSuccess) _users.emit(users.getOrThrow())
         else _errors.emit("Error fetching users: ${users.exceptionOrNull()?.message}")
-        _isLoadingUsers.update { false }
     }
 
     companion object {

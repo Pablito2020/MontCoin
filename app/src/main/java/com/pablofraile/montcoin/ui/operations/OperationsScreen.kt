@@ -313,7 +313,7 @@ fun OperationsPreview() {
         loadMoreItems = {},
         onRefresh = {},
 //        errorMessage = "Error loading operations",
-        operations = emptyList(),
+        operations = operations,
         onReload = {}
     )
 }

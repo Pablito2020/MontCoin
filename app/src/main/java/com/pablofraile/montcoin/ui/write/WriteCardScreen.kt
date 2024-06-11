@@ -3,7 +3,9 @@ package com.pablofraile.montcoin.ui.write
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -166,11 +168,12 @@ fun WriteCardContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
+                Text("Select the user you want to write to the card:", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(16.dp))
                 UserSelectable(
                     users = userSelectable,
                     onUserClicked = onSelectedUser,
                     modifier = Modifier
-                        .padding(16.dp)
                         .weight(0.8f)
                 )
                 val animatedAlpha by animateFloatAsState(

@@ -2,7 +2,6 @@ package com.pablofraile.montcoin.ui.users
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -44,9 +43,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -54,7 +52,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.pablofraile.montcoin.R
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.InfiniteScroll
 import com.pablofraile.montcoin.ui.common.Menu
@@ -94,6 +91,7 @@ fun UsersScreen(
                     }
                 },
                 actions = {
+                    if (users.isEmpty()) return@CenterAlignedTopAppBar
                     ListOrderDropDown(
                         currentOrder = currentOrder,
                         onChangeOrder = onChangeOrder,
@@ -174,49 +172,64 @@ fun UsersContents(
             }
         } else {
             if (errorMessage != null) {
-                val coroutineScope = CoroutineScope(Dispatchers.IO)
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Column {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text = errorMessage
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Box(
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .align(Alignment.CenterHorizontally)
-                                .clickable {
-                                    coroutineScope.launch {
-                                        onRefresh()
-                                    }
-                                },
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .clip(
-                                        ButtonDefaults.shape
-                                    )
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                            ) {
-                                Text("Try again", modifier = Modifier.padding(10.dp))
-                                Icon(
-                                    imageVector = Icons.Filled.Replay,
-                                    contentDescription = "reload",
-                                    modifier = Modifier.padding(10.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                RefreshMessage(
+                    message = errorMessage,
+                    buttonMessage = "Try Again",
+                    onRefresh = onRefresh,
+                    buttonColor = MaterialTheme.colorScheme.errorContainer
+                )
             } else {
                 ListUsers(users, onClick, onRefresh, snackbarHostState)
+            }
+        }
+    }
+}
+
+@Composable
+fun RefreshMessage(
+    message: String,
+    buttonMessage: String,
+    onRefresh: suspend () -> Unit,
+    buttonColor: Color = MaterialTheme.colorScheme.errorContainer,
+) {
+    val coroutineScope = CoroutineScope(Dispatchers.IO)
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Column {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = message
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .clickable {
+                        coroutineScope.launch {
+                            onRefresh()
+                        }
+                    },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(
+                            ButtonDefaults.shape
+                        )
+                        .background(buttonColor)
+                ) {
+                    Text(buttonMessage, modifier = Modifier.padding(10.dp))
+                    Icon(
+                        imageVector = Icons.Filled.Replay,
+                        contentDescription = "reload",
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
             }
         }
     }
@@ -230,6 +243,14 @@ private fun ListUsers(
     snackbarHostState: SnackbarHostState,
 ) {
     Scaffold { inner ->
+        if (users.isEmpty()) {
+            RefreshMessage(
+                message = "No users found!",
+                buttonMessage = "Refresh Page",
+                onRefresh = onRefresh,
+                buttonColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        }
         InfiniteScroll(
             elements = users,
             itemRender = @Composable { user, m ->
@@ -282,13 +303,12 @@ fun UserItem(user: User, onClick: (User) -> Unit) {
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.user),
+            Icon(
+                imageVector = Icons.Filled.SupervisedUserCircle,
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape),
-                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -346,7 +366,7 @@ fun UserItem(user: User, onClick: (User) -> Unit) {
 fun UsersScreenPreview() {
     UsersContents(
         users = emptyList(),
-        errorMessage = "Couldn't fetch from API",
+        errorMessage = null,
         isLoading = false
     )
 }

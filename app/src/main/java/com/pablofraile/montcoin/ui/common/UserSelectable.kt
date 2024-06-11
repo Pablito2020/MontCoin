@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material.icons.sharp.SupervisedUserCircle
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -47,7 +48,7 @@ fun UserSelectable(
             .fillMaxHeight()
     ) {
         items(users, key = { it.user.id.value }) { element ->
-            Box(modifier = Modifier.animateItemPlacement()) {
+            Card(modifier = Modifier.animateItemPlacement().padding(3.dp)) {
                 UserSelectableItem(
                     user = element.user,
                     isSelected = element.isSelected,
@@ -65,7 +66,7 @@ fun UserSelectableItem(
     onUserClicked: (User) -> Unit,
 ) {
     val color =
-        if (isSelected) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface
+        if (isSelected) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surfaceVariant
     Surface(
         onClick = { onUserClicked(user) },
         color = color
