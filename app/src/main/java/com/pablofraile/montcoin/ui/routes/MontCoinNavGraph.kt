@@ -100,6 +100,7 @@ fun MontCoinNavGraph(
             BulkOperationRoute(
                 viewModel = bulkOperationViewModel,
                 openDrawer = openDrawer,
+                onClose = navigationActions.navigateToOperation,
             )
         }
     }

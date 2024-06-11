@@ -1,7 +1,6 @@
 package com.pablofraile.montcoin.ui.bulk
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,11 +12,16 @@ import com.pablofraile.montcoin.model.isValidAmount
 fun BulkOperationRoute(
     viewModel: BulkOperationViewModel,
     openDrawer: () -> Unit,
+    onClose: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val amount by viewModel.amount.collectAsState()
     val users by viewModel.users.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val correctOperation by viewModel.correctOperation.collectAsState()
+    val error by viewModel.errors.collectAsState()
     BulkOperationScreen(
+        isLoading = isLoading,
         amount = amount,
         isValidAmount = amount.isValidAmount(),
         users = users,
@@ -26,6 +30,11 @@ fun BulkOperationRoute(
         toggleAllUsers = viewModel::toggleAllUsers,
         onAmountChange = viewModel::changeAmount,
         openDrawer = openDrawer,
+        result = correctOperation,
+        onResultShowed = viewModel::cleanCorrectOperation,
+        error = error,
+        onRetryError = viewModel::cleanErrors,
+        onCloseError = onClose,
         snackbarHostState = snackbarHostState
     )
 }

@@ -1,12 +1,12 @@
 package com.pablofraile.montcoin.ui.bulk
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.pablofraile.montcoin.data.operations.OperationsRepository
 import com.pablofraile.montcoin.data.users.UsersRepository
 import com.pablofraile.montcoin.model.BulkOperation
+import com.pablofraile.montcoin.model.BulkOperationResult
 import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.toAmount
 import com.pablofraile.montcoin.ui.common.UserSelectable
@@ -30,6 +30,16 @@ class BulkOperationViewModel(
 
     private val _errors = MutableStateFlow<String?>(null)
     val errors = _errors
+    fun cleanErrors() {
+        _errors.update { null }
+        fetchUsers()
+    }
+
+    private val _correctOperation = MutableStateFlow<BulkOperationResult?>(null)
+    val correctOperation = _correctOperation
+    fun cleanCorrectOperation() {
+        _correctOperation.update { null }
+    }
 
     private val _amount = MutableStateFlow("")
     val amount: StateFlow<String> = _amount
@@ -38,12 +48,16 @@ class BulkOperationViewModel(
     }
 
     init {
+        fetchUsers()
+    }
+
+    private fun fetchUsers() {
         viewModelScope.launch {
-            fetchUsers()
+            fetchUsersAsync()
         }
     }
 
-    private suspend fun fetchUsers() {
+    private suspend fun fetchUsersAsync() {
         _isLoading.update { true }
         _errors.update { null }
         val users = usersRepository.getUsers()
@@ -98,7 +112,7 @@ class BulkOperationViewModel(
         if (result.isFailure) {
             _errors.emit(result.exceptionOrNull()?.message)
         } else {
-            Log.e("BulkOperationViewModel", "Bulk operation executed: $result")
+            _correctOperation.emit(result.getOrThrow())
         }
     }
 
