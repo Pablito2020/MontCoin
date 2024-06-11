@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pablofraile.montcoin.data.AppContainer
 import com.pablofraile.montcoin.model.Id
+import com.pablofraile.montcoin.ui.bulk.BulkOperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationRoute
 import com.pablofraile.montcoin.ui.operation.OperationViewModel
 import com.pablofraile.montcoin.ui.operations.OperationsRoute
@@ -86,6 +87,11 @@ fun MontCoinNavGraph(
             UserRoute(
                 model = userViewModel,
                 onGoBack = navigationActions.navigateBack,
+            )
+        }
+        composable(route = MontCoinDestinations.BULK_OPERATION) { navBackStackEntry ->
+            BulkOperationRoute(
+                openDrawer = openDrawer,
             )
         }
     }

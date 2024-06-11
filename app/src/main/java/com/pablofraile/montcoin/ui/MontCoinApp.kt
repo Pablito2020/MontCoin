@@ -43,6 +43,7 @@ fun MontCoinApp(container: AppContainer) {
                     navigateToTransactions = navigationActions.navigateToOperations,
                     navigateToWriteCard = navigationActions.navigateToWriteCard,
                     navigateToListUsers = navigationActions.navigateToListUsers,
+                    navigateToBulkOperation = navigationActions.navigateToBulkOperation,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
             },

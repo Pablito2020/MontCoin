@@ -34,6 +34,7 @@ fun AppDrawer(
     navigateToTransactions: () -> Unit,
     navigateToWriteCard: () -> Unit,
     navigateToListUsers: () -> Unit,
+    navigateToBulkOperation: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -86,16 +87,16 @@ fun AppDrawer(
         HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
 
         Text(
-            text = "Sets",
+            text = "Bulk",
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
             fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
             color = MaterialTheme.colorScheme.onSurface
         )
         NavigationDrawerItem(
-            label = { Text("Delete and Send") },
+            label = { Text("Operation") },
             icon = { Icon(Icons.Filled.Euro, null) },
-            selected = false,
-            onClick = { navigateToListUsers(); closeDrawer() },
+            selected = currentRoute == MontCoinDestinations.BULK_OPERATION,
+            onClick = { navigateToBulkOperation(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
@@ -126,6 +127,7 @@ fun PreviewAppDrawer() {
             navigateToTransactions = {},
             navigateToWriteCard = {},
             navigateToListUsers = {},
+            navigateToBulkOperation = {},
             closeDrawer = {},
         )
     }

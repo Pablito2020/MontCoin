@@ -14,6 +14,7 @@ object MontCoinDestinations {
     const val OPERATIONS_ROUTE = "operations"
     const val WRITE_CARD = "write_card"
     const val LIST_USERS = "list_users"
+    const val BULK_OPERATION = "bulk_operation"
 }
 
 /**
@@ -64,6 +65,15 @@ class MontCoinNavigationActions(navController: NavHostController) {
     }
     val navigateToUser: (user: User) -> Unit = { user ->
         navController.navigate("${MontCoinDestinations.USER_ROUTE}/${user.id.value}") {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToBulkOperation: () -> Unit = {
+        navController.navigate(MontCoinDestinations.BULK_OPERATION) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
             launchSingleTop = true
             restoreState = true
         }
