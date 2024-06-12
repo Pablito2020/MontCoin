@@ -7,8 +7,7 @@ data class HourOperationsStats(
     val positiveAmount: Amount,
     val negativeAmount: Amount,
     val hour: Int
-) {}
-
+)
 
 data class Operation(val id: UUID, val user: User, val amount: Amount, val date: Date)
 

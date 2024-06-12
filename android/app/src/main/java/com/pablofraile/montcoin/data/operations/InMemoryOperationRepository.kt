@@ -75,7 +75,7 @@ class InMemoryOperationRepository(
                 negativeAmount = operations.filter { operation -> operation.amount.value < 0 }
                     .map { operation -> -(operation.amount.value) }
                     .reduceOrNull { acc, amount -> acc + amount }?.let { Amount(it) } ?: Amount(0),
-                hour = ((now.time - operations.first().date.time) / 60).toInt()
+                hour = ((now.time - operations.first().date.time) / (60 * 1000)).toInt()
             )
         }
         return Result.success(stats)

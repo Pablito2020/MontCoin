@@ -28,8 +28,8 @@ class IncomeChartData(
 }
 
 fun List<HourOperationsStats>.toChartData() = IncomeChartData(
-    income = this.map { Pair(it.positiveAmount.value, it.hour) },
-    expenses = this.map { Pair(it.negativeAmount.value, it.hour) }
+    income = this.map { Pair(it.positiveAmount.value, -it.hour) },
+    expenses = this.map { Pair(it.negativeAmount.value, -it.hour) }
 )
 
 @Composable
