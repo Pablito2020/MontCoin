@@ -13,8 +13,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,16 +37,36 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Operation
+import com.pablofraile.montcoin.ui.common.Chart
+import com.pablofraile.montcoin.ui.common.IncomeChartData
 import com.pablofraile.montcoin.ui.common.SearchingAnimation
 import com.pablofraile.montcoin.ui.common.Sensor
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
+import com.patrykandpatrick.vico.compose.m2.common.rememberM2VicoTheme
+import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
+import com.patrykandpatrick.vico.core.cartesian.Scroll
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.LineCartesianLayerModel
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import kotlinx.coroutines.launch
+import java.util.Date
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +77,9 @@ fun OperationScreen(
     card: Sensor,
     operation: Operation?,
     errorMessage: String?,
+    modelProducer: CartesianChartModelProducer = remember { CartesianChartModelProducer.build() },
     closeError: () -> Unit,
+    onRefresh: () -> Unit = {},
     isDoingOperation: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -83,16 +106,12 @@ fun OperationScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            Toast.makeText(
-                                context,
-                                "Search is not yet implemented in this configuration",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            onRefresh()
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "search"
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refresh"
                         )
                     }
                 }
@@ -104,6 +123,7 @@ fun OperationScreen(
             amountIsValid = amountIsValid,
             card = card,
             operation = operation,
+            modelProducer = modelProducer,
             isDoingOperation = isDoingOperation,
             errorMessage = errorMessage,
             closeError = closeError,
@@ -125,6 +145,7 @@ fun OperationContent(
     amountIsValid: Boolean,
     card: Sensor,
     operation: Operation?,
+    modelProducer: CartesianChartModelProducer = remember { CartesianChartModelProducer.build() },
     errorMessage: String?,
     closeError: () -> Unit,
     isDoingOperation: Boolean,
@@ -141,6 +162,35 @@ fun OperationContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+        Chart(modelProducer)
+//        ProvideVicoTheme(rememberM3VicoTheme(lineCartesianLayerColors = listOf(
+//            Color.Green,
+//            Color.Red
+//        ))) {
+//            val scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End)
+//            val zoomState = rememberVicoZoomState()
+//            val modelProducer = remember { CartesianChartModelProducer.build () }
+//            LaunchedEffect(Unit) {
+//                modelProducer.tryRunTransaction {
+//                    val x=listOf(24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+//                    lineSeries {
+//                        series(x=x, y=x)
+//                        series(x=x, y=x.reversed())
+//                    }
+//                }
+//            }
+//            CartesianChartHost(
+//                chart=rememberCartesianChart(
+//                    rememberLineCartesianLayer(),
+//                    startAxis = rememberStartAxis(),
+//                    bottomAxis = rememberBottomAxis(),
+//                ),
+//                modelProducer = modelProducer,
+//                scrollState = scrollState,
+//                zoomState = zoomState,
+//            )
+//        }
+        HorizontalDivider(modifier=Modifier.padding(30.dp))
         ShowOperationUi(
             isDoingOperation = isDoingOperation,
             operation = operation,

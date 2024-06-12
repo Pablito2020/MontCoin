@@ -1,5 +1,6 @@
 package com.pablofraile.montcoin.ui.operation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,9 @@ import com.pablofraile.montcoin.model.WriteOperation
 import com.pablofraile.montcoin.model.isValidAmount
 import com.pablofraile.montcoin.model.toAmount
 import com.pablofraile.montcoin.ui.common.Sensor
+import com.pablofraile.montcoin.ui.common.toChartData
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,11 +27,16 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OperationViewModel(cardRepository: CardRepository, private val repo: OperationsRepository) :
     ViewModel() {
+
+    init {
+        onRefresh()
+    }
 
     private val _amount = MutableStateFlow("")
     val amount: StateFlow<String> = _amount
@@ -61,6 +70,31 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
     private val _errorMessage: MutableStateFlow<String?> = MutableStateFlow(null)
     val errorMessage: StateFlow<String?> = _errorMessage
     fun cleanError() = _errorMessage.update { null }
+
+    val modelProducer = CartesianChartModelProducer.build()
+    fun onRefresh() {
+        viewModelScope.launch {
+            val result = repo.getOperationsForToday()
+            if (result.isSuccess) modelProducer.runTransaction {
+                val resultStats = result.getOrThrow()
+                val data = resultStats.toChartData()
+                Log.e("OperationViewModel", "onRefresh: $data")
+                lineSeries {
+                    if (data.income.isEmpty()) {
+                        series(x = listOf(0), y = listOf(0))
+                    } else {
+                        series(x = data.income.map { it.second }, y = data.income.map { it.first })
+                    }
+                    if (data.expenses.isEmpty()) {
+                        series(x = listOf(0), y = listOf(0))
+                    } else {
+                        series(x = data.expenses.map { it.second }, y = data.expenses.map { it.first })
+                    }
+                }
+            }.await()
+            else _errorMessage.emit(result.exceptionOrNull()?.message)
+        }
+    }
 
     private val _isDoingOperation = MutableStateFlow(false)
     val isDoingOperation: StateFlow<Boolean> = _isDoingOperation

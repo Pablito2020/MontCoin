@@ -3,8 +3,10 @@ package com.pablofraile.montcoin.data.operations
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.pablofraile.montcoin.data.users.UsersRepository
+import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.BulkOperation
 import com.pablofraile.montcoin.model.BulkOperationResult
+import com.pablofraile.montcoin.model.HourOperationsStats
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
 import com.pablofraile.montcoin.model.Operations
@@ -18,7 +20,7 @@ import java.util.UUID
 
 class InMemoryOperationRepository(
     val userRepository: UsersRepository
-): OperationsRepository {
+) : OperationsRepository {
 
     val operations: MutableStateFlow<Operations> = MutableStateFlow(emptyList())
 
@@ -40,7 +42,13 @@ class InMemoryOperationRepository(
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun execute(operations: BulkOperation): Result<BulkOperationResult> {
         delay(2000)
-        return Result.success(BulkOperationResult(operations.users, operations.amount, Date.from(Instant.now())))
+        return Result.success(
+            BulkOperationResult(
+                operations.users,
+                operations.amount,
+                Date.from(Instant.now())
+            )
+        )
     }
 
     override suspend fun getOperationsFor(userId: Id): Result<List<Operation>> {
@@ -51,6 +59,26 @@ class InMemoryOperationRepository(
     override suspend fun getOperations(page: Int, size: Int): Result<List<Operation>> {
         delay(2000)
         return Result.success(operations.value.drop(page * size).take(size))
+    }
+
+    override suspend fun getOperationsForToday(): Result<List<HourOperationsStats>> {
+        delay(2000)
+        val now = Date()
+        val less24Hours = now.time - 24 * 60 * 60 * 1000
+        val operationsFromNow =
+            operations.value.filter { it.date.time >= less24Hours && it.date.time <= now.time }
+        val stats = operationsFromNow.groupBy { (it.date.time / 60).toInt() }.map { (hour, operations) ->
+            HourOperationsStats(
+                positiveAmount = (operations.filter { operation -> operation.amount.value > 0 }
+                    .map { operation -> operation.amount.value }
+                    .reduceOrNull { acc, amount -> acc + amount }?.let { Amount(it) } ?: Amount(0)),
+                negativeAmount = operations.filter { operation -> operation.amount.value < 0 }
+                    .map { operation -> -(operation.amount.value) }
+                    .reduceOrNull { acc, amount -> acc + amount }?.let { Amount(it) } ?: Amount(0),
+                hour = ((now.time - operations.first().date.time) / 60).toInt()
+            )
+        }
+        return Result.success(stats)
     }
 
 }
