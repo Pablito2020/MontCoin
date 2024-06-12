@@ -7,8 +7,8 @@ from routers import users
 app = FastAPI(
     title="MontCoin API",
     description="Create and read transactions for the MontCoin currency",
-    docs_url='/docs',
-    redoc_url='/redoc',
+    docs_url="/docs",
+    redoc_url="/redoc",
     version="0.1.0",
     swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"},
 )
@@ -29,5 +29,4 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return RedirectResponse(url='/docs')
-
+    return RedirectResponse(url="/docs")

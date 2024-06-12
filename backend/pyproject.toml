@@ -10,6 +10,7 @@ package-mode = false
 python = "^3.12"
 fastapi = "^0.111.0"
 PyJWT = {extras = ["crypto"], version = "^2.8.0"}
+ntplib = "^0.4.0"
 
 
 [build-system]

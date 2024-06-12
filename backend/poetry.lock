@@ -501,6 +501,17 @@ files = [
 ]
 
 [[package]]
+name = "ntplib"
+version = "0.4.0"
+description = "Python NTP library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ntplib-0.4.0-py2.py3-none-any.whl", hash = "sha256:8d27375329ed7ff38755f7b6d4658b28edc147cadf40338a63a0da8133469d60"},
+    {file = "ntplib-0.4.0.tar.gz", hash = "sha256:899d8fb5f8c2555213aea95efca02934c7343df6ace9d7628a5176b176906267"},
+]
+
+[[package]]
 name = "orjson"
 version = "3.10.4"
 description = "Fast, correct Python JSON library supporting dataclasses, datetimes, and numpy"
@@ -1210,4 +1221,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "097f94ca08a6cadffe3458fed1eb5c2fbf88e3568eaf5018f8ccac3feffa9bd7"
+content-hash = "20d405d8f4d684f30140e4ce4a4e37e3c75e37bd52c59ba9aa8e90d48c70d276"
