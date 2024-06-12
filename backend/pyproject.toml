@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "montcoin-backend"
+version = "0.1.0"
+description = "MontCoin endpoints for moving money!"
+authors = ["Pablo Fraile Alonso <pablo@pablofraile.net>"]
+license = "GPL"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+PyJWT = {extras = ["crypto"], version = "^2.8.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
