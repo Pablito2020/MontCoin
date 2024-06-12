@@ -56,9 +56,6 @@ import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.ui.common.InfiniteScroll
 import com.pablofraile.montcoin.ui.common.Menu
 import com.pablofraile.montcoin.ui.common.MenuAction
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +70,7 @@ fun UsersScreen(
     openDrawer: () -> Unit,
     onChangeOrder: (Order) -> Unit,
     onRefresh: suspend () -> Unit,
+    fetchUsersFirstTime: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     Scaffold(
@@ -110,6 +108,7 @@ fun UsersScreen(
             searchValue = search,
             onClick = onClick,
             onSearchChange = onSearchChange,
+            fetchUsersFirstTime = fetchUsersFirstTime,
             snackbarHostState = snackbarHostState,
             modifier = modifier
         )
@@ -125,6 +124,7 @@ fun UsersContents(
     searchValue: String = "",
     onClick: (User) -> Unit = {},
     onRefresh: suspend () -> Unit = {},
+    fetchUsersFirstTime: () -> Unit = {},
     onSearchChange: (String) -> Unit = {},
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
 ) {
@@ -175,11 +175,11 @@ fun UsersContents(
                 RefreshMessage(
                     message = errorMessage,
                     buttonMessage = "Try Again",
-                    onRefresh = onRefresh,
+                    onRefresh = fetchUsersFirstTime,
                     buttonColor = MaterialTheme.colorScheme.errorContainer
                 )
             } else {
-                ListUsers(users, onClick, onRefresh, snackbarHostState)
+                ListUsers(users, onClick, fetchUsersFirstTime, onRefresh, snackbarHostState)
             }
         }
     }
@@ -189,10 +189,9 @@ fun UsersContents(
 fun RefreshMessage(
     message: String,
     buttonMessage: String,
-    onRefresh: suspend () -> Unit,
+    onRefresh: () -> Unit,
     buttonColor: Color = MaterialTheme.colorScheme.errorContainer,
 ) {
-    val coroutineScope = CoroutineScope(Dispatchers.IO)
     Row(
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
@@ -209,11 +208,7 @@ fun RefreshMessage(
                 modifier = Modifier
                     .wrapContentWidth()
                     .align(Alignment.CenterHorizontally)
-                    .clickable {
-                        coroutineScope.launch {
-                            onRefresh()
-                        }
-                    },
+                    .clickable { onRefresh() },
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -239,6 +234,7 @@ fun RefreshMessage(
 private fun ListUsers(
     users: List<User>,
     onClick: (User) -> Unit,
+    fetchUsersFirstTime: () -> Unit,
     onRefresh: suspend () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -247,7 +243,7 @@ private fun ListUsers(
             RefreshMessage(
                 message = "No users found!",
                 buttonMessage = "Refresh Page",
-                onRefresh = onRefresh,
+                onRefresh = fetchUsersFirstTime,
                 buttonColor = MaterialTheme.colorScheme.secondaryContainer
             )
         }

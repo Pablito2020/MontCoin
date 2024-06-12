@@ -33,6 +33,7 @@ fun UsersRoute(
         onChangeOrder = model::setOrder,
         openDrawer = openDrawer,
         snackbarHostState = snackbarHostState,
-        isLoading = isLoadingUsers
+        isLoading = isLoadingUsers,
+        fetchUsersFirstTime = model::fetchUsersFirstTime
     )
 }

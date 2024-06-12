@@ -56,17 +56,21 @@ class UsersViewModel(private val usersRepository: UsersRepository) : ViewModel()
     val isLoadingUsers: StateFlow<Boolean> = _isLoadingUsers
 
     init {
+        fetchUsersFirstTime()
+    }
+
+    fun fetchUsersFirstTime() {
         val scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
+            _isLoadingUsers.update { true }
             fetchUsers()
+            _isLoadingUsers.update { false }
         }
     }
 
     suspend fun fetchUsers() {
-        _isLoadingUsers.update { true }
         _errors.update {null}
         val users = usersRepository.getUsers()
-        _isLoadingUsers.update { false }
         if (users.isSuccess) _users.emit(users.getOrThrow())
         else _errors.emit("Error fetching users: ${users.exceptionOrNull()?.message}")
     }
