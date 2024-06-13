@@ -1,94 +1,85 @@
-import functools
-import uuid
-from typing import Callable
+from typing import Union
 
-import requests
 import typer
-from rich import print
 from rich.progress import track
-from rich.table import Table
 
-from admin.security import add_signature
+from admin.config.config_file_builder import ConfigFileBuilder, DEFAULT_SIGNATURE_ALGORITHM, DEFAULT_NTP_SERVER
+from admin.config.csv_reader import read_csv
+from admin.user.repository import create_user, get_users, delete_user
+from admin.tui.tui import informative_command, print_users
+from admin.user.user import User, Id
 
 app = typer.Typer()
-
-URL = "http://localhost:8000"
-
-
-def pretty_print(func: Callable[..., requests.Response]):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if result.status_code == 200:
-            typer.echo(f"Operation: {func.__name__} done correctly! 🚀 ")
-        else:
-            typer.echo(f"Error in operation: {func.__name__}")
-            print(result)
-
-    return wrapper
-
-
-def send_post(uri: str, payload: dict) -> requests.Response:
-    to_send = add_signature(payload)
-    return requests.post(
-        f"{URL}{uri}",
-        json=to_send,
-    )
-
-
-def __create_user(username: str, id: str = str(uuid.uuid4()), amount: int = 0) -> requests.Response:
-    return send_post(uri=f"/user/{id}", payload={"name": username, "amount": amount})
 
 
 @app.command(
     name="create",
     help="Creates a user in the system",
 )
-@pretty_print
-def create_user(username: str, id: str = str(uuid.uuid4()), amount: int = 0):
-    return __create_user(id=id, username=username, amount=amount)
+@informative_command
+def create_user_command(
+    username: str, id: Union[str, None] = None, amount: Union[int, None] = None
+):
+    user = User.from_value(id=id, username=username, amount=amount)
+    return create_user(user)
 
 
 @app.command(
     name="create-all",
     help="Creates all the users from the csv file",
 )
-def create_all_users():
-    for user in track(range(100), description="Creating users"):
-        __create_user(username=f"User {user}")
+def create_all_users_command(csv_path: str):
+    for user in track(
+        read_csv(file_path=csv_path, map_fn=User.from_strings),
+        description="Creating users..",
+    ):
+        create_user(user)
 
 
 @app.command(
     name="list",
     help="List all the users in the system",
 )
-@pretty_print
-def list_all_users():
-    r = requests.get(f"{URL}/users")
-    table = Table(title="Users")
-    table.add_column("Id", justify="right", style="cyan", no_wrap=True)
-    table.add_column("Name", style="magenta")
-    table.add_column("Amount", justify="right", style="green")
-    for user in r.json()["users"]:
-        table.add_row(user["id"], user["name"], str(user["amount"]))
-    print(table)
-    return r
+def list_all_users_command():
+    users = get_users()
+    print_users(users)
 
 
 @app.command(
     name="delete",
     help="Delete a user from the system",
 )
-def list_all_users():
-    print("Hello World!")
+@informative_command
+def delete_user_command(id: str):
+    return delete_user(Id(id))
 
 
 @app.command(
-    name="delete all",
+    name="delete-all",
     help="Delete all the users from the system",
 )
-def list_all_users():
-    print("Hello World!")
+def delete_all_users_command():
+    users = get_users()
+    for user in track(
+        users,
+        description="Deleting users..",
+    ):
+        delete_user(user.id)
+
+
+@app.command(
+    name="configure",
+    help="Configure the settings of the application",
+)
+def config_command():
+    builder = ConfigFileBuilder()
+    (
+        builder.add_api_url(typer.prompt("Backend API URL"))
+        .add_user_private_key_path(typer.prompt("Your private key path"))
+        .add_signature_algorithm(typer.prompt("Signature algorithm", default=DEFAULT_SIGNATURE_ALGORITHM))
+        .add_ntp_server(typer.prompt("NTP server", default=DEFAULT_NTP_SERVER))
+        .write_file("config.ini")
+    )
 
 
 def main():
