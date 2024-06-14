@@ -1,6 +1,11 @@
+from contextlib import contextmanager
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
+
+import models
+from models.database import engine
 
 from routers import users
 
@@ -12,11 +17,8 @@ app = FastAPI(
     version="0.1.0",
     swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"},
 )
-
 app.router.redirect_slashes = False
-
 app.include_router(users.router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,6 +27,9 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+models.database.Base.metadata.create_all(engine)
+
 
 
 @app.get("/")

@@ -20,7 +20,8 @@ class UserAccountInformation(BaseModel):
 
 
 class User(Id, UserAccountInformation):
-    pass
+    operations_with_card: int = Field(default=0, example=0,
+                                      description="The number of operations the user has made with a card")
 
 
 class UserStats(User):
