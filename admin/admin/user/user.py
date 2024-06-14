@@ -26,13 +26,11 @@ class User:
 
     @staticmethod
     def from_strings(value: List[str]) -> "User":
-        if not value:
-            raise ValueError(f"Non specified values, cannot create user from: {value}")
-        if len(value) == 1:
-            return User(id=Id.generate(), username=value[0], amount=0)
-        if len(value) == 2:
-            return User(id=Id.generate(), username=value[0], amount=int(value[1]))
-        raise ValueError(f"Too many values, cannot create user from: {value}")
+        if len(value) != 2:
+            raise ValueError(f"Non valid values, cannot create user from: {value}")
+        username, amount = value
+        amount = amount or 0
+        return User(id=Id.generate(), username=username, amount=amount)
 
     @staticmethod
     def from_value(id: str | None, username: str, amount: int | None) -> "User":

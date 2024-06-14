@@ -18,7 +18,7 @@ app = typer.Typer()
 )
 @informative_command
 def create_user_command(
-    username: str, id: Union[str, None] = None, amount: Union[int, None] = None
+        username: str, id: Union[str, None] = None, amount: Union[int, None] = None
 ):
     user = User.from_value(id=id, username=username, amount=amount)
     return create_user(user)
@@ -30,10 +30,12 @@ def create_user_command(
 )
 def create_all_users_command(csv_path: str):
     for user in track(
-        read_csv(file_path=csv_path, map_fn=User.from_strings),
-        description="Creating users..",
+            read_csv(file_path=csv_path, map_fn=User.from_strings),
+            description="Creating users..",
     ):
-        create_user(user)
+        if create_user(user).status_code != 200:
+            typer.echo(f"Error creating user: {user}", color=typer.colors.RED)
+            return
 
 
 @app.command(
@@ -61,8 +63,8 @@ def delete_user_command(id: str):
 def delete_all_users_command():
     users = get_users()
     for user in track(
-        users,
-        description="Deleting users..",
+            users,
+            description="Deleting users..",
     ):
         delete_user(user.id)
 
