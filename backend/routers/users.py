@@ -2,11 +2,10 @@ from fastapi import APIRouter
 from starlette import status
 
 from models.database import db_dependency
-from schemas.users import Users, User, CreateUser, DeleteUser
+from models.users import get_all_users, get_user_by_id
 from schemas.security import CreateUserSigned, DeleteUserSigned
-from security.jwt import decode_user_token
-
-from models.users import Users as UserDb
+from schemas.users import Users, User
+from services.users import delete_user_signed, create_user_signed
 
 router = APIRouter(
     tags=["Users"],
@@ -28,14 +27,7 @@ router = APIRouter(
 )
 def get_users(db: db_dependency) -> Users:
     return Users(
-        users=[
-            User(
-                id=current_user.id,
-                name=current_user.name,
-                amount=current_user.amount,
-                operations_with_card=current_user.operations_with_card,
-            ) for current_user in db.query(UserDb).all()
-        ]
+        users=get_all_users(db)
     )
 
 
@@ -52,13 +44,10 @@ def get_users(db: db_dependency) -> Users:
     },
 )
 def get_user_id(user_id: str, db: db_dependency) -> User:
-    current_user = db.query(UserDb).filter_by(id=user_id).first()
-    return User(
-        id=current_user.id,
-        name=current_user.name,
-        amount=current_user.amount,
-        operations_with_card=current_user.operations_with_card,
-    )
+    user = get_user_by_id(user_id, db=db)
+    if not user:
+        return status.HTTP_404_NOT_FOUND
+    return user
 
 
 @router.post(
@@ -73,25 +62,8 @@ def get_user_id(user_id: str, db: db_dependency) -> User:
         },
     },
 )
-def create_user_from_id(user_id: str, create_user_signed: CreateUserSigned, db: db_dependency) -> User:
-    create_user = CreateUser(**decode_user_token(create_user_signed.signature))
-    assert (
-            CreateUser(**create_user_signed.dict()) == create_user
-    ), "The fields should be the same as the signed one"
-    new_user = UserDb(
-        id=user_id,
-        name=create_user.name,
-        amount=0,
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return User(
-        id=new_user.id,
-        name=new_user.name,
-        amount=new_user.amount,
-        operations_with_card=new_user.operations_with_card,
-    )
+def create_user_from_id(user_id: str, create_user_req_signed: CreateUserSigned, db: db_dependency) -> User:
+    return create_user_signed(user_id, create_user_req_signed, db)
 
 
 @router.delete(
@@ -107,18 +79,4 @@ def create_user_from_id(user_id: str, create_user_signed: CreateUserSigned, db: 
     },
 )
 def delete_user_from_id(user_id: str, request: DeleteUserSigned, db: db_dependency) -> User:
-    delete_user = DeleteUser(**decode_user_token(request.signature))
-    assert (
-            DeleteUser(**request.dict()) == delete_user
-    ), "The fields should be the same as the signed one"
-    user = db.query(UserDb).filter_by(id=user_id).first()
-    if not user:
-        return status.HTTP_404_NOT_FOUND
-    db.delete(user)
-    db.commit()
-    return User(
-        id=user.id,
-        name=user.name,
-        amount=user.amount,
-        operations_with_card=user.operations_with_card,
-    )
+    return delete_user_signed(user_id, request, db)
