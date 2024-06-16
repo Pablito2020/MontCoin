@@ -2,10 +2,10 @@ from fastapi import APIRouter
 from starlette import status
 
 from models.database import db_dependency
-from models.users import get_all_users, get_user_by_id
+from models.users import get_all_users
 from schemas.security import CreateUserSigned, DeleteUserSigned
 from schemas.users import Users, User
-from services.users import delete_user_signed, create_user_signed
+from services.users import delete_user_signed, create_user_signed, get_user_by_id
 
 router = APIRouter(
     tags=["Users"],
@@ -44,10 +44,7 @@ def get_users(db: db_dependency) -> Users:
     },
 )
 def get_user_id(user_id: str, db: db_dependency) -> User:
-    user = get_user_by_id(user_id, db=db)
-    if not user:
-        return status.HTTP_404_NOT_FOUND
-    return user
+    return get_user_by_id(user_id, db)
 
 
 @router.post(

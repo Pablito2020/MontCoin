@@ -45,7 +45,7 @@ def get_user_db_by_id(user_id: str, db: Session) -> _Users | None:
     return db.query(_Users).filter_by(id=user_id).first()
 
 
-def get_user_by_id(user_id: str, db: Session) -> User | None:
+def get_user_from_db_by_id(user_id: str, db: Session) -> User | None:
     db_user = get_user_db_by_id(user_id, db)
     return from_db_to_schema(db_user) if db_user else None
 

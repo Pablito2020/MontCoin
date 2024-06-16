@@ -7,7 +7,7 @@ from starlette.responses import RedirectResponse
 import models
 from models.database import engine
 
-from routers import users
+from routers import users, operations
 
 app = FastAPI(
     title="MontCoin API",
@@ -19,6 +19,7 @@ app = FastAPI(
 )
 app.router.redirect_slashes = False
 app.include_router(users.router)
+app.include_router(operations.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

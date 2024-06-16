@@ -2,10 +2,18 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 
-from models.users import get_user_by_id, get_user_by_name, delete_user as delete_user_, create_user as create_user_
+from models.users import get_user_from_db_by_id, get_user_by_name, delete_user as delete_user_, \
+    create_user as create_user_
 from schemas.security import DeleteUserSigned, CreateUserSigned
 from schemas.users import DeleteUser, User, CreateUser
 from security.signing import assert_signature_user
+
+
+def get_user_by_id(id: str, db: Session):
+    user = get_user_from_db_by_id(id, db=db)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user found with id: {id}")
+    return user
 
 
 def create_user_signed(id: str, create_user_req_signed: CreateUserSigned, db: Session):
@@ -30,7 +38,7 @@ def delete_user_signed(user_id: str, request: DeleteUserSigned, db: Session):
 
 
 def delete_user(user_id: str, db: Session) -> User:
-    user = get_user_by_id(user_id, db)
+    user = get_user_from_db_by_id(user_id, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user found with id: {user_id}")
     delete_user_(user=user, db=db)
