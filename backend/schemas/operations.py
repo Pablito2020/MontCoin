@@ -21,7 +21,7 @@ class Operation(Id, AmountOperation):
     )
 
 
-class WriteOperation(Id, AmountOperation):
+class WriteOperation(AmountOperation):
     should_fail_if_not_enough_money: bool = Field(
         default=False,
         description="If true, the operation will fail if the user does not have enough money",

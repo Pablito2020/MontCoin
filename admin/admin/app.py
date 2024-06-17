@@ -5,6 +5,8 @@ from rich.progress import track
 
 from admin.config.config_file_builder import ConfigFileBuilder, DEFAULT_SIGNATURE_ALGORITHM, DEFAULT_NTP_SERVER
 from admin.config.csv_reader import read_csv
+from admin.operation.operation import Operation
+from admin.operation.repository import create_operation_for
 from admin.user.repository import create_user, get_users, delete_user
 from admin.tui.tui import informative_command, print_users
 from admin.user.user import User, Id
@@ -67,6 +69,20 @@ def delete_all_users_command():
             description="Deleting users..",
     ):
         delete_user(user.id)
+
+
+@app.command(
+    name="operate",
+    help="Create an operation given a user id",
+)
+def operate_for(user_id: str, amount: int):
+    operation = Operation(
+        amount=amount,
+        should_fail_if_not_enough_money=True,
+        with_credit_card=False,
+    )
+    create_operation_for(user_id, operation)
+
 
 
 @app.command(

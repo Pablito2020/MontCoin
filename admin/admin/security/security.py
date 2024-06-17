@@ -1,15 +1,16 @@
 from functools import cache
+from typing import Type
 
 import jwt
 import ntplib
 
 from admin.config.config import Configuration
-from admin.config.security import SignAlgorithm, UsersPrivateKeyPath, NtpServer
+from admin.config.security import SignAlgorithm, UsersPrivateKeyPath, NtpServer, OperationsPrivateKeyPath
 
 
 @cache
-def get_private_key_file_path() -> str | None:
-    return Configuration.get(UsersPrivateKeyPath)
+def get_private_key_file_path(type_key: Type[UsersPrivateKeyPath | OperationsPrivateKeyPath]) -> str | None:
+    return Configuration.get(type_key)
 
 
 @cache
@@ -39,7 +40,7 @@ def add_signature_with_key(data: dict, key: str) -> dict:
     return to_send
 
 
-def add_signature(data: dict) -> dict:
-    with open(get_private_key_file_path(), "r") as private_key:
+def add_signature(data: dict, type_key: Type[UsersPrivateKeyPath | OperationsPrivateKeyPath]) -> dict:
+    with open(get_private_key_file_path(type_key=type_key), "r") as private_key:
         key = private_key.read()
         return add_signature_with_key(data, key)

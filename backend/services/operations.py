@@ -18,6 +18,6 @@ def create_operation_for(user_id: str, write_operation: WriteOperationSigned, db
     return do_operation(
         user_id=user_id,
         amount=safe_write_operation.amount,
-        done_with_credit_card=safe_write_operation.done_with_credit_card,
+        done_with_credit_card=safe_write_operation.with_credit_card,
         db=db
     )

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+import time
 
 from sqlalchemy import Column, String, ForeignKey, Integer, Date
 from sqlalchemy.orm import Session
@@ -17,7 +18,7 @@ class Operations(Base):
     )
     user_id = Column(String, ForeignKey('users.id'), index=True)
     amount = Column(Integer)
-    date = Column(Date, index=True)
+    date = Column(Integer, index=True, default=time.time())
 
 
 class BulkOperations(Base):
@@ -32,8 +33,7 @@ def create_operation(
         user_id: str,
         amount: int,
 ) -> Operations:
-    current_time = datetime.datetime.now()
-    print(str(current_time))
+    current_time = int(time.time())
     operation = Operations(user_id=user_id, amount=amount, date=current_time)
     return operation
 
