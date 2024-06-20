@@ -1,5 +1,7 @@
 # TODO: This is very dirty.
 import datetime
+from dataclasses import dataclass
+from typing import List
 
 import ntplib
 
@@ -16,3 +18,23 @@ def get_current_time_spain_on_utc() -> int | None:
 def get_current_spain_datetime() -> datetime.datetime | None:
     if unix_time_es := get_current_time_spain_on_utc():
         return datetime.datetime.fromtimestamp(unix_time_es)
+
+
+@dataclass
+class HourRange:
+    begin: int
+    end: int
+    from_current_time_differs_in_hours: int
+
+    def __contains__(self, item: int):
+        return self.begin < item <= self.end
+
+
+def get_24_hour_range_from(utc: int) -> List[HourRange]:
+    one_hour_in_utc = 3600
+    hours = []
+    for i in range(0, 24):
+        begin = utc - one_hour_in_utc * (i + 1)
+        end = utc - one_hour_in_utc * i
+        hours.append(HourRange(begin=begin, end=end, from_current_time_differs_in_hours=i))
+    return hours

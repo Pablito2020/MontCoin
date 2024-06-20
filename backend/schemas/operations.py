@@ -21,6 +21,22 @@ class Operation(Id, AmountOperation):
     )
 
 
+class OperationStats(BaseModel):
+    positive_amount: int = Field(
+        description="The amount of positive operations",
+        examples=[10]
+    )
+    negative_amount: int = Field(
+        description="The amount of negative operations",
+        examples=[10]
+    )
+    hour: int = Field(
+        description="The hour of the day of the operation",
+        ge=0,
+        le=24,
+    )
+
+
 class WriteOperation(AmountOperation):
     should_fail_if_not_enough_money: bool = Field(
         default=False,

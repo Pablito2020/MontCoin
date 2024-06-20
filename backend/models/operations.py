@@ -1,16 +1,14 @@
 import time
 import uuid
-import datetime
 from typing import List
 
-import ntplib
 from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.orm import Session
 
 from models.database import Base
 from models.users import get_user_db_by_id, from_db_to_schema
 from schemas.operations import Operation
-from services.timeservice import get_current_time_spain_on_utc
+from services.timeservice import get_current_time_spain_on_utc, HourRange
 
 
 class Operations(Base):
@@ -74,7 +72,7 @@ def do_operation(
     )
 
 
-def list_operations(
+def get_operations(
         db: Session
 ) -> List[Operation]:
     operations = []
@@ -84,6 +82,43 @@ def list_operations(
         operations.append(Operation(
             id=operation.id,
             user=schema_user,
+            amount=operation.amount,
+            date=operation.date
+        ))
+    return operations
+
+
+def get_operations_for_user(
+        user_id: str,
+        db: Session
+) -> List[Operation]:
+    user_id = get_user_db_by_id(user_id, db)
+    user_schema = from_db_to_schema(user_id)
+    operations = []
+    for operation in db.query(Operations).filter_by(user_id=user_id).all():
+        operations.append(Operation(
+            id=operation.id,
+            user=user_schema,
+            amount=operation.amount,
+            date=operation.date
+        ))
+    return operations
+
+
+def get_operations_inside_range(
+        range: HourRange,
+        db: Session
+) -> List[Operation]:
+    operations: List[Operation] = []
+    for operation in db.query(Operations).filter(
+        Operations.date > range.begin,
+        Operations.date.between(range.begin, range.end)
+    ).all():
+        user = get_user_db_by_id(operation.user_id, db)
+        user_schema = from_db_to_schema(user)
+        operations.append(Operation(
+            id=operation.id,
+            user=user_schema,
             amount=operation.amount,
             date=operation.date
         ))

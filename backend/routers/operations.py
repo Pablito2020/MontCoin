@@ -1,13 +1,15 @@
 from typing import List
 
 from fastapi import APIRouter
+from fastapi_pagination import paginate, Page
 from starlette import status
 
 from models.database import db_dependency
-from models.operations import list_operations
-from schemas.operations import Operation
+from models.operations import get_operations, get_operations_for_user
+from schemas.operations import Operation, OperationStats
 from schemas.security import WriteOperationSigned
-from services.operations import create_operation_for
+from services.operations import create_operation_for, get_operations_daily_stats
+from services.users import get_user_by_id
 
 router = APIRouter(
     tags=["Operations"],
@@ -38,7 +40,30 @@ def do_operation(user_id: str, write_operation: WriteOperationSigned, db: db_dep
     summary="Get all operations",
     response_description="The operations in a list",
     status_code=status.HTTP_200_OK,
-    response_model=List[Operation]
+    response_model=Page[Operation]
 )
 def get_operations_route(db: db_dependency):
-    return list_operations(db)
+    return paginate(get_operations(db))
+
+
+@router.get(
+    path="/operations/today",
+    summary="Get all operations done within 24 hours",
+    response_description="The operations in a list",
+    status_code=status.HTTP_200_OK,
+    response_model=List[OperationStats]
+)
+def get_operations_stats_today(db: db_dependency):
+    return get_operations_daily_stats(db)
+
+
+@router.get(
+    path="/operations/user/{user_id}",
+    summary="Get all operations for a given user",
+    response_description="The operations in a list",
+    status_code=status.HTTP_200_OK,
+    response_model=List[Operation]
+)
+def get_operations_stats_today(user_id: str, db: db_dependency):
+    user = get_user_by_id(user_id, db)
+    return get_operations_for_user(user.id, db)

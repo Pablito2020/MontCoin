@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
@@ -17,6 +18,7 @@ app = FastAPI(
 app.router.redirect_slashes = False
 app.include_router(users.router)
 app.include_router(operations.router)
+add_pagination(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
