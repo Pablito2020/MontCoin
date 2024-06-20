@@ -1,7 +1,10 @@
+from typing import List
+
 from fastapi import APIRouter
 from starlette import status
 
 from models.database import db_dependency
+from models.operations import list_operations
 from schemas.operations import Operation
 from schemas.security import WriteOperationSigned
 from services.operations import create_operation_for
@@ -28,3 +31,14 @@ router = APIRouter(
 )
 def do_operation(user_id: str, write_operation: WriteOperationSigned, db: db_dependency) -> Operation:
     return create_operation_for(user_id=user_id, write_operation=write_operation, db=db)
+
+
+@router.get(
+    path="/operations",
+    summary="Get all operations",
+    response_description="The operations in a list",
+    status_code=status.HTTP_200_OK,
+    response_model=List[Operation]
+)
+def get_operations_route(db: db_dependency):
+    return list_operations(db)

@@ -1,12 +1,9 @@
-from contextlib import contextmanager
-
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
 import models
 from models.database import engine
-
 from routers import users, operations
 
 app = FastAPI(
@@ -30,7 +27,6 @@ app.add_middleware(
 )
 
 models.database.Base.metadata.create_all(engine)
-
 
 
 @app.get("/")

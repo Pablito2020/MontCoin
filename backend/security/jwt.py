@@ -4,10 +4,10 @@ from functools import cache
 from typing import Type
 
 import jwt
-import ntplib
 
 from configuration.config import Configuration
 from configuration.security import UsersPublicKeyPath, OperationsPublicKeyPath
+from services.timeservice import get_current_spain_datetime
 
 ALGORITHM = "RS256"
 ALLOWED_DELAY_ON_DATE = datetime.timedelta(seconds=10)
@@ -32,13 +32,9 @@ def __assert_correct_timestamp_and_decode(token: jwt_token, path: Type[UsersPubl
 
 
 def __decode(token: jwt_token, path: Type[UsersPublicKeyPath | OperationsPublicKeyPath]) -> dict:
-    try:
-        ntp_client = ntplib.NTPClient()
-        unix_time_es = ntp_client.request('es.pool.ntp.org').tx_time
-        unix_time = datetime.datetime.fromtimestamp(unix_time_es)
+    if unix_time := get_current_spain_datetime():
         return __assert_correct_timestamp_and_decode(token, path, timestamp=unix_time)
-    except ntplib.NTPException:
-        raise ValueError("Couldn't fetch NTP time. Maybe the server is down?")
+    raise ValueError("Couldn't fetch time.")
 
 
 def decode_user_token(token: jwt_token) -> dict:
