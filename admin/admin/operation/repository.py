@@ -30,7 +30,7 @@ def get_operations():
     result = requests.get(
         url=f"{get_base_url()}/operations",
     )
-    for operation in result.json():
+    for operation in result.json()["items"]:
         yield Operation.from_value(id=operation["id"],
                                    date=datetime.utcfromtimestamp(operation['date']).strftime('%Y-%m-%d %H:%M:%S'),
                                    amount=operation["amount"],
