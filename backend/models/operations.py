@@ -15,8 +15,7 @@ class Operations(Base):
     __tablename__ = 'operations'
 
     id = Column(
-        String, primary_key=True, index=True, default=str(uuid.uuid4())
-    )
+        String, primary_key=True, index=True)
     user_id = Column(String, ForeignKey('users.id'), index=True)
     amount = Column(Integer)
     date = Column(Integer, index=True, default=time.time())
@@ -35,7 +34,7 @@ def create_operation_db(
         amount: int,
 ) -> Operations:
     if unix_time_es := get_current_time_spain_on_utc():
-        operation = Operations(user_id=user_id, amount=amount, date=unix_time_es)
+        operation = Operations(id=str(uuid.uuid4()), user_id=user_id, amount=amount, date=unix_time_es)
         return operation
     raise ValueError("Couldn't get time")
 
@@ -111,8 +110,8 @@ def get_operations_inside_range(
 ) -> List[Operation]:
     operations: List[Operation] = []
     for operation in db.query(Operations).filter(
-        Operations.date > range.begin,
-        Operations.date.between(range.begin, range.end)
+            Operations.date > range.begin,
+            Operations.date.between(range.begin, range.end)
     ).all():
         user = get_user_db_by_id(operation.user_id, db)
         user_schema = from_db_to_schema(user)

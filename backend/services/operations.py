@@ -15,7 +15,7 @@ from services.users import get_user_by_id
 
 def create_operation_for(user_id: str, write_operation: WriteOperationSigned, db: Session) -> Operation:
     safe_write_operation = assert_signature_operation(request=write_operation, type=WriteOperation)
-    do_operation_for(user_id=user_id, write_operation=safe_write_operation, db=db)
+    return do_operation_for(user_id=user_id, write_operation=safe_write_operation, db=db)
 
 
 def do_operation_for(user_id: str, write_operation: WriteOperation, db: Session) -> Operation:
