@@ -7,7 +7,7 @@ from starlette import status
 from models.database import db_dependency
 from models.operations import get_operations, get_operations_for_user
 from schemas.operations import Operation, OperationStats
-from schemas.security import WriteOperationSigned
+from schemas.security import WriteOperationSigned, DeleteUserSigned
 from services.operations import create_operation_for, get_operations_daily_stats
 from services.users import get_user_by_id
 
@@ -53,7 +53,7 @@ def get_operations_route(db: db_dependency):
     status_code=status.HTTP_200_OK,
     response_model=List[OperationStats]
 )
-def get_operations_stats_today(db: db_dependency):
+def get_operations_stats_today_route(db: db_dependency):
     return get_operations_daily_stats(db)
 
 
@@ -64,6 +64,15 @@ def get_operations_stats_today(db: db_dependency):
     status_code=status.HTTP_200_OK,
     response_model=List[Operation]
 )
-def get_operations_stats_today(user_id: str, db: db_dependency):
+def get_operations_for_user_id_route(user_id: str, db: db_dependency):
     user = get_user_by_id(user_id, db)
     return get_operations_for_user(user.id, db)
+
+
+@router.post(
+    path="/operations/bulk",
+    summary="Create an operation for N users",
+    status_code=status.HTTP_200_OK,
+)
+def create_bulk_operation(request: DeleteUserSigned, db: db_dependency):
+    pass

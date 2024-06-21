@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from schemas.operations import WriteOperation
+from schemas.operations import WriteOperation, CreateBulkOperation
 from schemas.users import CreateUser, DeleteUser
 
 
@@ -15,6 +15,10 @@ class CreateUserSigned(Signed, CreateUser):
 
 
 class DeleteUserSigned(Signed, DeleteUser):
+    pass
+
+
+class CreateBulkOperationSigned(Signed, CreateBulkOperation):
     pass
 
 

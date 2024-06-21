@@ -37,6 +37,17 @@ class OperationStats(BaseModel):
     )
 
 
+class CreateBulkOperation(BaseModel):
+    users: list[str] = Field(
+        description="List of users ids",
+        example=["5aecbceb-105f-4a76-96b0-303d07f024b7"],
+    )
+    amount: int = Field(
+        description="The amount of MontCoin of the operation",
+        examples=[10, -10]
+    )
+
+
 class WriteOperation(AmountOperation):
     should_fail_if_not_enough_money: bool = Field(
         default=False,
