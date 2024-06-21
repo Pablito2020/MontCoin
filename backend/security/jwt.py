@@ -1,9 +1,11 @@
 import datetime
 import logging
 from functools import cache
+from fastapi import HTTPException
 from typing import Type
 
 import jwt
+from starlette import status
 
 from configuration.config import Configuration
 from configuration.security import UsersPublicKeyPath, OperationsPublicKeyPath
@@ -24,11 +26,14 @@ def get_public_key(path: Type[UsersPublicKeyPath | OperationsPublicKeyPath]) -> 
 
 def __assert_correct_timestamp_and_decode(token: jwt_token, path: Type[UsersPublicKeyPath | OperationsPublicKeyPath],
                                           timestamp: datetime) -> dict:
-    payload = jwt.decode(token, get_public_key(path), algorithms=[ALGORITHM])
-    date = payload.get("date")
-    if not date or datetime.datetime.fromtimestamp(date) > timestamp + ALLOWED_DELAY_ON_DATE:
-        logging.warning(f"Date on signature is null or too far in the future: {token}")
-    return payload
+    try:
+        payload = jwt.decode(token, get_public_key(path), algorithms=[ALGORITHM])
+        date = payload.get("date")
+        if not date or datetime.datetime.fromtimestamp(date) > timestamp + ALLOWED_DELAY_ON_DATE:
+            logging.warning(f"Date on signature is null or too far in the future: {token}")
+        return payload
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Signature.")
 
 
 def __decode(token: jwt_token, path: Type[UsersPublicKeyPath | OperationsPublicKeyPath]) -> dict:

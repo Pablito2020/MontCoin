@@ -1,29 +1,33 @@
 package com.pablofraile.montcoin.data.api
 
 import android.util.Log
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.http.isSuccess
-import io.ktor.serialization.gson.gson
 
 data class OperationToday(val positive_amount: Int, val negative_amount: Int, val hour: Int)
 
+open class WriteOperation(
+    val amount: Int,
+    val should_fail_if_not_enough_money: Boolean,
+    val with_credit_card: Boolean
+)
+
 object OperationsApi {
-    private const val API_URL = "http://192.168.2.29:8000"
 
     suspend fun getOperationsToday(): Result<List<OperationToday>> {
-        val client = HttpClient(OkHttp) {
-            install(ContentNegotiation) {
-                gson()
-            }
-        }
-        val response = client.get("${API_URL}/operations/today")
-        if (!response.status.isSuccess())
-            return Result.failure(Exception("Error getting operations today"))
-        return Result.success(response.body())
+        val x = createOperation()
+        Log.e("OperationsApi", "getOperationsToday: $x")
+        return CommonApi.get("/operations/today")
+    }
+
+    suspend fun createOperation(): Result<Any> {
+        val userId = "7bac45c3-7201-4ff5-a942-00deb0ebf476"
+        val signedMessage = createSignedInstance<_, SignedWriteOperation>(
+            WriteOperation(
+                100,
+                false,
+                false
+            )
+        )
+        return CommonApi.post("/operation/user/$userId", signedMessage)
     }
 
 }
