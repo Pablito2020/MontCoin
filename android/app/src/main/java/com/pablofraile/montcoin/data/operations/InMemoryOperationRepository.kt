@@ -2,6 +2,7 @@ package com.pablofraile.montcoin.data.operations
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.pablofraile.montcoin.data.api.OperationsApi
 import com.pablofraile.montcoin.data.users.UsersRepository
 import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.BulkOperation
@@ -62,7 +63,7 @@ class InMemoryOperationRepository(
     }
 
     override suspend fun getOperationsForToday(): Result<List<HourOperationsStats>> {
-        delay(2000)
+        OperationsApi.getOperationsToday()
         val now = Date()
         val less24Hours = now.time - 24 * 60 * 60 * 1000
         val operationsFromNow =
