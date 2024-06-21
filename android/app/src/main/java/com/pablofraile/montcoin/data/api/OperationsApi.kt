@@ -20,13 +20,11 @@ object OperationsApi {
 
     suspend fun createOperation(): Result<Any> {
         val userId = "7bac45c3-7201-4ff5-a942-00deb0ebf476"
-        val signedMessage = createSignedInstance<_, SignedWriteOperation>(
-            WriteOperation(
+        val signedMessage: SignedWriteOperation = WriteOperation(
                 100,
                 false,
                 false
-            )
-        )
+            ).sign()
         return CommonApi.post("/operation/user/$userId", signedMessage)
     }
 

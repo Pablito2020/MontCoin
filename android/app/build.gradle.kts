@@ -80,4 +80,5 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.contentnegotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation("com.auth0:java-jwt:4.4.0")
 }
