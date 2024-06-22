@@ -12,6 +12,7 @@ import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class BackendOperationRepository(private val operationsApi: OperationsApi) : OperationsRepository {
     override suspend fun execute(operation: WriteOperation): Result<Operation> {
@@ -25,7 +26,7 @@ class BackendOperationRepository(private val operationsApi: OperationsApi) : Ope
                     amount = Amount(it.user.amount),
                     numberOfOperations = it.user.operations_with_card
                 ),
-                date = Date(it.date)
+                date = it.date.toDate()
             )
         }
     }
@@ -46,7 +47,7 @@ class BackendOperationRepository(private val operationsApi: OperationsApi) : Ope
                         amount = Amount(operationApi.user.amount),
                         numberOfOperations = operationApi.user.operations_with_card
                     ),
-                    date = Date(operationApi.date)
+                    date = operationApi.date.toDate()
                 )
             }
         }
@@ -64,7 +65,7 @@ class BackendOperationRepository(private val operationsApi: OperationsApi) : Ope
                         amount = Amount(operationApi.user.amount),
                         numberOfOperations = operationApi.user.operations_with_card
                     ),
-                    date = Date(operationApi.date)
+                    date = operationApi.date.toDate()
                 )
             }
         }
@@ -81,4 +82,13 @@ class BackendOperationRepository(private val operationsApi: OperationsApi) : Ope
             }
         }
     }
+}
+
+
+fun Int.toDate(): Date {
+    return Date(this.toEpochMillis())
+}
+
+fun Int.toEpochMillis(): Long {
+    return TimeUnit.SECONDS.toMillis(this.toLong())
 }

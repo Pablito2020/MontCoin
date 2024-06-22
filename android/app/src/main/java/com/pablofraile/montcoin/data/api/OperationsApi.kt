@@ -21,7 +21,7 @@ class OperationApi(
     val id: String,
     val amount: Int,
     val user: UserApi,
-    val date: Long
+    val date: Int
 )
 
 class PaginatedOperations(

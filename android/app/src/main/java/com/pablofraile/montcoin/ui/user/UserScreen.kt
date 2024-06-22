@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -276,10 +277,10 @@ fun ColumnScope.EmptyOperations() {
 fun ListOperations(
     operations: List<Operation>,
 ) {
-    Column(modifier = Modifier.padding(12.dp)) {
-        operations.forEach { item ->
+    LazyColumn(modifier = Modifier.padding(12.dp)) {
+        this.items(operations.size, key={it -> operations[it].id.toString()}) { index ->
             OperationItem(
-                operation = item,
+                operation = operations[index],
                 modifier = Modifier.padding(8.dp)
             )
         }
