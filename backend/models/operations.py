@@ -91,10 +91,10 @@ def get_operations_for_user(
         user_id: str,
         db: Session
 ) -> List[Operation]:
-    user_id = get_user_db_by_id(user_id, db)
-    user_schema = from_db_to_schema(user_id)
+    user = get_user_db_by_id(user_id, db)
+    user_schema = from_db_to_schema(user)
     operations = []
-    for operation in db.query(Operations).filter_by(user_id=user_id).all():
+    for operation in db.query(Operations).filter_by(user_id=user.id).all():
         operations.append(Operation(
             id=operation.id,
             user=user_schema,
