@@ -5,9 +5,9 @@ import com.pablofraile.montcoin.model.Amount
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.User
 
-class BackendUsersRepository : UsersRepository {
+class BackendUsersRepository(private val usersApi: UsersApi) : UsersRepository {
     override suspend fun getUserById(id: String): Result<User?> {
-        return UsersApi.getUserById(id).map {
+        return usersApi.getUserById(id).map {
             it?.let {
                 User(
                     id = Id(it.id),
@@ -20,7 +20,7 @@ class BackendUsersRepository : UsersRepository {
     }
 
     override suspend fun getUsers(): Result<List<User>> {
-        return UsersApi.getUsers().map {
+        return usersApi.getUsers().map {
             it.map { userApi ->
                 User(
                     id = Id(userApi.id),

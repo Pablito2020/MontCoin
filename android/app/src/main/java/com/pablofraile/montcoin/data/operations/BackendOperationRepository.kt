@@ -13,9 +13,9 @@ import com.pablofraile.montcoin.model.WriteOperation
 import java.util.Date
 import java.util.UUID
 
-class BackendOperationRepository : OperationsRepository {
+class BackendOperationRepository(private val operationsApi: OperationsApi) : OperationsRepository {
     override suspend fun execute(operation: WriteOperation): Result<Operation> {
-        return OperationsApi.makeOperation(operation).map {
+        return operationsApi.makeOperation(operation).map {
             Operation(
                 id = UUID.fromString(it.id),
                 amount = Amount(it.amount),
@@ -44,7 +44,7 @@ class BackendOperationRepository : OperationsRepository {
     }
 
     override suspend fun getOperationsForToday(): Result<List<HourOperationsStats>> {
-        return OperationsApi.getOperationsToday().map {
+        return operationsApi.getOperationsToday().map {
             it.map { operationToday ->
                 HourOperationsStats(
                     positiveAmount = Amount(operationToday.positive_amount),

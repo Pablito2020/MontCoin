@@ -7,13 +7,13 @@ class UserApi(
     val operations_with_card: Int
 )
 
-object UsersApi {
+class UsersApi(apiUrl: String, credentials: Credentials) : CommonApi(apiUrl, credentials) {
 
     suspend fun getUsers(): Result<List<UserApi>> {
-        return CommonApi.get("/users")
+        return get("/users")
     }
 
     suspend fun getUserById(id: String): Result<UserApi?> {
-        return CommonApi.getOr404Null("/user/$id")
+        return getOr404Null("/user/$id")
     }
 }

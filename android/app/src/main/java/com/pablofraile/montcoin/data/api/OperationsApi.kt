@@ -25,10 +25,10 @@ class OperationApi(
 )
 
 
-object OperationsApi {
+class OperationsApi(apiUrl: String, credentials: Credentials) : CommonApi(apiUrl, credentials) {
 
     suspend fun getOperationsToday(): Result<List<OperationToday>> {
-        return CommonApi.get("/operations/today")
+        return get("/operations/today")
     }
 
     suspend fun makeOperation(writeOperation: WriteOperation): Result<OperationApi> {
@@ -37,12 +37,12 @@ object OperationsApi {
             writeOperation.amount.value,
             false,
             false
-        ).sign()
-        return CommonApi.post("/operation/user/$userId", signedMessage)
+        ).sign(credentials)
+        return post("/operation/user/$userId", signedMessage)
     }
 
     suspend fun getOperationsFor(userId: String): Result<List<OperationApi>> {
-        return CommonApi.get("/operation/user/$userId")
+        return get("/operation/user/$userId")
     }
 
 }

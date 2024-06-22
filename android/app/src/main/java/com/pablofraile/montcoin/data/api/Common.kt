@@ -12,9 +12,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.gson.gson
 
-object CommonApi {
-
-    const val API_URL = "http://192.168.2.29:8000"
+open class CommonApi(val apiUrl: String, val credentials: Credentials) {
 
     val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {
@@ -24,7 +22,7 @@ object CommonApi {
 
     suspend inline fun <reified T>get(uri: String): Result<T> {
         try {
-            val response = client.get("$API_URL$uri")
+            val response = client.get("$apiUrl$uri")
             if (!response.status.isSuccess())
                 return Result.failure(Exception("Error getting $uri"))
             return Result.success(response.body())
@@ -36,7 +34,7 @@ object CommonApi {
 
     suspend inline fun <reified T>getOr404Null(uri: String): Result<T?> {
         try {
-            val response = client.get("$API_URL$uri")
+            val response = client.get("$apiUrl$uri")
             if (response.status.value == 404)
                 return Result.success(null)
             if (!response.status.isSuccess())
@@ -49,7 +47,7 @@ object CommonApi {
 
     suspend inline fun <reified T, reified R>post(uri: String, body: R): Result<T> {
         try {
-            val response = client.post("$API_URL$uri") {
+            val response = client.post("$apiUrl$uri") {
                 contentType(ContentType.Application.Json)
                 setBody(body)
             }

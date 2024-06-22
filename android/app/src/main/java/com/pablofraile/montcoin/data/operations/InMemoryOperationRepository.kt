@@ -63,7 +63,6 @@ class InMemoryOperationRepository(
     }
 
     override suspend fun getOperationsForToday(): Result<List<HourOperationsStats>> {
-        OperationsApi.getOperationsToday()
         val now = Date()
         val less24Hours = now.time - 24 * 60 * 60 * 1000
         val operationsFromNow =
