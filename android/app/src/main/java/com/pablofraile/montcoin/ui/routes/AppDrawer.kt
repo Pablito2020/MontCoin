@@ -1,19 +1,16 @@
 package com.pablofraile.montcoin.ui.routes
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.content.res.Resources.Theme
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Euro
-import androidx.compose.material.icons.filled.FeaturedPlayList
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Wallet
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,9 +19,13 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pablofraile.montcoin.R
 import com.pablofraile.montcoin.ui.theme.MontCoinTheme
 
 @Composable
@@ -104,10 +105,15 @@ fun AppDrawer(
 
 @Composable
 private fun MontCoinLogo(modifier: Modifier = Modifier) {
-    Row(modifier = modifier) {
-        Icon(
-            imageVector = Icons.Filled.Home,
-            contentDescription = "MontCoin",
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painterResource(R.mipmap.ic_launcher_foreground),
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(48.dp)
         )
         Text(
             text = "MontCoin",
