@@ -26,9 +26,7 @@ router = APIRouter(
     },
 )
 def get_users(db: db_dependency) -> Users:
-    return Users(
-        users=get_all_users(db)
-    )
+    return get_all_users(db)
 
 
 @router.get(

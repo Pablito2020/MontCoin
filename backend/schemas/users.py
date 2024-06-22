@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, Field
 
 from schemas.common import Id
@@ -27,18 +29,7 @@ class UserStats(User):
     )
 
 
-class Users(BaseModel):
-    users: list[User] = Field(
-        description="List of users",
-        example=[
-            User(
-                id="5aecbceb-105f-4a76-96b0-303d07f024b7",
-                name="John Doe",
-                amount=10,
-            ),
-        ],
-    )
-
+Users = List[User]
 
 # Crud operations
 
