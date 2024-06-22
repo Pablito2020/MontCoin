@@ -8,11 +8,26 @@ import com.pablofraile.montcoin.model.BulkOperationResult
 import com.pablofraile.montcoin.model.HourOperationsStats
 import com.pablofraile.montcoin.model.Id
 import com.pablofraile.montcoin.model.Operation
+import com.pablofraile.montcoin.model.User
 import com.pablofraile.montcoin.model.WriteOperation
+import java.util.Date
+import java.util.UUID
 
 class BackendOperationRepository : OperationsRepository {
     override suspend fun execute(operation: WriteOperation): Result<Operation> {
-        return Result.failure(Exception("Not implemented"))
+        return OperationsApi.makeOperation(operation).map {
+            Operation(
+                id = UUID.fromString(it.id),
+                amount = Amount(it.amount),
+                user = User(
+                    id = Id(it.user.id),
+                    name = it.user.name,
+                    amount = Amount(it.user.amount),
+                    numberOfOperations = it.user.operations_with_card
+                ),
+                date = Date(it.date)
+            )
+        }
     }
 
     override suspend fun execute(operations: BulkOperation): Result<BulkOperationResult> {

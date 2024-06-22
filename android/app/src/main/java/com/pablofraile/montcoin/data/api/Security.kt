@@ -81,16 +81,9 @@ fun getSignatureForMap(values: Map<String, Any>): String {
     return token.sign(Algorithm.RSA256(getPrivateKey() as RSAPrivateKey))
 }
 
-private interface Signed {
+interface Signed {
     val signature: String
 }
-
-class SignedWriteOperation(
-    amount: Int,
-    should_fail_if_not_enough_money: Boolean,
-    with_credit_card: Boolean,
-    override val signature: String,
-) : WriteOperation(amount, should_fail_if_not_enough_money, with_credit_card), Signed
 
 inline fun <T : Any, reified R> T.sign(): R where R : Signed {
     val originalClass = this::class

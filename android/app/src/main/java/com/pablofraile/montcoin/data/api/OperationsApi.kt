@@ -1,31 +1,48 @@
 package com.pablofraile.montcoin.data.api
 
-import android.util.Log
+import com.pablofraile.montcoin.model.WriteOperation
 
 data class OperationToday(val positive_amount: Int, val negative_amount: Int, val hour: Int)
 
-open class WriteOperation(
+open class WriteOperationApi(
     val amount: Int,
     val should_fail_if_not_enough_money: Boolean,
     val with_credit_card: Boolean
 )
 
+class SignedWriteOperationApi(
+    amount: Int,
+    should_fail_if_not_enough_money: Boolean,
+    with_credit_card: Boolean,
+    override val signature: String,
+) : WriteOperationApi(amount, should_fail_if_not_enough_money, with_credit_card), Signed
+
+class OperationApi(
+    val id: String,
+    val amount: Int,
+    val user: UserApi,
+    val date: Long
+)
+
+
 object OperationsApi {
 
     suspend fun getOperationsToday(): Result<List<OperationToday>> {
-        val x = createOperation()
-        Log.e("OperationsApi", "getOperationsToday: $x")
         return CommonApi.get("/operations/today")
     }
 
-    suspend fun createOperation(): Result<Any> {
-        val userId = "7bac45c3-7201-4ff5-a942-00deb0ebf476"
-        val signedMessage: SignedWriteOperation = WriteOperation(
-                100,
-                false,
-                false
-            ).sign()
+    suspend fun makeOperation(writeOperation: WriteOperation): Result<OperationApi> {
+        val userId = writeOperation.userId.value
+        val signedMessage: SignedWriteOperationApi = WriteOperationApi(
+            writeOperation.amount.value,
+            false,
+            false
+        ).sign()
         return CommonApi.post("/operation/user/$userId", signedMessage)
+    }
+
+    suspend fun getOperationsFor(userId: String): Result<List<OperationApi>> {
+        return CommonApi.get("/operation/user/$userId")
     }
 
 }

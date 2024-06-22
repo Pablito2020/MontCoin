@@ -33,6 +33,20 @@ object CommonApi {
         }
     }
 
+
+    suspend inline fun <reified T>getOr404Null(uri: String): Result<T?> {
+        try {
+            val response = client.get("$API_URL$uri")
+            if (response.status.value == 404)
+                return Result.success(null)
+            if (!response.status.isSuccess())
+                return Result.failure(Exception("Error getting $uri"))
+            return Result.success(response.body())
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
+
     suspend inline fun <reified T, reified R>post(uri: String, body: R): Result<T> {
         try {
             val response = client.post("$API_URL$uri") {
