@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 const val BATCHING = 20
+const val INITIAL_PAGE = 1
 
 class OperationsViewModel(val operationsRepo: OperationsRepository) : ViewModel() {
 
-    private val _fetchedPages = MutableStateFlow(0)
+    private val _fetchedPages = MutableStateFlow(INITIAL_PAGE)
     private val _op: MutableStateFlow<List<Operation>> = MutableStateFlow(emptyList())
     val operations = _op
 
@@ -30,7 +31,7 @@ class OperationsViewModel(val operationsRepo: OperationsRepository) : ViewModel(
     }
 
     suspend fun reload() {
-        _fetchedPages.update { 0 }
+        _fetchedPages.update { INITIAL_PAGE }
         fetchNextPage()
     }
 
@@ -39,7 +40,7 @@ class OperationsViewModel(val operationsRepo: OperationsRepository) : ViewModel(
         val newOperations = operationsRepo.getOperations(page = page, size = BATCHING)
         if (newOperations.isSuccess) {
             _fetchedPages.update { it + 1 }
-            if (page == 0) _op.update { newOperations.getOrNull()!! }
+            if (page == INITIAL_PAGE) _op.update { newOperations.getOrNull()!! }
             else _op.update { it + newOperations.getOrNull()!! }
         } else _errorMessages.update { newOperations.exceptionOrNull()?.message }
     }

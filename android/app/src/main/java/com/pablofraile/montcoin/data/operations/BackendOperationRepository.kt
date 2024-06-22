@@ -35,12 +35,39 @@ class BackendOperationRepository(private val operationsApi: OperationsApi) : Ope
     }
 
     override suspend fun getOperationsFor(userId: Id): Result<List<Operation>> {
-        return Result.success(emptyList())
+        return operationsApi.getOperationsFor(userId.value).map {
+            it.map { operationApi ->
+                Operation(
+                    id = UUID.fromString(operationApi.id),
+                    amount = Amount(operationApi.amount),
+                    user = User(
+                        id = Id(operationApi.user.id),
+                        name = operationApi.user.name,
+                        amount = Amount(operationApi.user.amount),
+                        numberOfOperations = operationApi.user.operations_with_card
+                    ),
+                    date = Date(operationApi.date)
+                )
+            }
+        }
     }
 
     override suspend fun getOperations(page: Int, size: Int): Result<List<Operation>> {
-        Log.e("BackendOperationRepository", "getOperations not implemented")
-        return Result.success(emptyList())
+        return operationsApi.getOperations(page, size).map {
+            it.items.map { operationApi ->
+                Operation(
+                    id = UUID.fromString(operationApi.id),
+                    amount = Amount(operationApi.amount),
+                    user = User(
+                        id = Id(operationApi.user.id),
+                        name = operationApi.user.name,
+                        amount = Amount(operationApi.user.amount),
+                        numberOfOperations = operationApi.user.operations_with_card
+                    ),
+                    date = Date(operationApi.date)
+                )
+            }
+        }
     }
 
     override suspend fun getOperationsForToday(): Result<List<HourOperationsStats>> {

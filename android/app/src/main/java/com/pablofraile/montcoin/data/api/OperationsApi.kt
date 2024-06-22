@@ -24,6 +24,13 @@ class OperationApi(
     val date: Long
 )
 
+class PaginatedOperations(
+    val page: Int,
+    val size: Int,
+    val total: Int,
+    val pages: Int,
+    val items: List<OperationApi>
+)
 
 class OperationsApi(apiUrl: String, credentials: Credentials) : CommonApi(apiUrl, credentials) {
 
@@ -42,7 +49,11 @@ class OperationsApi(apiUrl: String, credentials: Credentials) : CommonApi(apiUrl
     }
 
     suspend fun getOperationsFor(userId: String): Result<List<OperationApi>> {
-        return get("/operation/user/$userId")
+        return get("/operations/user/$userId")
+    }
+
+    suspend fun getOperations(page: Int, size: Int): Result<PaginatedOperations> {
+        return get("/operations?page=$page&size=$size")
     }
 
 }
