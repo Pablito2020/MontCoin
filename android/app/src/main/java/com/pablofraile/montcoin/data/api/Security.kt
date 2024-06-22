@@ -9,6 +9,7 @@ import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.spec.PKCS8EncodedKeySpec
+import java.util.concurrent.TimeUnit
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
@@ -60,9 +61,9 @@ fun getPrivateKey(): PrivateKey? {
     return kf.generatePrivate(keySpec)
 }
 
-suspend fun getSignatureForMap(values: Map<String, Any>): Pair<Int, String> {
+fun getSignatureForMap(values: Map<String, Any>): String {
     val newValues: MutableMap<String, Any> = values.toMutableMap()
-    val date = 1234567890
+    val date = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
     newValues["date"] = date
     var token = JWT.create()
     for (key in newValues.keys) {
@@ -72,15 +73,16 @@ suspend fun getSignatureForMap(values: Map<String, Any>): Pair<Int, String> {
             token = token.withClaim(key, newValues[key] as String)
         else if (newValues[key] is Boolean)
             token = token.withClaim(key, newValues[key] as Boolean)
+        else if (newValues[key] is Long)
+            token = token.withClaim(key, newValues[key] as Long)
         else
             throw IllegalArgumentException("Unsupported type")
     }
-    return Pair(date, token.sign(Algorithm.RSA256(getPrivateKey() as RSAPrivateKey)))
+    return token.sign(Algorithm.RSA256(getPrivateKey() as RSAPrivateKey))
 }
 
 private interface Signed {
     val signature: String
-    val date: Int
 }
 
 class SignedWriteOperation(
@@ -88,21 +90,19 @@ class SignedWriteOperation(
     should_fail_if_not_enough_money: Boolean,
     with_credit_card: Boolean,
     override val signature: String,
-    override val date: Int
 ) : WriteOperation(amount, should_fail_if_not_enough_money, with_credit_card), Signed
 
-suspend inline fun <T : Any, reified R> T.sign(): R where R : Signed {
+inline fun <T : Any, reified R> T.sign(): R where R : Signed {
     val originalClass = this::class
     val originalProperties = originalClass.memberProperties
     val valuesMap = originalProperties.associate { prop ->
         prop.name to prop.getter.call(this) as Any
     }
-    val (date, signature) = getSignatureForMap(valuesMap)
+    val signature = getSignatureForMap(valuesMap)
     val constructor = R::class.primaryConstructor!!
     val args = constructor.parameters.associateWith { parameter ->
         when (parameter.name) {
             "signature" -> signature
-            "date" -> date
             else -> originalProperties.find { it.name == parameter.name }?.getter?.call(this)
         }
     }

@@ -13,6 +13,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.gson.gson
 
 object CommonApi {
+
     const val API_URL = "http://192.168.2.29:8000"
 
     val client = HttpClient(OkHttp) {
