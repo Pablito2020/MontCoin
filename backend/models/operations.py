@@ -1,9 +1,11 @@
 import time
 import uuid
+from fastapi import HTTPException
 from typing import List
 
 from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.orm import Session
+from starlette import status
 
 from models.database import Base
 from models.users import get_user_db_by_id, from_db_to_schema
@@ -36,7 +38,7 @@ def create_operation_db(
     if unix_time_es := get_current_utc_time():
         operation = Operations(id=str(uuid.uuid4()), user_id=user_id, amount=amount, date=unix_time_es)
         return operation
-    raise ValueError("Couldn't get time")
+    raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Couldn't get time")
 
 
 def from_operation_db_to_schema(
