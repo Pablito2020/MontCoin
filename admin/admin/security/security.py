@@ -26,7 +26,7 @@ def get_ntp_server() -> str | None:
 def get_current_time() -> int | None:
     try:
         ntp_client = ntplib.NTPClient()
-        return ntp_client.request(get_ntp_server()).tx_time
+        return int(ntp_client.request(get_ntp_server()).tx_time)
     except ntplib.NTPException:
         return None
 
