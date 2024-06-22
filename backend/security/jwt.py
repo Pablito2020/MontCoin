@@ -9,7 +9,7 @@ from starlette import status
 
 from configuration.config import Configuration
 from configuration.security import UsersPublicKeyPath, OperationsPublicKeyPath
-from services.timeservice import get_current_spain_datetime
+from services.timeservice import get_current_utc_datetime
 
 ALGORITHM = "RS256"
 ALLOWED_DELAY_ON_DATE = datetime.timedelta(seconds=10)
@@ -37,7 +37,7 @@ def __assert_correct_timestamp_and_decode(token: jwt_token, path: Type[UsersPubl
 
 
 def __decode(token: jwt_token, path: Type[UsersPublicKeyPath | OperationsPublicKeyPath]) -> dict:
-    if unix_time := get_current_spain_datetime():
+    if unix_time := get_current_utc_datetime():
         return __assert_correct_timestamp_and_decode(token, path, timestamp=unix_time)
     raise ValueError("Couldn't fetch time.")
 

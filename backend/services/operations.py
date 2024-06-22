@@ -9,7 +9,7 @@ from schemas.operations import WriteOperation, Operation, OperationStats, Create
 from schemas.security import WriteOperationSigned, CreateBulkOperationSigned
 from schemas.users import User
 from security.signing import assert_signature_operation
-from services.timeservice import get_24_hour_range_from, get_current_time_spain_on_utc, HourRange
+from services.timeservice import get_24_hour_range_from, get_current_utc_time, HourRange
 from services.users import get_user_by_id
 
 
@@ -46,7 +46,7 @@ def get_stats_from(operations: List[Operation], hour_range: HourRange) -> Operat
 
 
 def get_operations_daily_stats(db: Session) -> List[OperationStats]:
-    time = get_current_time_spain_on_utc()
+    time = get_current_utc_time()
     hour_ranges = get_24_hour_range_from(time)
     stats = []
     for hour_range in hour_ranges:

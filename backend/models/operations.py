@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from models.database import Base
 from models.users import get_user_db_by_id, from_db_to_schema
 from schemas.operations import Operation
-from services.timeservice import get_current_time_spain_on_utc, HourRange
+from services.timeservice import get_current_utc_time, HourRange
 
 
 class Operations(Base):
@@ -33,7 +33,7 @@ def create_operation_db(
         user_id: str,
         amount: int,
 ) -> Operations:
-    if unix_time_es := get_current_time_spain_on_utc():
+    if unix_time_es := get_current_utc_time():
         operation = Operations(id=str(uuid.uuid4()), user_id=user_id, amount=amount, date=unix_time_es)
         return operation
     raise ValueError("Couldn't get time")
@@ -84,7 +84,7 @@ def get_operations(
             amount=operation.amount,
             date=operation.date
         ))
-    return operations
+    return sorted(operations, key=lambda x: x.date, reverse=True)
 
 
 def get_operations_for_user(
@@ -101,7 +101,7 @@ def get_operations_for_user(
             amount=operation.amount,
             date=operation.date
         ))
-    return operations
+    return sorted(operations, key=lambda x: x.date, reverse=True)
 
 
 def get_operations_inside_range(
