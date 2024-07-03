@@ -23,7 +23,7 @@ class Configuration:
 
     @staticmethod
     def __instantiate__():
-        Configuration.CONFIG = configparser.ConfigParser(os.environ)
+        Configuration.CONFIG = configparser.ConfigParser(os.environ, strict=False)
         Configuration.CONFIG.read(Configuration.CONFIGURATION_FILE)
 
     @staticmethod

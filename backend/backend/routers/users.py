@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from starlette import status
 
-from models.database import db_dependency
-from models.users import get_all_users
-from schemas.security import CreateUserSigned, DeleteUserSigned
-from schemas.users import Users, User
-from services.users import delete_user_signed, create_user_signed, get_user_by_id
+from backend.models.database import db_dependency
+from backend.models.users import get_all_users
+from backend.schemas.security import CreateUserSigned, DeleteUserSigned
+from backend.schemas.users import Users, User
+from backend.services.users import delete_user_signed, create_user_signed, get_user_by_id
 
 router = APIRouter(
     tags=["Users"],

@@ -3,9 +3,9 @@ from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
-import models
-from models.database import engine
-from routers import users, operations
+import backend.models
+from backend.models.database import engine
+from backend.routers import users, operations
 
 app = FastAPI(
     title="MontCoin API",
@@ -28,7 +28,7 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-models.database.Base.metadata.create_all(engine)
+backend.models.database.Base.metadata.create_all(engine)
 
 
 @app.get("/")

@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "montcoin-backend"
+name = "backend"
 version = "0.1.0"
 description = "MontCoin endpoints for moving money!"
 authors = ["Pablo Fraile Alonso <pablo@pablofraile.net>"]
 license = "GPL"
-package-mode = false
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -15,6 +15,8 @@ sqlalchemy = "^2.0.30"
 psycopg2 = "^2.9.9"
 fastapi-pagination = "^0.12.25"
 
+[tool.poetry.scripts]
+api = "backend.main:main"
 
 [build-system]
 requires = ["poetry-core"]

@@ -3,8 +3,8 @@ from typing import TypeVar, Type
 from fastapi import HTTPException
 from starlette import status
 
-from schemas.security import Signed
-from security.jwt import decode_user_token, decode_operation_token
+from backend.schemas.security import Signed
+from backend.security.jwt import decode_user_token, decode_operation_token
 
 T = TypeVar('T')
 R = TypeVar('R', bound=Signed)

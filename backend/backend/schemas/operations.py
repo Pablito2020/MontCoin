@@ -1,7 +1,7 @@
 from pydantic import Field, BaseModel
 
-from schemas.common import Id
-from schemas.users import User
+from backend.schemas.common import Id
+from backend.schemas.users import User
 
 
 class AmountOperation(BaseModel):

@@ -4,13 +4,13 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 
-from models.operations import do_operation, get_operations_inside_range
-from schemas.operations import WriteOperation, Operation, OperationStats, CreateBulkOperation
-from schemas.security import WriteOperationSigned, CreateBulkOperationSigned
-from schemas.users import User
-from security.signing import assert_signature_operation
-from services.timeservice import get_24_hour_range_from, get_current_utc_time, HourRange
-from services.users import get_user_by_id
+from backend.models.operations import do_operation, get_operations_inside_range
+from backend.schemas.operations import WriteOperation, Operation, OperationStats, CreateBulkOperation
+from backend.schemas.security import WriteOperationSigned, CreateBulkOperationSigned
+from backend.schemas.users import User
+from backend.security.signing import assert_signature_operation
+from backend.services.timeservice import get_24_hour_range_from, get_current_utc_time, HourRange
+from backend.services.users import get_user_by_id
 
 
 def create_operation_for(user_id: str, write_operation: WriteOperationSigned, db: Session) -> Operation:

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
-from schemas.operations import WriteOperation, CreateBulkOperation
-from schemas.users import CreateUser, DeleteUser
+from backend.schemas.operations import WriteOperation, CreateBulkOperation
+from backend.schemas.users import CreateUser, DeleteUser
 
 
 class Signed(BaseModel):

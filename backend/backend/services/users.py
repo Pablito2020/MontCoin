@@ -2,11 +2,11 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 
-from models.users import get_user_from_db_by_id, get_user_by_name, delete_user as delete_user_, \
+from backend.models.users import get_user_from_db_by_id, get_user_by_name, delete_user as delete_user_, \
     create_user as create_user_
-from schemas.security import DeleteUserSigned, CreateUserSigned
-from schemas.users import DeleteUser, User, CreateUser
-from security.signing import assert_signature_user
+from backend.schemas.security import DeleteUserSigned, CreateUserSigned
+from backend.schemas.users import DeleteUser, User, CreateUser
+from backend.security.signing import assert_signature_user
 
 
 def get_user_by_id(id: str, db: Session):

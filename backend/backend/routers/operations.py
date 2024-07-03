@@ -4,12 +4,12 @@ from fastapi import APIRouter
 from fastapi_pagination import paginate, Page
 from starlette import status
 
-from models.database import db_dependency
-from models.operations import get_operations, get_operations_for_user
-from schemas.operations import Operation, OperationStats
-from schemas.security import WriteOperationSigned, DeleteUserSigned
-from services.operations import create_operation_for, get_operations_daily_stats
-from services.users import get_user_by_id
+from backend.models.database import db_dependency
+from backend.models.operations import get_operations, get_operations_for_user
+from backend.schemas.operations import Operation, OperationStats
+from backend.schemas.security import WriteOperationSigned, DeleteUserSigned
+from backend.services.operations import create_operation_for, get_operations_daily_stats
+from backend.services.users import get_user_by_id
 
 router = APIRouter(
     tags=["Operations"],

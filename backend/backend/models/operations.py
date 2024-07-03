@@ -7,10 +7,10 @@ from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.orm import Session
 from starlette import status
 
-from models.database import Base
-from models.users import get_user_db_by_id, from_db_to_schema
-from schemas.operations import Operation
-from services.timeservice import get_current_utc_time, HourRange
+from backend.models.database import Base
+from backend.models.users import get_user_db_by_id, from_db_to_schema
+from backend.schemas.operations import Operation
+from backend.services.timeservice import get_current_utc_time, HourRange
 
 
 class Operations(Base):

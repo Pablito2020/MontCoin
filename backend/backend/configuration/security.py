@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 from typing import Optional
 
-from configuration.config import ConfigurationOption
+from backend.configuration.config import ConfigurationOption
 
 SECURITY_KEY = "Security"
 

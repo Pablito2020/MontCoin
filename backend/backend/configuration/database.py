@@ -2,7 +2,7 @@ import logging
 from configparser import ConfigParser
 from pathlib import Path
 
-from configuration.config import ConfigurationOption, Configuration
+from backend.configuration.config import ConfigurationOption, Configuration
 
 DB_KEY = "Database"
 

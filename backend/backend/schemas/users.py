@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from schemas.common import Id
+from backend.schemas.common import Id
 
 
 # Users schema

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 
-from configuration.database import get_database_url
+from backend.configuration.database import get_database_url
 
 engine = create_engine(get_database_url())
 

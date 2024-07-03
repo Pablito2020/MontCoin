@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import Session
 
-from models.database import Base
-from schemas.users import User
+from backend.models.database import Base
+from backend.schemas.users import User
 
 
 class _Users(Base):
