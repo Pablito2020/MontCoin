@@ -65,3 +65,4 @@ vcs.xml
 
 # Google services
 google-services.json
+.direnv
