@@ -21,7 +21,6 @@
           };
           devShell = pkgs.mkShell {
             name = "montcoin-main";
-            packages = [ pkgs.gnumake pkgs.poetry];
             inherit (self.commits.${system}.pre-commit-check) shellHook;
             buildInputs = self.commits.${system}.pre-commit-check.enabledPackages;
           };
