@@ -16,6 +16,10 @@ class Configuration:
     CONFIGURATION_FILE = "config.ini"
 
     @staticmethod
+    def set_config_file(file_name: str):
+        Configuration.CONFIGURATION_FILE = file_name
+
+    @staticmethod
     def set_up():
         if Configuration.CONFIG is None:
             Configuration.__instantiate__()
