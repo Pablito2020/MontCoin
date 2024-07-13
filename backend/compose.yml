@@ -1,0 +1,17 @@
+services:
+  backend:
+    image: localhost/montcoin-backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - sqlite:/data
+
+
+volumes:
+  sqlite:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/pablo/test
+      o: bind

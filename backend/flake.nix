@@ -34,7 +34,17 @@
           program = "${backend}/bin/api";
         };
         packages.default = backend;
-nixosModules = {
+        image = pkgs.dockerTools.buildLayeredImage {
+          name = "montcoin-backend";
+          tag = "latest";
+          contents = [ backend ./config.ini ];
+          config = {
+            Cmd = [ "${backend}/bin/api" ];
+            WorkingDir = "/data";
+            Volumes = { "/data" = { }; };
+          };
+        };
+        nixosModules = {
         montcoin-api =
           { config, lib, ... }:
           let
@@ -78,6 +88,5 @@ nixosModules = {
           };
       };
 
-      }
-    );
+    });
 }
