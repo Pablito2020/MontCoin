@@ -21,7 +21,7 @@ interface AppContainer {
 
 class AppContainerImpl(private val applicationContext: Context) : AppContainer {
 
-    private val apiUrl = "http://192.168.2.29:8000"
+    private val apiUrl = "http://100.110.191.107:8000"
 
     override val credentials: Credentials by lazy {
         val privateKey =
