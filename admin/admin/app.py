@@ -35,8 +35,9 @@ def create_all_users_command(csv_path: str):
             read_csv(file_path=csv_path, map_fn=User.from_strings),
             description="Creating users..",
     ):
-        if create_user(user).status_code != 200:
-            typer.echo(f"Error creating user: {user}", color=typer.colors.RED)
+        operation = create_user(user)
+        if operation.status_code != 200:
+            typer.echo(f"Error creating user: {user} {operation}", color=typer.colors.RED)
             return
 
 
