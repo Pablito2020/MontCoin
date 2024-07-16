@@ -1,15 +1,15 @@
 import time
 import uuid
-from fastapi import HTTPException
 from typing import List
 
+from fastapi import HTTPException
 from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.orm import Session
 from starlette import status
 
 from backend.models.database import Base
 from backend.models.users import get_user_db_by_id, from_db_to_schema
-from backend.schemas.operations import Operation
+from backend.schemas.operations import Operation, CreatedBulkOperation
 from backend.services.timeservice import get_current_utc_time, HourRange
 
 
@@ -21,14 +21,6 @@ class Operations(Base):
     user_id = Column(String, ForeignKey('users.id'), index=True)
     amount = Column(Integer)
     date = Column(Integer, index=True, default=time.time())
-
-
-class BulkOperations(Base):
-    __tablename__ = 'bulk_operations'
-
-    id = Column(String, index=True, primary_key=True)
-    operation_id = Column(String, ForeignKey('operations.id'), index=True, primary_key=True)
-    amount = Column(Integer)
 
 
 def create_operation_db(
@@ -71,6 +63,16 @@ def do_operation(
         amount=operation.amount,
         date=operation.date
     )
+
+
+def do_bulk_operation(
+        users_id: List[str],
+        amount: int,
+        db: Session
+) -> CreatedBulkOperation:
+    for user_id in users_id:
+        do_operation(user_id, amount, False, db)
+    return CreatedBulkOperation(num_users=len(users_id), amount=amount)
 
 
 def get_operations(

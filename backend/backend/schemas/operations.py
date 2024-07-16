@@ -48,6 +48,17 @@ class CreateBulkOperation(BaseModel):
     )
 
 
+class CreatedBulkOperation(BaseModel):
+    num_users: int = Field(
+        description="Number of users that the operation was made",
+        example=[100, 10],
+    )
+    amount: int = Field(
+        description="The amount of MontCoin of the operation",
+        examples=[10, -10]
+    )
+
+
 class WriteOperation(AmountOperation):
     should_fail_if_not_enough_money: bool = Field(
         default=False,

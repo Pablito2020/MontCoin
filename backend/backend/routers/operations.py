@@ -5,8 +5,8 @@ from fastapi_pagination import paginate, Page
 from starlette import status
 
 from backend.models.database import db_dependency
-from backend.models.operations import get_operations, get_operations_for_user
-from backend.schemas.operations import Operation, OperationStats
+from backend.models.operations import get_operations, get_operations_for_user, do_bulk_operation
+from backend.schemas.operations import Operation, OperationStats, CreateBulkOperation, CreatedBulkOperation
 from backend.schemas.security import WriteOperationSigned, DeleteUserSigned
 from backend.services.operations import create_operation_for, get_operations_daily_stats
 from backend.services.users import get_user_by_id
@@ -73,6 +73,7 @@ def get_operations_for_user_id_route(user_id: str, db: db_dependency):
     path="/operations/bulk",
     summary="Create an operation for N users",
     status_code=status.HTTP_200_OK,
+    response_model=CreatedBulkOperation
 )
-def create_bulk_operation(request: DeleteUserSigned, db: db_dependency):
-    pass
+def create_bulk_operation(request: CreateBulkOperation, db: db_dependency):
+    return do_bulk_operation(users_id=request.users, amount=request.amount, db=db)
