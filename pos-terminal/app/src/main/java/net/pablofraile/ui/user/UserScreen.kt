@@ -47,7 +47,6 @@ import net.pablofraile.ui.operations.OperationItem
 import net.pablofraile.ui.theme.LoseMoneyColor
 import net.pablofraile.ui.theme.WinMoneyColor
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(
     isLoading: Boolean,
@@ -57,90 +56,37 @@ fun UserScreen(
     percentage: Percentage?,
     onOkError: () -> Unit = {},
     onRetryError: () -> Unit = {},
-    onRefresh: () -> Unit = {},
-    goBack: () -> Unit = {},
-    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = user?.name ?: "Loading...",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = goBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                },
-                actions = {
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .width(64.dp)
-                        ) {
-                            val state = PullToRefreshState(
-                                positionalThresholdPx = 0.toFloat(),
-                                initialRefreshing = true,
-                                enabled = { true }
-                            )
-                            PullToRefreshDefaults.Indicator(
-                                state = state,
-                                modifier = Modifier.align(Alignment.CenterEnd)
-                            )
-                        }
-                    } else {
-                        IconButton(
-                            onClick = onRefresh
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = "refresh"
-                            )
-                        }
-                    }
+    UserComponent(
+        operations = operations,
+        user = user,
+        percentage = percentage,
+        modifier = modifier,
+        isLoading = isLoading
+    )
+    if (errorMessage != null)
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = @Composable {
+                TextButton(onClick = onOkError) {
+                    Text("Go Back")
                 }
-            )
-        }
-    ) { innerPadding ->
-        val modifier = Modifier.padding(innerPadding)
-        UserComponent(
-            operations = operations,
-            user = user,
-            percentage = percentage,
-            modifier = modifier,
-            isLoading = isLoading
-        )
-        if (errorMessage != null)
-            AlertDialog(
-                onDismissRequest = {},
-                confirmButton = @Composable {
-                    TextButton(onClick = onOkError) {
-                        Text("Go Back")
-                    }
-                },
-                dismissButton = @Composable {
-                    TextButton(onClick = onRetryError) {
-                        Text("Retry")
-                    }
-                },
-                icon = @Composable {
-                    Icon(Icons.Filled.Warning, contentDescription = "Error")
-                },
-                title = @Composable {
-                    Text("Error Loading the Page!")
-                },
-                text = @Composable {
-                    Text("The error was: $errorMessage.\n Do you want to retry?")
-                })
-    }
+            },
+            dismissButton = @Composable {
+                TextButton(onClick = onRetryError) {
+                    Text("Retry")
+                }
+            },
+            icon = @Composable {
+                Icon(Icons.Filled.Warning, contentDescription = "Error")
+            },
+            title = @Composable {
+                Text("Error Loading the Page!")
+            },
+            text = @Composable {
+                Text("The error was: $errorMessage.\n Do you want to retry?")
+            })
 }
 
 @Composable
@@ -161,13 +107,15 @@ fun UserComponent(
             if (user != null && percentage != null) {
                 when (percentage) {
                     is Percentage.Empty -> {
-                        Box(modifier= Modifier
-                            .padding(16.dp)
-                            .align(Alignment.CenterHorizontally)
+                        Box(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .align(Alignment.CenterHorizontally)
                         ) {
-                            Column(modifier = Modifier
-                                .align(Alignment.Center)
-                                .fillMaxSize(),
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize(),
                                 verticalArrangement = Arrangement.SpaceEvenly,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
@@ -193,6 +141,7 @@ fun UserComponent(
                             }
                         }
                     }
+
                     is PercentageV -> {
                         Box(Modifier.padding(16.dp)) {
                             val circleColors = listOf(
@@ -276,7 +225,7 @@ fun ListOperations(
     operations: List<Operation>,
 ) {
     LazyColumn(modifier = Modifier.padding(12.dp)) {
-        this.items(operations.size, key={it -> operations[it].id.toString()}) { index ->
+        this.items(operations.size, key = { it -> operations[it].id.toString() }) { index ->
             OperationItem(
                 operation = operations[index],
                 modifier = Modifier.padding(8.dp)
