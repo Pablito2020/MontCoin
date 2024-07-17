@@ -2,22 +2,18 @@ package net.pablofraile
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.MotionEvent
-import android.view.View
-import android.view.View.OnTouchListener
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,10 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import net.pablofraile.data.card.nfc.NfcCardRepository
+import net.pablofraile.ui.common.SearchingAnimation
+import net.pablofraile.ui.common.Sensor
 import net.pablofraile.ui.theme.PosterminalTheme
 import net.pablofraile.utils.NfcActivityTemplate
 
@@ -40,14 +39,17 @@ class MainActivity : NfcActivityTemplate() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val _viewModel: MainViewModel = viewModel(
+            val viewModel: MainViewModel = viewModel(
                 factory = MainViewModel.provideFactory(
+                    (application as PosApplication).container.cardRepository,
+                    (application as PosApplication).container.operationsRepository
                 )
             )
-            val searching by _viewModel.search.collectAsStateWithLifecycle()
+            val userId by viewModel.userId.collectAsStateWithLifecycle(null)
+            val searching by viewModel.sensor.collectAsStateWithLifecycle()
             PosterminalTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainScreen(searching = searching, onTimeout={ _viewModel.setSearching(true)}, modifier=Modifier.padding(innerPadding))
+                    MainScreen(searching=searching, userId = userId, onTimeout={ viewModel.searchDevices() }, modifier=Modifier.padding(innerPadding))
                 }
             }
         }
@@ -62,7 +64,7 @@ class MainActivity : NfcActivityTemplate() {
 }
 
 @Composable
-fun MainScreen(searching: Boolean, onTimeout: () -> Unit, modifier: Modifier = Modifier) {
+fun MainScreen(searching: Sensor, userId: String?, onTimeout: () -> Unit, modifier: Modifier = Modifier) {
     var lastInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
     LaunchedEffect(lastInteractionTime) {
@@ -84,10 +86,11 @@ fun MainScreen(searching: Boolean, onTimeout: () -> Unit, modifier: Modifier = M
                 }
             }
     ) {
-        if (searching) {
-            Greeting("Search")
-        }else {
-            Greeting("Not search")
+        if (searching == Sensor.Searching) {
+                Spacer(modifier = Modifier.height(16.dp))
+                SearchingAnimation()
+        }else if (searching == Sensor.Stopped ) {
+            Greeting("User: ${userId}")
         }
     }
 }
