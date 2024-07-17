@@ -37,7 +37,7 @@
         image = pkgs.dockerTools.buildLayeredImage {
           name = "montcoin-backend";
           tag = "latest";
-          contents = [ backend ./config.ini ];
+          contents = [ backend ];
           config = {
             Cmd = [ "${backend}/bin/api" ];
             WorkingDir = "/data";

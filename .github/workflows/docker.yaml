@@ -1,0 +1,40 @@
+name: Deploy container image to github registry
+
+on:
+  push:
+    branches:
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Default to bash
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build image and deploy
+        run: | 
+            cd backend
+            nix build .#image.x86_64-linux
+            docker load < result
+            docker tag localhost/montcoin-backend:latest ghcr.io/pablito2020/montcoin-backend:latest
+            docker push localhost/montcoin-backend:latest ghcr.io/pablito2020/montcoin-backend:latest
