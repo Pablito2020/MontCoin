@@ -1,5 +1,6 @@
 package net.pablofraile
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
@@ -27,10 +28,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import net.pablofraile.data.card.nfc.NfcCardRepository
 import net.pablofraile.ui.theme.PosterminalTheme
+import net.pablofraile.utils.NfcActivityTemplate
 
 
-class MainActivity : ComponentActivity() {
+class MainActivity : NfcActivityTemplate() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +51,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override suspend fun onTagRead(intent: Intent?) {
+        val nfc =
+            ((application as PosApplication).container.cardRepository as NfcCardRepository)
+        nfc.send(intent)
     }
 
 }
