@@ -36,5 +36,5 @@ jobs:
             cd backend
             nix build .#image.x86_64-linux
             docker load < result
-            docker tag localhost/montcoin-backend:latest ghcr.io/pablito2020/montcoin-backend:latest
-            docker push localhost/montcoin-backend:latest ghcr.io/pablito2020/montcoin-backend:latest
+            docker tag montcoin-backend:latest ghcr.io/pablito2020/montcoin-backend:latest
+            docker push ghcr.io/pablito2020/montcoin-backend:latest
