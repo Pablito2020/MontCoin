@@ -27,7 +27,7 @@ def parse_args():
 def main():
     parse_args()
     from backend.app import app
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, timeout_keep_alive=600)
 
 if __name__ == "__main__":
     main()
