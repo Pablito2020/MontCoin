@@ -46,6 +46,8 @@ data class Credentials(val privateKey: String) {
                 token = token.withClaim(key, newValues[key] as Boolean)
             else if (newValues[key] is Long)
                 token = token.withClaim(key, newValues[key] as Long)
+            else if (newValues[key] is List<*>)
+                token = token.withClaim(key, newValues[key] as List<*>)
             else
                 throw IllegalArgumentException("Unsupported type")
         }

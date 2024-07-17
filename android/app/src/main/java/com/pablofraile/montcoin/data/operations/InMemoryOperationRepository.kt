@@ -45,9 +45,8 @@ class InMemoryOperationRepository(
         delay(2000)
         return Result.success(
             BulkOperationResult(
-                operations.users,
+                operations.users.size,
                 operations.amount,
-                Date.from(Instant.now())
             )
         )
     }

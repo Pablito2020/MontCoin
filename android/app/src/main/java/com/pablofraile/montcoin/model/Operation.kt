@@ -26,4 +26,4 @@ internal fun String.toAmount(): Result<Amount> {
 data class WriteOperation(val userId: Id, val amount: Amount)
 
 data class BulkOperation(val users: List<Id>, val amount: Amount)
-data class BulkOperationResult(val users: List<Id>, val amount: Amount, val date: Date)
+data class BulkOperationResult(val users: Int, val amount: Amount)

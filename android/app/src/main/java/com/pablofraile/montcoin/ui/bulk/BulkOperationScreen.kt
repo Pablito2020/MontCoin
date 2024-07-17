@@ -138,7 +138,7 @@ fun BulkOperationContent(
         if (result != null) {
             val coroutineScope = rememberCoroutineScope()
             LaunchedEffect(result) {
-                coroutineScope.launch { snackbarHostState.showSnackbar("Operations done correctly on ${result.users.count().toFloat() / users.count().toFloat() * 100}% of users!", duration = SnackbarDuration.Long) }.join()
+                coroutineScope.launch { snackbarHostState.showSnackbar("Operations done correctly on ${result.users.toFloat() / users.count().toFloat() * 100}% of users!", duration = SnackbarDuration.Long) }.join()
                 onResultShowed()
             }
         }
@@ -232,13 +232,7 @@ fun LoadedBulkOperationContent(
 fun BulkOperationScreenPreview() {
     BulkOperationScreen(
         error = null,
-        result = BulkOperationResult(
-            amount = Amount(100),
-            users = listOf(
-                Id("1"),
-            ),
-            date = java.util.Date()
-        ),
+        result = null,
         isLoading = false,
         amount = "100",
         isValidAmount = true,

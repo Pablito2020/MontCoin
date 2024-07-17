@@ -32,7 +32,9 @@ class BackendOperationRepository(private val operationsApi: OperationsApi) : Ope
     }
 
     override suspend fun execute(operations: BulkOperation): Result<BulkOperationResult> {
-        return Result.failure(Exception("Not implemented"))
+        return operationsApi.makeBulkOperation(operations).map {
+            BulkOperationResult(users=it.num_users, amount=Amount(it.amount))
+        }
     }
 
     override suspend fun getOperationsFor(userId: Id): Result<List<Operation>> {
