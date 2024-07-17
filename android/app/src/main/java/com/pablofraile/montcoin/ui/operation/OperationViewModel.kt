@@ -1,6 +1,7 @@
 package com.pablofraile.montcoin.ui.operation
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -52,6 +53,13 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
         _sensor.update { card }
     }
 
+    private val _shouldFail: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val shouldFailIfNotEnoughMoney: StateFlow<Boolean> = _shouldFail
+    fun changeFailCondition(newValue: Boolean) {
+        //val newValue = !_shouldFail.value
+        _shouldFail.value = newValue
+    }
+
     fun searchDevices() = changeCardState(Sensor.Searching)
     fun stopSearchingDevices() = changeCardState(Sensor.Stopped)
 
@@ -88,7 +96,9 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
                     if (data.expenses.isEmpty()) {
                         series(x = listOf(0), y = listOf(0))
                     } else {
-                        series(x = data.expenses.map { it.second }, y = data.expenses.map { it.first })
+                        series(
+                            x = data.expenses.map { it.second },
+                            y = data.expenses.map { it.first })
                     }
                 }
             }.await()
@@ -108,7 +118,14 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
 
     private suspend fun doOperation(userId: Id, amount: Amount): Result<Operation> {
         _isDoingOperation.emit(true)
-        val result = repo.execute(WriteOperation(userId, amount, withCard = true))
+        val result = repo.execute(
+            WriteOperation(
+                userId,
+                amount,
+                shouldFailIfNotEnough = _shouldFail.value,
+                withCard = true
+            )
+        )
         _isDoingOperation.emit(false)
         return result
     }

@@ -51,8 +51,9 @@ open class CommonApi(val apiUrl: String, val credentials: Credentials) {
                 contentType(ContentType.Application.Json)
                 setBody(body)
             }
-            if (!response.status.isSuccess())
+            if (!response.status.isSuccess()) {
                 return Result.failure(Exception("Error getting $uri"))
+            }
             return Result.success(response.body())
         } catch (e: Exception) {
             return Result.failure(e)

@@ -29,6 +29,7 @@ fun OperationRoute(
     val operation by model.operationResult.collectAsStateWithLifecycle(initialValue = null)
     val isDoingOperation by model.isDoingOperation.collectAsStateWithLifecycle()
     val errorMessage by model.errorMessage.collectAsStateWithLifecycle()
+    val shouldFailIfNotEnough by model.shouldFailIfNotEnoughMoney.collectAsStateWithLifecycle()
     val modelProducer = model.modelProducer
     OperationScreen(
         amount = amount,
@@ -43,7 +44,9 @@ fun OperationRoute(
         closeError = model::cleanError,
         operation = operation,
         openDrawer = openDrawer,
-        onRefresh = model::onRefresh    ,
-        snackbarHostState = snackbarHostState
+        onRefresh = model::onRefresh,
+        snackbarHostState = snackbarHostState,
+        onFailOperation=model::changeFailCondition,
+        enabledFailed = shouldFailIfNotEnough
     )
 }

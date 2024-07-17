@@ -5,14 +5,17 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
@@ -30,6 +33,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -83,6 +87,8 @@ fun OperationScreen(
     isDoingOperation: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
+    onFailOperation: (Boolean) -> Unit,
+    enabledFailed: Boolean,
     onAmountChange: (String) -> Unit,
     openDrawer: () -> Unit,
     snackbarHostState: SnackbarHostState
@@ -131,6 +137,8 @@ fun OperationScreen(
             onStop = onStop,
             onAmountChange = onAmountChange,
             modifier = Modifier.padding(innerPadding),
+            onFailOperation = onFailOperation,
+            enabledFailed = enabledFailed,
             snackbarHostState = snackbarHostState
         )
     }
@@ -152,6 +160,8 @@ fun OperationContent(
     onStart: () -> Unit,
     onStop: () -> Unit,
     onAmountChange: (String) -> Unit,
+    onFailOperation: (Boolean) -> Unit,
+    enabledFailed: Boolean,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
@@ -163,33 +173,6 @@ fun OperationContent(
         verticalArrangement = Arrangement.Top
     ) {
         Chart(modelProducer)
-//        ProvideVicoTheme(rememberM3VicoTheme(lineCartesianLayerColors = listOf(
-//            Color.Green,
-//            Color.Red
-//        ))) {
-//            val scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End)
-//            val zoomState = rememberVicoZoomState()
-//            val modelProducer = remember { CartesianChartModelProducer.build () }
-//            LaunchedEffect(Unit) {
-//                modelProducer.tryRunTransaction {
-//                    val x=listOf(24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
-//                    lineSeries {
-//                        series(x=x, y=x)
-//                        series(x=x, y=x.reversed())
-//                    }
-//                }
-//            }
-//            CartesianChartHost(
-//                chart=rememberCartesianChart(
-//                    rememberLineCartesianLayer(),
-//                    startAxis = rememberStartAxis(),
-//                    bottomAxis = rememberBottomAxis(),
-//                ),
-//                modelProducer = modelProducer,
-//                scrollState = scrollState,
-//                zoomState = zoomState,
-//            )
-//        }
         HorizontalDivider(modifier=Modifier.padding(30.dp))
         ShowOperationUi(
             isDoingOperation = isDoingOperation,
@@ -205,7 +188,19 @@ fun OperationContent(
             onDone = onStart
         )
         Spacer(modifier = Modifier.height(16.dp))
-        ActionButton(cardState = card, onStart = onStart, onStop = onStop)
+        Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+            Switch(
+                thumbContent = {
+                    Icon(
+                        Icons.Default.Error,
+                        contentDescription = null
+                    )
+                },
+                checked = enabledFailed,
+                onCheckedChange = onFailOperation
+            )
+            ActionButton(cardState = card, onStart = onStart, onStop = onStop)
+        }
         if (card == Sensor.Searching) {
             Spacer(modifier = Modifier.height(16.dp))
             SearchingAnimation()
@@ -344,6 +339,8 @@ fun OperationScreenPreview() {
         onAmountChange = {},
         isDoingOperation = false,
         errorMessage = null,
+        onFailOperation = {},
+        enabledFailed = true,
         closeError = {},
     )
 }

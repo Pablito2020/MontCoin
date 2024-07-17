@@ -59,7 +59,7 @@ class OperationsApi(apiUrl: String, credentials: Credentials) : CommonApi(apiUrl
         val userId = writeOperation.userId.value
         val signedMessage: SignedWriteOperationApi = WriteOperationApi(
             writeOperation.amount.value,
-            false,
+            writeOperation.shouldFailIfNotEnough,
             writeOperation.withCard
         ).sign(credentials)
         return post("/operation/user/$userId", signedMessage)
