@@ -46,7 +46,7 @@ class WriteCardViewModel(
         scope.launch {
             _isRefreshing.update { true }
             val users = usersRepository.getUsers()
-            if (users.isSuccess) _users.update { users.getOrThrow() }
+            if (users.isSuccess) _users.update { users.getOrThrow().sortedBy { it.name } }
             else errorMessage.emit(users.exceptionOrNull()?.message ?: "Unknown Error")
             _isRefreshing.update { false }
         }

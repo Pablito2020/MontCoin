@@ -23,7 +23,7 @@ internal fun String.toAmount(): Result<Amount> {
     return Result.success(Amount(this.toInt()))
 }
 
-data class WriteOperation(val userId: Id, val amount: Amount)
+data class WriteOperation(val userId: Id, val amount: Amount, val withCard: Boolean = false)
 
 data class BulkOperation(val users: List<Id>, val amount: Amount)
 data class BulkOperationResult(val users: Int, val amount: Amount)

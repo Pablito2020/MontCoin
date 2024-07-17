@@ -108,7 +108,7 @@ class OperationViewModel(cardRepository: CardRepository, private val repo: Opera
 
     private suspend fun doOperation(userId: Id, amount: Amount): Result<Operation> {
         _isDoingOperation.emit(true)
-        val result = repo.execute(WriteOperation(userId, amount))
+        val result = repo.execute(WriteOperation(userId, amount, withCard = true))
         _isDoingOperation.emit(false)
         return result
     }
