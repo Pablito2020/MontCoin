@@ -65,28 +65,6 @@ fun UserScreen(
         modifier = modifier,
         isLoading = isLoading
     )
-    if (errorMessage != null)
-        AlertDialog(
-            onDismissRequest = {},
-            confirmButton = @Composable {
-                TextButton(onClick = onOkError) {
-                    Text("Go Back")
-                }
-            },
-            dismissButton = @Composable {
-                TextButton(onClick = onRetryError) {
-                    Text("Retry")
-                }
-            },
-            icon = @Composable {
-                Icon(Icons.Filled.Warning, contentDescription = "Error")
-            },
-            title = @Composable {
-                Text("Error Loading the Page!")
-            },
-            text = @Composable {
-                Text("The error was: $errorMessage.\n Do you want to retry?")
-            })
 }
 
 @Composable

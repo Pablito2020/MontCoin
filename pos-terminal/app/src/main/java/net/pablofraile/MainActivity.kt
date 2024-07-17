@@ -56,6 +56,7 @@ class MainActivity : NfcActivityTemplate() {
             val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
             val percentage by viewModel.percentage.collectAsStateWithLifecycle()
             val searching by viewModel.sensor.collectAsStateWithLifecycle()
+            val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
             PosterminalTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainScreen(
@@ -66,6 +67,7 @@ class MainActivity : NfcActivityTemplate() {
                         operations=operations,
                         errorMessage=errorMessage,
                         percentage=percentage,
+                        isLoading = isLoading,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -89,6 +91,7 @@ fun MainScreen(
     errorMessage: String?,
     percentage: Percentage?,
     onTimeout: () -> Unit,
+    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     var lastInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -97,7 +100,7 @@ fun MainScreen(
         while (true) {
             delay(1000) // Check every second
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastInteractionTime > 4000) {
+            if (currentTime - lastInteractionTime > 6000) {
                 onTimeout()
                 lastInteractionTime = currentTime // Reset to avoid repeated calls
             }
@@ -115,7 +118,7 @@ fun MainScreen(
             SearchingAnimation()
         } else if (searching == Sensor.Stopped && userId != null && user != null) {
             UserScreen(
-                isLoading = false,
+                isLoading = isLoading,
                 user = user,
                 operations = operations,
                 errorMessage = errorMessage,
