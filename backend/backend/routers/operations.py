@@ -7,7 +7,8 @@ from starlette import status
 from backend.models.database import db_dependency
 from backend.models.operations import get_operations, get_operations_for_user, do_bulk_operation
 from backend.schemas.operations import Operation, OperationStats, CreateBulkOperation, CreatedBulkOperation
-from backend.schemas.security import WriteOperationSigned, DeleteUserSigned
+from backend.schemas.security import WriteOperationSigned, DeleteUserSigned, CreateBulkOperationSigned
+from backend.security.signing import assert_signature_operation
 from backend.services.operations import create_operation_for, get_operations_daily_stats
 from backend.services.users import get_user_by_id
 
@@ -75,5 +76,6 @@ def get_operations_for_user_id_route(user_id: str, db: db_dependency):
     status_code=status.HTTP_200_OK,
     response_model=CreatedBulkOperation
 )
-def create_bulk_operation(request: CreateBulkOperation, db: db_dependency):
+def create_bulk_operation(signed_request: CreateBulkOperationSigned, db: db_dependency):
+    request = assert_signature_operation(request=signed_request, type=CreateBulkOperation)
     return do_bulk_operation(users_id=request.users, amount=request.amount, db=db)
