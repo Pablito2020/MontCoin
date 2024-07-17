@@ -34,10 +34,11 @@
           program = "${backend}/bin/api";
         };
         packages.default = backend;
-        image = pkgs.dockerTools.buildLayeredImage {
+        image = pkgs.dockerTools.buildImage {
           name = "montcoin-backend";
           tag = "latest";
-          contents = [ backend ];
+          # contents = [ backend ];
+	  copyToRoot = [ pkgs.iana-etc backend pkgs.cacert];
           config = {
             Cmd = [ "${backend}/bin/api" ];
             WorkingDir = "/data";
