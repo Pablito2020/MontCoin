@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from typing import Iterable
 
 from admin.user.user import User
 
 
-@dataclass
+@dataclass(frozen=True)
 class CreateOperation:
     amount: int
     should_fail_if_not_enough_money: bool
@@ -14,6 +15,18 @@ class CreateOperation:
             "amount": self.amount,
             "should_fail_if_not_enough_money": self.should_fail_if_not_enough_money,
             "with_credit_card": self.with_credit_card,
+        }
+
+
+@dataclass(frozen=True)
+class CreateBulkOperation:
+    users: Iterable[User]
+    amount: int
+
+    def to_dict(self) -> dict:
+        return {
+            "users": [user.id.value for user in self.users],
+            "amount": self.amount,
         }
 
 

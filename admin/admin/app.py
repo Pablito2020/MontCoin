@@ -1,14 +1,15 @@
-from typing import Union
+from math import inf
+from typing import Union, Annotated
 
 import typer
 from rich.progress import track
 
 from admin.config.config_file_builder import ConfigFileBuilder, DEFAULT_SIGNATURE_ALGORITHM, DEFAULT_NTP_SERVER
 from admin.config.csv_reader import read_csv
-from admin.operation.operation import CreateOperation
-from admin.operation.repository import create_operation_for, get_operations
-from admin.user.repository import create_user, get_users, delete_user
+from admin.operation.operation import CreateOperation, CreateBulkOperation
+from admin.operation.repository import create_operation_for, get_operations, do_bulk_operation
 from admin.tui.tui import informative_command, print_users, print_operations
+from admin.user.repository import create_user, get_users, delete_user
 from admin.user.user import User, Id
 
 app = typer.Typer()
@@ -92,6 +93,16 @@ def operate_for(user_id: str, amount: int):
 def list_operations():
     operations = list(get_operations())
     print_operations(operations)
+
+
+@app.command(
+    name="bulk",
+    help="Do a bulk operation on all users",
+)
+def bulk_command(amount: Annotated[int, typer.Option()]):
+    users = get_users()
+    bulk_operation = CreateBulkOperation(users=users, amount=amount)
+    do_bulk_operation(bulk_operation)
 
 
 @app.command(

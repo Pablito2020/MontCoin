@@ -6,7 +6,7 @@ import requests
 from admin.config.api import ApiUrl
 from admin.config.config import Configuration
 from admin.config.security import OperationsPrivateKeyPath
-from admin.operation.operation import CreateOperation, Operation
+from admin.operation.operation import CreateOperation, Operation, CreateBulkOperation
 from admin.security.http import signed_post
 from admin.user.user import User
 
@@ -21,6 +21,14 @@ def get_base_url() -> str:
 def create_operation_for(user_id: str, operation: CreateOperation):
     return signed_post(
         url=f"{get_base_url()}/operation/user/{user_id}",
+        payload=operation.to_dict(),
+        key_type=OperationsPrivateKeyPath
+    )
+
+
+def do_bulk_operation(operation: CreateBulkOperation):
+    return signed_post(
+        url=f"{get_base_url()}/operations/bulk",
         payload=operation.to_dict(),
         key_type=OperationsPrivateKeyPath
     )

@@ -27,7 +27,7 @@ def create_user(user: User) -> requests.Response:
 
 def get_users() -> Iterable[User]:
     response = requests.get(f"{get_base_url()}/users")
-    for user in response.json()["users"]:
+    for user in response.json():
         yield User.from_value(id=user["id"], username=user["name"], amount=user["amount"])
 
 
