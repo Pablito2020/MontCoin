@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import net.pablofraile.model.Amount
 import net.pablofraile.model.Id
@@ -78,26 +81,46 @@ fun UserComponent(
     if (isLoading) {
         LoadingCircular()
     } else {
-        Column(
+        Row(
             modifier = modifier
                 .fillMaxSize()
+                .padding(16.dp)
         ) {
-            if (user != null && percentage != null) {
-                when (percentage) {
-                    is Percentage.Empty -> {
-                        Box(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .align(Alignment.CenterHorizontally)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .fillMaxSize(),
-                                verticalArrangement = Arrangement.SpaceEvenly,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f).fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (user != null && percentage != null) {
+                    when (percentage) {
+                        is Percentage.Empty -> {
+                            Text(
+                                text = "Amount",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                            Text(
+                                text = "${user.amount} \uD83D\uDCB8",
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        }
+                        is PercentageV -> {
+                            Box(Modifier.padding(16.dp)) {
+                                val circleColors = listOf(
+                                    WinMoneyColor,
+                                    LoseMoneyColor
+                                )
+                                AnimatedCircle(
+                                    percentage.toList(),
+                                    circleColors,
+                                    Modifier
+                                        .height(300.dp)
+                                        .align(Alignment.Center)
+                                        .fillMaxWidth()
+                                )
+                                Column(modifier = Modifier.align(Alignment.Center)) {
                                     Text(
                                         text = "Amount",
                                         style = MaterialTheme.typography.bodySmall,
@@ -109,55 +132,51 @@ fun UserComponent(
                                         modifier = Modifier.align(Alignment.CenterHorizontally)
                                     )
                                 }
-                                HorizontalDivider()
-                                Text(
-                                    text = "No operations found \uD83E\uDEF0",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                )
                             }
+//                            val circleColors = listOf(
+//                                WinMoneyColor,
+//                                LoseMoneyColor
+//                            )
+//                            Text(
+//                                text = "Amount",
+//                                style = MaterialTheme.typography.bodySmall,
+//                                modifier = Modifier.align(Alignment.CenterHorizontally)
+//                            )
+//                            Text(
+//                                text = "${user.amount} \uD83D\uDCB8",
+//                                style = MaterialTheme.typography.headlineMedium,
+//                                modifier = Modifier.align(Alignment.CenterHorizontally)
+//                            )
+//                            AnimatedCircle(
+//                                percentage.toList(),
+//                                circleColors,
+//                                Modifier
+//                                    .height(300.dp)
+//                                    .align(Alignment.CenterHorizontally)
+//                                    .fillMaxWidth()
+//                            )
                         }
                     }
+                }
+            }
 
-                    is PercentageV -> {
-                        Box(Modifier.padding(16.dp)) {
-                            val circleColors = listOf(
-                                WinMoneyColor,
-                                LoseMoneyColor
-                            )
-                            AnimatedCircle(
-                                percentage.toList(),
-                                circleColors,
-                                Modifier
-                                    .height(300.dp)
-                                    .align(Alignment.Center)
-                                    .fillMaxWidth()
-                            )
-                            Column(modifier = Modifier.align(Alignment.Center)) {
-                                Text(
-                                    text = "Amount",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                )
-                                Text(
-                                    text = "${user.amount} \uD83D\uDCB8",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                )
-                            }
-                        }
-                        HorizontalDivider()
-                        Operations(
-                            operations = operations
-                        )
-                    }
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f).fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (operations.isEmpty()) {
+                    EmptyOperations()
+                } else {
+                    ListOperations(operations = operations)
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun LoadingCircular() {
@@ -195,9 +214,160 @@ fun ColumnScope.EmptyOperations() {
             .padding(20.dp)
             .align(Alignment.CenterHorizontally)
     )
-
 }
-
+//
+//
+//@Composable
+//fun UserScreen(
+//    isLoading: Boolean,
+//    user: User?,
+//    operations: List<Operation>,
+//    errorMessage: String?,
+//    percentage: Percentage?,
+//    onOkError: () -> Unit = {},
+//    onRetryError: () -> Unit = {},
+//    modifier: Modifier = Modifier,
+//) {
+//    UserComponent(
+//        operations = operations,
+//        user = user,
+//        percentage = percentage,
+//        modifier = modifier,
+//        isLoading = isLoading
+//    )
+//}
+//
+//@Composable
+//fun UserComponent(
+//    operations: List<Operation>,
+//    isLoading: Boolean,
+//    user: User?,
+//    percentage: Percentage?,
+//    modifier: Modifier = Modifier,
+//) {
+//    if (isLoading) {
+//        LoadingCircular()
+//    } else {
+//        Column(
+//            modifier = modifier
+//                .fillMaxSize()
+//        ) {
+//            if (user != null && percentage != null) {
+//                when (percentage) {
+//                    is Percentage.Empty -> {
+//                        Box(
+//                            modifier = Modifier
+//                                .padding(16.dp)
+//                                .align(Alignment.CenterHorizontally)
+//                        ) {
+//                            Column(
+//                                modifier = Modifier
+//                                    .align(Alignment.Center)
+//                                    .fillMaxSize(),
+//                                verticalArrangement = Arrangement.SpaceEvenly,
+//                                horizontalAlignment = Alignment.CenterHorizontally
+//                            ) {
+//                                Column {
+//                                    Text(
+//                                        text = "Amount",
+//                                        style = MaterialTheme.typography.bodySmall,
+//                                        modifier = Modifier.align(Alignment.CenterHorizontally)
+//                                    )
+//                                    Text(
+//                                        text = "${user.amount} \uD83D\uDCB8",
+//                                        style = MaterialTheme.typography.headlineMedium,
+//                                        modifier = Modifier.align(Alignment.CenterHorizontally)
+//                                    )
+//                                }
+//                                HorizontalDivider()
+//                                Text(
+//                                    text = "No operations found \uD83E\uDEF0",
+//                                    style = MaterialTheme.typography.bodyLarge,
+//                                    fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+//                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+//                                )
+//                            }
+//                        }
+//                    }
+//
+//                    is PercentageV -> {
+//                        Box(Modifier.padding(16.dp)) {
+//                            val circleColors = listOf(
+//                                WinMoneyColor,
+//                                LoseMoneyColor
+//                            )
+//                            AnimatedCircle(
+//                                percentage.toList(),
+//                                circleColors,
+//                                Modifier
+//                                    .height(300.dp)
+//                                    .align(Alignment.Center)
+//                                    .fillMaxWidth()
+//                            )
+//                            Column(modifier = Modifier.align(Alignment.Center)) {
+//                                Text(
+//                                    text = "Amount",
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+//                                )
+//                                Text(
+//                                    text = "${user.amount} \uD83D\uDCB8",
+//                                    style = MaterialTheme.typography.headlineMedium,
+//                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+//                                )
+//                            }
+//                        }
+//                        HorizontalDivider()
+//                        Operations(
+//                            operations = operations
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//
+//@Composable
+//fun LoadingCircular() {
+//    Box(
+//        modifier = Modifier
+//            .padding(12.dp)
+//            .fillMaxSize(),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        CircularProgressIndicator(
+//            color = MaterialTheme.colorScheme.secondary,
+//            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+//            modifier = Modifier.align(Alignment.Center)
+//        )
+//    }
+//}
+//
+//@Composable
+//fun ColumnScope.Operations(
+//    operations: List<Operation>,
+//) {
+//    if (operations.isEmpty())
+//        EmptyOperations()
+//    else
+//        ListOperations(operations = operations)
+//}
+//
+//@Composable
+//fun ColumnScope.EmptyOperations() {
+//    Text(
+//        text = "No operations found \uD83E\uDEF0",
+//        style = MaterialTheme.typography.bodyLarge,
+//        fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+//        modifier = Modifier
+//            .padding(20.dp)
+//            .align(Alignment.CenterHorizontally)
+//    )
+//
+//}
+//
 @Composable
 fun ListOperations(
     operations: List<Operation>,
@@ -211,8 +381,9 @@ fun ListOperations(
         }
     }
 }
-
+//
 @Preview(showBackground = true)
+@PreviewScreenSizes
 @Composable
 fun UserScreenPreview() {
     val user = User(

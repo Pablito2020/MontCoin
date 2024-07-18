@@ -109,7 +109,7 @@ fun MainScreen(
     Box(modifier = modifier
         .fillMaxSize()
         .pointerInput(Unit) {
-            detectTapGestures {
+            detectTapGestures { it->
                 lastInteractionTime = System.currentTimeMillis()
             }
         }) {
