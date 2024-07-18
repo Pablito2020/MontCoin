@@ -132,7 +132,7 @@ fun UserComponent(
                                         modifier = Modifier.align(Alignment.CenterHorizontally)
                                     )
                                 }
-                            }
+                                }
 //                            val circleColors = listOf(
 //                                WinMoneyColor,
 //                                LoseMoneyColor

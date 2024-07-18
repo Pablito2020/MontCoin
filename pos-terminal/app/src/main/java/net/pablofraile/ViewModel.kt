@@ -4,13 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -18,7 +15,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import net.pablofraile.data.card.CardRepository
 import net.pablofraile.data.operations.OperationsRepository
 import net.pablofraile.data.users.UsersRepository
@@ -26,11 +22,16 @@ import net.pablofraile.model.Id
 import net.pablofraile.model.Operations
 import net.pablofraile.model.User
 import net.pablofraile.ui.common.Sensor
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import net.pablofraile.ui.user.Percentage
 import net.pablofraile.ui.user.PercentageV
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MainViewModel(cardRepository: CardRepository, private val repo: OperationsRepository, private val usersRepository: UsersRepository,
+class MainViewModel(
+    cardRepository: CardRepository,
+    private val repo: OperationsRepository,
+    private val usersRepository: UsersRepository,
 ) :
     ViewModel() {
 
@@ -38,6 +39,15 @@ class MainViewModel(cardRepository: CardRepository, private val repo: Operations
     val sensor: StateFlow<Sensor> = _sensor
     private fun changeCardState(card: Sensor) {
         _sensor.update { card }
+    }
+
+    private val _lastInteraction: MutableStateFlow<Long> = MutableStateFlow(System.currentTimeMillis())
+    val lastInteraction: StateFlow<Long> = _lastInteraction
+    fun updateLastInteraction() {
+        Log.e("DEBUGING", "UPdated Last Inter")
+        viewModelScope.launch {
+            _lastInteraction.emit(System.currentTimeMillis())
+        }
     }
 
     fun searchDevices() = changeCardState(Sensor.Searching)
@@ -53,12 +63,12 @@ class MainViewModel(cardRepository: CardRepository, private val repo: Operations
             val id = tag.getOrThrow().value
             fetchAll(id)
             emit(id)
+            updateLastInteraction()
             stopSearchingDevices()
         } else {
             emit(null)
         }
     }.shareIn(viewModelScope, SharingStarted.Lazily)
-
 
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -75,7 +85,8 @@ class MainViewModel(cardRepository: CardRepository, private val repo: Operations
     val isLoading = _isLoading
 
     private val _percentageFromOperations = _operations.map {
-        val totalSum = it.sumOf { op -> if (op.amount.value < 0) op.amount.value * -1 else op.amount.value }
+        val totalSum =
+            it.sumOf { op -> if (op.amount.value < 0) op.amount.value * -1 else op.amount.value }
         if (it.isEmpty() || totalSum == 0) return@map Percentage.Empty
         val negative = it.sumOf { op -> if (op.amount.value < 0) -1 * op.amount.value else 0 }
         val positive = it.sumOf { op -> if (op.amount.value > 0) op.amount.value else 0 }
@@ -85,9 +96,9 @@ class MainViewModel(cardRepository: CardRepository, private val repo: Operations
         )
     }
     val percentage = _percentageFromOperations.stateIn(
-        scope=viewModelScope,
-        started=SharingStarted.Lazily,
-        initialValue=null,
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = null,
     )
 
     private suspend fun fetchAll(userId: String) {

@@ -4,7 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,6 +59,7 @@ class MainActivity : NfcActivityTemplate() {
             val operations by viewModel.operations.collectAsStateWithLifecycle()
             val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
             val percentage by viewModel.percentage.collectAsStateWithLifecycle()
+            val lastInteraction by viewModel.lastInteraction.collectAsStateWithLifecycle()
             val searching by viewModel.sensor.collectAsStateWithLifecycle()
             val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
             PosterminalTheme {
@@ -64,10 +69,12 @@ class MainActivity : NfcActivityTemplate() {
                         userId = userId,
                         onTimeout = { viewModel.searchDevices() },
                         user=user,
+                        lastInteraction = lastInteraction,
                         operations=operations,
                         errorMessage=errorMessage,
                         percentage=percentage,
                         isLoading = isLoading,
+                        onClick = viewModel::updateLastInteraction,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -85,8 +92,10 @@ class MainActivity : NfcActivityTemplate() {
 @Composable
 fun MainScreen(
     searching: Sensor,
+    lastInteraction: Long,
     userId: String?,
     user: User?,
+    onClick: () -> Unit,
     operations: List<Operation>,
     errorMessage: String?,
     percentage: Percentage?,
@@ -94,24 +103,29 @@ fun MainScreen(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    var lastInteractionTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
-    LaunchedEffect(lastInteractionTime) {
+    LaunchedEffect(lastInteraction) {
         while (true) {
             delay(1000) // Check every second
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastInteractionTime > 6000) {
+            if (currentTime - lastInteraction > 6000) {
                 onTimeout()
-                lastInteractionTime = currentTime // Reset to avoid repeated calls
+                onClick()
             }
         }
     }
     Box(modifier = modifier
         .fillMaxSize()
         .pointerInput(Unit) {
-            detectTapGestures { it->
-                lastInteractionTime = System.currentTimeMillis()
+            detectTapGestures {
+                onClick()
             }
+            detectTransformGestures { _, _ ,_ ,_ ->
+                onClick()
+            }
+            detectHorizontalDragGestures { change, dragAmount ->  onClick()}
+            detectVerticalDragGestures { change, dragAmount ->  onClick()}
+            detectDragGestures { a, b -> onClick() }
         }) {
         if (searching == Sensor.Searching) {
             Spacer(modifier = Modifier.height(16.dp))
